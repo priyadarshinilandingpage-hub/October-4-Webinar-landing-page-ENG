@@ -1,0 +1,2054 @@
+@import "tailwindcss";
+@import "./sections.css";
+@import "./bold.css";
+@import "./overlays.css";
+@source not "../assets-inbox";
+
+/* ═════════════════════════════════════════════════════════════════════════
+   THE SAFFRON LEDGER: a founder's farm journal meets a business ledger.
+   Botanical specimen labels + ledger ruling + rubber stamps + one red-orange
+   saffron thread. No pills, no shimmer, no blurred-blob-only backgrounds.
+
+   Tokens (semantic, used by every section; they flip in the dark theme):
+     ivory = page background      paper = card surface
+     ink = primary text           ink-2 = secondary text      line = hairlines
+     lilac / lilac-2 / blush / cream = soft washes
+     plum / plum-2 = the contrast band (value stack + checkout)
+     saffron / saffron-deep / gold / gold-soft = accent (CTA, prices, numbers)
+     thread = the saffron thread     stamp = rubber-stamp ink
+   Dark theme: wrap the page in [data-theme="dark"] (see components/LandingPage.tsx).
+   Light "paper objects" inside the dark theme: .receipt, .checkout-card, .light-island
+   or [data-theme="light"] re-apply the light tokens to their subtree.
+   ═════════════════════════════════════════════════════════════════════════ */
+@theme {
+  --color-ivory: #fbf9fc;
+  --color-paper: #fffdf9;
+  --color-ink: #1e1530;
+  --color-ink-2: #5b5270;
+  --color-line: #e8e2f0;
+  --color-lilac: #e9e3f5;
+  --color-lilac-2: #f3effa;
+  --color-blush: #f6e6ee;
+  --color-cream: #fcf3e6;
+  --color-violet: #7b6ba8;
+  --color-violet-deep: #5b4b8a;
+  --color-rose: #c27a9a;
+  --color-plum: #241634;
+  --color-plum-2: #3a2352;
+  --color-mist: #d9cfea;
+  --color-saffron: #d9531e;
+  --color-saffron-deep: #b8431a;
+  --color-gold: #e8a33d;
+  --color-gold-soft: #f7e3c0;
+  --color-thread: #c8441a;
+  --color-stamp: #a83a14;
+
+  --shadow-soft: 0 1px 2px rgb(30 21 48 / 0.04), 0 12px 32px -14px rgb(30 21 48 / 0.16);
+  --shadow-lift: 0 2px 6px rgb(30 21 48 / 0.05), 0 28px 56px -20px rgb(30 21 48 / 0.28);
+  --shadow-glow: 0 18px 60px -18px rgb(232 163 61 / 0.55);
+  --shadow-plate: 0 1px 0 rgb(30 21 48 / 0.06), 0 18px 34px -24px rgb(30 21 48 / 0.4);
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-rise: cubic-bezier(0.2, 0.85, 0.1, 1);
+  --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@theme inline {
+  --font-serif: var(--font-display), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-ledger), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* ─────────────────────────── Component variables (light) ─────────────────────────── */
+:root {
+  /* The page typography (bold type) everywhere, including the thank-you + legal pages. */
+  --font-display: var(--font-bold-display);
+  --font-body: var(--font-bold-body);
+  /* Legacy vars still used by the thank-you + legal pages. */
+  --bg: #fbf9fc;
+  --fg: #1e1530;
+  --muted: #5b5270;
+  --topbar-h: 60px;
+
+  /* Fine grain: thresholded fractal noise (speckles, not a grey veil). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12 0 0 0 0 .08 0 0 0 0 .19 0 0 0 3 -1.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12 0 0 0 0 .08 0 0 0 0 .19 0 0 0 1.5 -.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.42'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* A short wavy thread, used as a mask for the text-link underline. */
+  --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='6' viewBox='0 0 14 6'%3E%3Cpath d='M0 3.2C2.3.6 4.7.6 7 3.2s4.7 2.6 7 0' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  --grain-img: var(--grain);
+  --grain-op: 0.15;
+  --page-wash: transparent;
+  --rule: rgb(30 21 48 / 0.045);
+  --rule-strong: rgb(30 21 48 / 0.14);
+  --glow-1: rgb(233 227 245 / 0.9);
+  --glow-2: rgb(246 230 238 / 0.85);
+  --glow-3: rgb(252 238 214 / 0.6);
+  --glow-4: rgb(123 107 168 / 0.1);
+  --wash-a: rgb(233 227 245 / 0.9);
+  --wash-b: rgb(246 230 238 / 0.85);
+  --wash-c: rgb(252 243 230 / 0.92);
+  --wash-d: rgb(247 227 192 / 0.5);
+  --plum-bg:
+    var(--grain-light), radial-gradient(40% 30% at 85% 62%, rgb(232 163 61 / 0.16), transparent 70%),
+    radial-gradient(45% 28% at 10% 30%, rgb(123 107 168 / 0.35), transparent 72%),
+    radial-gradient(40% 25% at 70% 12%, rgb(194 122 154 / 0.22), transparent 72%),
+    linear-gradient(180deg, #241634 0%, #2e1c43 45%, #3a2352 75%, #2a1a3d 100%);
+
+  --card-bg: rgb(255 253 249 / 0.82);
+  --card-edge: rgb(30 21 48 / 0.09);
+  --card-shadow: 0 1px 0 rgb(30 21 48 / 0.04), 0 16px 32px -24px rgb(30 21 48 / 0.32);
+
+  /* CTA: white on saffron-deep = 5.45:1; stub ink on gold-soft = 6.7:1. */
+  --cta-face: #b8431a;
+  --cta-ink: #ffffff;
+  --cta-plate: #6b240a;
+  --cta-perf: rgb(255 255 255 / 0.6);
+  --cta-stub: #f7e3c0;
+  --cta-stub-ink: #8a2f0f;
+  --stamp-blend: multiply;
+  --pm-disc: rgb(255 253 249 / 0.86);
+
+  --ph-bg: #f5f1f8;
+  --ph-grid: rgb(91 82 112 / 0.075);
+
+  --field-bg: #ffffff;
+  --field-line: #d8cfe4;
+  --field-line-hover: #c2b6d6;
+  --field-ph: #857c98;
+  --err: #b42318;
+
+  color-scheme: light;
+}
+
+/* ─────────────────────────── Dark variant: deep aubergine, magenta-plum band ───────────────────────────
+   Applied by [data-theme="dark"] on the page wrapper. :root:has() lifts it to the document too, so the
+   body, the fixed mesh/grain backdrop and the browser chrome (color-scheme) all go dark. */
+:root:has(.theme-root[data-theme="dark"]),
+[data-theme="dark"] {
+  --color-ivory: #170c24;
+  --color-paper: #24142f;
+  --color-ink: #f6eef8; /* 16.6:1 on ivory */
+  --color-ink-2: #c9b6d6; /* 10:1 on ivory, 9.2:1 on paper */
+  --color-line: #3a2748;
+  --color-lilac: #2e1b45;
+  --color-lilac-2: #2b1838;
+  --color-blush: #3a1830;
+  --color-cream: #2e1d26;
+  --color-violet: #a58be8; /* 6.7:1 */
+  --color-violet-deep: #c4b0f5; /* 9.8:1 (the "strong" violet = lighter on dark) */
+  --color-rose: #e08ab5;
+  --color-plum: #3a0f32;
+  --color-plum-2: #5a1747;
+  --color-mist: #d9cfea;
+  --color-saffron: #e0662b; /* 5.5:1 on ivory */
+  --color-saffron-deep: #f08a4b; /* text-strength saffron on dark: 6.9:1 on paper */
+  --color-gold: #f0b04a;
+  --color-gold-soft: #3b2419;
+  --color-thread: #e0662b;
+  --color-stamp: #f08a4b;
+
+  --grain-img: var(--grain-light);
+  --grain-op: 0.06;
+  --page-wash: linear-gradient(180deg, #140a1f 0%, #1a0e28 55%, #1c0f2b 100%);
+  --rule: rgb(246 238 248 / 0.035);
+  --rule-strong: rgb(246 238 248 / 0.14);
+  --glow-1: rgb(91 58 160 / 0.34);
+  --glow-2: rgb(142 47 99 / 0.32);
+  --glow-3: rgb(224 102 43 / 0.07);
+  --glow-4: rgb(180 69 122 / 0.2);
+  --wash-a: rgb(110 75 181 / 0.17);
+  --wash-b: rgb(180 69 122 / 0.16);
+  --wash-c: rgb(224 102 43 / 0.06);
+  --wash-d: rgb(240 176 74 / 0.08);
+  --plum-bg:
+    var(--grain-light), radial-gradient(40% 30% at 85% 62%, rgb(240 176 74 / 0.13), transparent 70%),
+    radial-gradient(45% 28% at 10% 30%, rgb(110 75 181 / 0.34), transparent 72%),
+    radial-gradient(42% 26% at 70% 12%, rgb(180 69 122 / 0.4), transparent 72%),
+    linear-gradient(180deg, #2a0b26 0%, #3e1037 45%, #571645 75%, #330f2e 100%);
+
+  --card-bg: rgb(36 20 47 / 0.84);
+  --card-edge: rgb(246 238 248 / 0.09);
+  --card-shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 18px 36px -24px rgb(0 0 0 / 0.7);
+
+  /* Dark text on bright saffron = 5.6:1 (white would be only 3.4:1). */
+  --cta-face: #e0662b;
+  --cta-ink: #1b0a12;
+  --cta-plate: #7a2f10;
+  --cta-perf: rgb(27 10 18 / 0.5);
+  --cta-stub: #f3c98a;
+  --cta-stub-ink: #2a0f08;
+  --stamp-blend: normal;
+  --pm-disc: rgb(36 20 47 / 0.86);
+
+  --ph-bg: #1f1129;
+  --ph-grid: rgb(246 238 248 / 0.05);
+
+  --field-bg: #1c0f2b;
+  --field-line: #4a3560;
+  --field-line-hover: #62497c;
+  --field-ph: #a08db3;
+  --err: #ff9b8a;
+
+  color-scheme: dark;
+}
+
+/* Light "paper objects" (receipt, checkout card, anything marked .light-island / [data-theme="light"])
+   keep the light tokens even inside the dark theme: paper on a dark desk. */
+:where(.receipt, .checkout-card, .light-island, [data-theme="light"]) {
+  --color-ivory: #fbf9fc;
+  --color-paper: #fffdf9;
+  --color-ink: #1e1530;
+  --color-ink-2: #5b5270;
+  --color-line: #e8e2f0;
+  --color-lilac: #e9e3f5;
+  --color-lilac-2: #f3effa;
+  --color-blush: #f6e6ee;
+  --color-cream: #fcf3e6;
+  --color-violet: #7b6ba8;
+  --color-violet-deep: #5b4b8a;
+  --color-rose: #c27a9a;
+  --color-mist: #d9cfea;
+  --color-saffron: #d9531e;
+  --color-saffron-deep: #b8431a;
+  --color-gold: #e8a33d;
+  --color-gold-soft: #f7e3c0;
+  --color-thread: #c8441a;
+  --color-stamp: #a83a14;
+  --rule: rgb(30 21 48 / 0.045);
+  --rule-strong: rgb(30 21 48 / 0.14);
+  --wash-a: rgb(233 227 245 / 0.9);
+  --wash-b: rgb(246 230 238 / 0.85);
+  --card-bg: rgb(255 253 249 / 0.82);
+  --card-edge: rgb(30 21 48 / 0.09);
+  --cta-face: #b8431a;
+  --cta-ink: #ffffff;
+  --cta-plate: #6b240a;
+  --cta-perf: rgb(255 255 255 / 0.6);
+  --cta-stub: #f7e3c0;
+  --cta-stub-ink: #8a2f0f;
+  --stamp-blend: multiply;
+  --ph-bg: #f5f1f8;
+  --ph-grid: rgb(91 82 112 / 0.075);
+  --field-bg: #ffffff;
+  --field-line: #d8cfe4;
+  --field-line-hover: #c2b6d6;
+  --field-ph: #857c98;
+  --err: #b42318;
+  color-scheme: light;
+  color: var(--color-ink);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    font-feature-settings: "cv11", "ss01";
+    counter-reset: ledger;
+  }
+  ::selection {
+    background: var(--color-gold-soft);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Component classes live in the components layer so Tailwind utilities can still override them. */
+@layer components {
+/* ─────────────────────────── Layout helpers ─────────────────────────── */
+.wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+@media (min-width: 640px) {
+  .wrap {
+    padding-inline: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  .wrap {
+    padding-inline: 40px;
+  }
+}
+
+/* In-page anchors land below the sticky top bar. */
+section[id],
+main[id] {
+  scroll-margin-top: calc(var(--topbar-h) + 12px);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Theme wrapper (components/LandingPage.tsx). Browsers without :has() paint the dark page colour here. */
+.theme-root {
+  min-height: 100dvh;
+  color: var(--color-ink);
+}
+@supports not selector(:has(*)) {
+  .theme-root[data-theme="dark"] {
+    background: var(--color-ivory);
+  }
+}
+
+/* ─────────────────────────── Living background ───────────────────────────
+   Soft washes drifting behind the page + paper grain (fixed), and ledger ruling
+   that scrolls with the content (.ledger-page). Transform-only animation. */
+.mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+  background: var(--page-wash);
+}
+.mesh > i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  will-change: transform;
+}
+.mesh .b1 {
+  width: 85vmax;
+  height: 85vmax;
+  left: -34vmax;
+  top: -40vmax;
+  background: radial-gradient(closest-side, var(--glow-1), transparent);
+  animation: drift-a 36s ease-in-out infinite alternate;
+}
+.mesh .b2 {
+  width: 70vmax;
+  height: 70vmax;
+  right: -32vmax;
+  top: -6vmax;
+  background: radial-gradient(closest-side, var(--glow-2), transparent);
+  animation: drift-b 44s ease-in-out infinite alternate;
+}
+.mesh .b3 {
+  width: 70vmax;
+  height: 70vmax;
+  left: 5vmax;
+  bottom: -46vmax;
+  background: radial-gradient(closest-side, var(--glow-3), transparent);
+  animation: drift-c 52s ease-in-out infinite alternate;
+}
+.mesh .b4 {
+  width: 48vmax;
+  height: 48vmax;
+  right: 4vmax;
+  bottom: -10vmax;
+  background: radial-gradient(closest-side, var(--glow-4), transparent);
+  animation: drift-a 60s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift-a {
+  to {
+    transform: translate3d(8vmax, 6vmax, 0) scale(1.06);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate3d(-9vmax, 8vmax, 0) scale(0.95);
+  }
+}
+@keyframes drift-c {
+  to {
+    transform: translate3d(6vmax, -7vmax, 0) scale(1.08);
+  }
+}
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--grain-img);
+  background-size: 180px 180px;
+  opacity: var(--grain-op);
+}
+/* Ledger ruling: faint ruled lines on the page itself (fade in below the hero). */
+.ledger-page {
+  position: relative;
+}
+.ledger-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 35px, var(--rule) 35px 36px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 40svh, #000 110svh);
+  mask-image: linear-gradient(to bottom, transparent 0, transparent 40svh, #000 110svh);
+}
+
+/* ─────────────────────────── Feathered sections ───────────────────────────
+   Each section paints its wash on a layer that overhangs its edges and fades
+   in/out with a mask, so neighbours melt into each other (no hard edges). */
+.feather {
+  position: relative;
+  isolation: isolate;
+}
+.feather::before {
+  content: "";
+  position: absolute;
+  inset: -110px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--tint, none);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+}
+.tint-hero {
+  --tint:
+    radial-gradient(52% 58% at 80% 36%, var(--wash-a), transparent 72%),
+    radial-gradient(38% 44% at 8% 78%, var(--wash-b), transparent 70%),
+    radial-gradient(28% 30% at 58% 96%, var(--wash-d), transparent 70%);
+}
+.tint-lilac {
+  --tint:
+    radial-gradient(60% 55% at 14% 42%, var(--wash-a), transparent 72%),
+    radial-gradient(45% 50% at 92% 72%, var(--wash-b), transparent 70%);
+}
+.tint-blush {
+  --tint:
+    radial-gradient(55% 55% at 86% 30%, var(--wash-b), transparent 72%),
+    radial-gradient(45% 50% at 8% 80%, var(--wash-a), transparent 70%);
+}
+.tint-cream {
+  --tint:
+    radial-gradient(55% 50% at 20% 30%, var(--wash-c), transparent 72%),
+    radial-gradient(50% 50% at 88% 75%, var(--wash-a), transparent 70%);
+}
+.tint-gold {
+  --tint:
+    radial-gradient(50% 50% at 50% 55%, var(--wash-d), transparent 70%),
+    radial-gradient(60% 50% at 10% 20%, var(--wash-b), transparent 72%),
+    radial-gradient(50% 50% at 90% 85%, var(--wash-a), transparent 72%);
+}
+
+/* The one contrast band (value stack + checkout), feathered in and out.
+   Light: deep plum. Dark: a richer magenta-plum, so the payment zone still stands out. */
+.plum-zone {
+  position: relative;
+  isolation: isolate;
+  color: #fff;
+}
+.plum-zone::before {
+  content: "";
+  position: absolute;
+  inset: -100px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--plum-bg);
+  background-size:
+    180px 180px,
+    auto,
+    auto,
+    auto,
+    auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 200px, #000 calc(100% - 200px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 200px, #000 calc(100% - 200px), transparent 100%);
+}
+
+/* ─────────────────────────── Surfaces ─────────────────────────── */
+/* Paper card: hairline edge, a low printed shadow (no glassy white rim). */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-edge);
+  box-shadow: var(--card-shadow);
+}
+.glass {
+  background: color-mix(in srgb, var(--color-paper) 70%, transparent);
+  border: 1px solid var(--card-edge);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  box-shadow: var(--card-shadow);
+}
+/* Faint ruled lines inside any surface (ledger page). */
+.ruled {
+  background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule-strong) 31px 32px);
+  background-position: 0 -1px;
+}
+.hairline {
+  background: linear-gradient(90deg, transparent, var(--color-line) 15%, var(--color-line) 85%, transparent);
+  height: 1px;
+}
+.rule-single {
+  height: 1px;
+  background: var(--rule-strong);
+}
+.rule-double {
+  height: 4px;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.rule-dotted {
+  height: 0;
+  border-top: 1.5px dotted color-mix(in srgb, var(--color-ink-2) 50%, transparent);
+}
+
+/* Arched window frame for 4:5 portraits (kept for compatibility). */
+.arch {
+  border-radius: 50% 50% 28px 28px / 40% 40% 28px 28px;
+}
+
+/* Checkout card: light paper on the contrast band (also in the dark theme, see light islands above). */
+.checkout-card {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.985), rgb(251 249 252 / 0.96));
+}
+.join-glow {
+  background: radial-gradient(closest-side, rgb(232 163 61 / 0.32), rgb(194 122 154 / 0.14) 60%, transparent);
+}
+
+.barcode {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink) 0 2px,
+    transparent 2px 4px,
+    var(--color-ink) 4px 5px,
+    transparent 5px 9px,
+    var(--color-ink) 9px 12px,
+    transparent 12px 14px
+  );
+}
+
+/* Soft marker highlight for key phrases (wraps nicely across lines). */
+.mark {
+  background-image: linear-gradient(transparent 64%, rgb(232 163 61 / 0.32) 64%, rgb(232 163 61 / 0.32) 90%, transparent 90%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding-inline: 0.06em;
+}
+
+/* ─────────────────────────── CTA: the saffron ticket (components/ui.tsx → CtaLink) ───────────────────────────
+   Square-cut face (top-left + bottom-right corners clipped), a darker plate under it, a dashed
+   perforation with two punched notches, and the price stamped in a stub. Press = stamp press. */
+.cta {
+  --lift: 3px;
+  --cut: 9px;
+  --stub: 4.5rem;
+  --notch: 5px;
+  --h: 50px;
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+  padding-bottom: var(--lift);
+  color: var(--cta-ink);
+  text-decoration: none;
+  isolation: isolate;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cta-shape {
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+.cta-has-stub .cta-shape {
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0, #0000 94%, #000 100%),
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%, #0000 94%, #000 100%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0, #0000 94%, #000 100%),
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%, #0000 94%, #000 100%);
+  mask-composite: intersect;
+}
+.cta-plate {
+  position: absolute;
+  inset: var(--lift) 0 0 0;
+  z-index: -1;
+  background: var(--cta-plate);
+}
+.cta-face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: var(--h);
+  padding-left: 1.2rem;
+  background: var(--cta-face);
+  transition:
+    transform 0.16s var(--ease-press),
+    box-shadow 0.16s var(--ease-press);
+}
+.cta:not(.cta-has-stub) .cta-face {
+  padding-right: 1.05rem;
+}
+.cta-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-block: 0.6rem;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.18;
+  letter-spacing: -0.005em;
+  text-align: left;
+}
+.cta-arrow {
+  flex: none;
+  width: 1.85rem;
+  height: 0.7rem;
+}
+.cta-perf {
+  flex: none;
+  align-self: stretch;
+  width: 0;
+  margin: 8px 0 8px 0.3rem;
+  border-left: 1.5px dashed var(--cta-perf);
+}
+.cta-stub {
+  flex: none;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  width: calc(var(--stub) - 1.5px);
+  background: var(--cta-stub);
+  color: var(--cta-stub-ink);
+}
+.cta-price {
+  display: inline-block;
+  padding: 0.05rem 0.34rem 0.08rem;
+  border: 1.5px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: rotate(-4deg);
+}
+.cta-sm {
+  --h: 42px;
+  --stub: 3.7rem;
+  --cut: 7px;
+  --notch: 4px;
+}
+.cta-sm .cta-face {
+  gap: 0.45rem;
+  padding-left: 0.9rem;
+}
+.cta-sm .cta-label {
+  padding-block: 0.4rem;
+  font-size: 0.875rem;
+}
+.cta-sm .cta-arrow {
+  width: 1.35rem;
+}
+.cta-sm .cta-price {
+  font-size: 0.82rem;
+}
+.cta-lg {
+  --h: 54px;
+  --lift: 4px;
+  --stub: 4.3rem;
+  --cut: 11px;
+}
+/* Phones: tighter arrow + stub so "Ippove register pannunga" stays on one line at 375px. */
+.cta-lg .cta-face {
+  gap: 0.5rem;
+  padding-left: 1rem;
+}
+.cta-lg .cta-arrow {
+  width: 1.4rem;
+}
+.cta-lg .cta-label {
+  font-size: 0.98rem;
+}
+@media (min-width: 640px) {
+  .cta-lg {
+    --h: 58px;
+    --stub: 4.9rem;
+  }
+  .cta-lg .cta-face {
+    gap: 0.6rem;
+  }
+  .cta-lg .cta-arrow {
+    width: 1.85rem;
+  }
+  .cta-lg .cta-face {
+    padding-left: 1.5rem;
+  }
+  .cta-lg .cta-label {
+    font-size: 1.0625rem;
+  }
+  .cta-lg .cta-price {
+    font-size: 1.06rem;
+  }
+}
+/* Hand-drawn arrow: the shaft is partly drawn at rest and completes on hover; the head slides out. */
+.cta-arrow .shaft,
+.btn .shaft,
+.link-thread .shaft {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0.34;
+  transition: stroke-dashoffset 0.38s var(--ease-soft);
+}
+.cta-arrow .head,
+.btn .head,
+.link-thread .head {
+  transform: translateX(-12.5px);
+  transition: transform 0.38s var(--ease-soft);
+}
+@media (hover: hover) {
+  .cta:hover .cta-face {
+    transform: translateY(-1px);
+  }
+  .cta:hover .shaft,
+  .btn:hover .shaft,
+  .link-thread:hover .shaft {
+    stroke-dashoffset: 0;
+  }
+  .cta:hover .head,
+  .btn:hover .head,
+  .link-thread:hover .head {
+    transform: none;
+  }
+}
+.cta:focus-visible .shaft,
+.btn:focus-visible .shaft {
+  stroke-dashoffset: 0;
+}
+.cta:focus-visible .head,
+.btn:focus-visible .head {
+  transform: none;
+}
+.cta:active .cta-face {
+  transform: translateY(var(--lift));
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 0.22),
+    inset 0 0 0 999px rgb(0 0 0 / 0.05);
+}
+.cta:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
+}
+
+/* ─────────────────────────── Single-element buttons (.btn) ───────────────────────────
+   Same language for <button>s (checkout submit) and compact links (mobile bar): square-cut,
+   solid, on a hard plate; press = stamp. The clip polygon includes the plate below the box. */
+.btn {
+  --cut: 8px;
+  --lift: 3px;
+  --plate: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  clip-path: polygon(
+    var(--cut) 0,
+    100% 0,
+    100% calc(100% + var(--lift) - var(--cut)),
+    calc(100% - var(--cut)) calc(100% + var(--lift)),
+    0 calc(100% + var(--lift)),
+    0 var(--cut)
+  );
+  box-shadow: 0 var(--lift) 0 var(--plate);
+  transition:
+    transform 0.16s var(--ease-press),
+    box-shadow 0.16s var(--ease-press),
+    background-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-saffron {
+  --plate: var(--cta-plate);
+  background: var(--cta-face);
+  color: var(--cta-ink);
+}
+.btn-ink {
+  --plate: color-mix(in srgb, var(--color-ink) 55%, #000);
+  background: var(--color-ink);
+  color: var(--color-ivory);
+}
+.btn-line {
+  --plate: var(--rule-strong);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-ink),
+    0 var(--lift) 0 var(--plate);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(var(--lift));
+  box-shadow: inset 0 2px 0 rgb(0 0 0 / 0.22);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 var(--lift) 0 var(--plate),
+    inset 0 0 0 3px var(--cta-face),
+    inset 0 0 0 5px currentColor;
+}
+.btn-lg {
+  min-height: 56px;
+  padding: 0 1rem;
+  font-size: 0.98rem;
+}
+@media (min-width: 640px) {
+  .btn-lg {
+    min-height: 58px;
+    padding: 0 1.9rem;
+    font-size: 1.0625rem;
+  }
+}
+.btn-sm {
+  --cut: 6px;
+  min-height: 44px;
+  padding: 0 0.95rem;
+  font-size: 0.9rem;
+}
+.btn .arrow {
+  transition: transform 0.3s var(--ease-soft);
+}
+.btn .thread-arrow {
+  width: 1.5rem;
+  height: 0.6rem;
+}
+@media (hover: hover) {
+  .btn:hover .arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* ─────────────────────────── Secondary link: saffron-thread underline ─────────────────────────── */
+.link-thread {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.link-thread .lt-text {
+  position: relative;
+  padding-bottom: 3px;
+  background: linear-gradient(var(--rule-strong), var(--rule-strong)) 0 100% / 100% 1px no-repeat;
+}
+.link-thread .lt-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2.5px;
+  height: 6px;
+  background: var(--color-thread);
+  -webkit-mask: var(--wave) 0 50% / 14px 6px repeat-x;
+  mask: var(--wave) 0 50% / 14px 6px repeat-x;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.45s var(--ease-soft);
+}
+.link-thread:hover .lt-text::after,
+.link-thread:focus-visible .lt-text::after {
+  clip-path: inset(0 0 0 0);
+}
+.link-thread .lt-arrow {
+  width: 1.6rem;
+  height: 0.6rem;
+  color: var(--color-thread);
+}
+
+/* ─────────────────────────── Labels: ledger entry, specimen tag, stamp ─────────────────────────── */
+.lbl {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.lbl-ledger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: var(--color-violet-deep);
+}
+.lbl-no {
+  color: var(--color-saffron-deep);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.lbl-auto .lbl-no::before {
+  counter-increment: ledger;
+  content: counter(ledger, decimal-leading-zero);
+}
+.lbl-dash {
+  opacity: 0.55;
+}
+.lbl-rule {
+  flex: none;
+  width: 2.6rem;
+  height: 0;
+  border-top: 1px solid currentColor;
+  opacity: 0.4;
+}
+.lbl-light {
+  color: var(--color-gold);
+}
+.lbl-light .lbl-no {
+  color: var(--color-mist);
+}
+.lbl-specimen {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.5em 0.8em 0.5em 1.75em;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
+  -webkit-mask: radial-gradient(circle 0.25em at 0.85em 50%, #0000 92%, #000 100%);
+  mask: radial-gradient(circle 0.25em at 0.85em 50%, #0000 92%, #000 100%);
+}
+.lbl-specimen::before {
+  content: "";
+  position: absolute;
+  left: 0.42em;
+  top: calc(50% - 0.43em);
+  width: 0.86em;
+  height: 0.86em;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+}
+.lbl-specimen.lbl-light {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--color-mist);
+  border-color: rgb(255 255 255 / 0.22);
+}
+.lbl-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.28em 0.6em;
+  font-weight: 600;
+  color: var(--color-stamp);
+  border: 1.5px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  transform: rotate(-2.5deg);
+  mix-blend-mode: var(--stamp-blend);
+}
+.lbl-stamp.lbl-light {
+  color: var(--color-gold);
+  mix-blend-mode: normal;
+}
+
+/* Specimen tag for stats / credentials (ui.tsx → SpecimenTag). */
+.tag {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.55rem 0.7rem 0.6rem 1.8rem;
+  background: color-mix(in srgb, var(--color-paper) 95%, transparent);
+  color: var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+  -webkit-mask: radial-gradient(circle 3.5px at 0.9rem 50%, #0000 90%, #000 100%);
+  mask: radial-gradient(circle 3.5px at 0.9rem 50%, #0000 90%, #000 100%);
+}
+.tag::before {
+  content: "";
+  position: absolute;
+  left: calc(0.9rem - 6.5px);
+  top: calc(50% - 6.5px);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 26%, transparent);
+}
+.tag-v {
+  font-family: var(--font-serif);
+  font-size: 1.32rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.tag-c {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+/* Circular rubber postmark (ui.tsx → Postmark). */
+.postmark {
+  color: var(--color-stamp);
+  transform: rotate(-12deg);
+}
+.postmark .pm-disc {
+  fill: var(--pm-disc);
+}
+
+/* ─────────────────────────── Small animated bits ─────────────────────────── */
+/* Live marker: a small saffron diamond that blinks like a ledger cursor (no radar ping). */
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--color-saffron);
+  transform: rotate(45deg);
+  flex: none;
+  animation: live-blink 1.6s step-end infinite;
+}
+@keyframes live-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.floaty {
+  animation: floaty 7s ease-in-out infinite;
+}
+.floaty-2 {
+  animation: floaty 8s ease-in-out infinite 1.2s;
+}
+.floaty-3 {
+  animation: floaty 9s ease-in-out infinite 2.4s;
+}
+@keyframes floaty {
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+.spin-slow {
+  animation: spin 60s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─────────────────────────── Motion kit (components/motion.tsx) ─────────────────────────── */
+/* RiseText: each word rises out of its own mask. */
+.rise-w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0.12em 0.08em 0.17em;
+  margin: -0.12em -0.08em -0.17em;
+}
+.rise-i {
+  display: inline-block;
+}
+.rise[data-state="armed"] .rise-i {
+  transform: translateY(115%);
+}
+.rise[data-state="in"] .rise-i {
+  transition: transform 0.6s var(--ease-rise);
+  transition-delay: calc(var(--l, 0) * 85ms + var(--d, 0s));
+}
+.rise-load .rise-i {
+  animation: rise-in 0.6s var(--ease-rise) backwards;
+  animation-delay: calc(var(--i, 0) * 32ms + var(--d, 0s));
+}
+@keyframes rise-in {
+  from {
+    transform: translateY(115%);
+  }
+}
+
+/* Odometer: digits roll on a strip; a hidden ghost digit keeps width + baseline. */
+.odo {
+  --odo-lh: 1.15em;
+  display: inline-block;
+  white-space: nowrap;
+}
+.odo-col {
+  position: relative;
+  display: inline-block;
+  line-height: var(--odo-lh);
+  font-variant-numeric: tabular-nums;
+  clip-path: inset(0 -0.12em);
+}
+.odo-ghost {
+  visibility: hidden;
+}
+.odo-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(calc(var(--n) * -1 * var(--odo-lh)));
+  animation: odo-roll 0.62s cubic-bezier(0.25, 1.2, 0.45, 1) backwards;
+  animation-delay: calc(var(--c, 0) * 70ms + var(--d, 0s) + 0.1s);
+}
+.odo-strip > span {
+  display: block;
+  height: var(--odo-lh);
+  line-height: var(--odo-lh);
+}
+.odo[data-wait] .odo-strip {
+  animation: none;
+  transform: translateY(0);
+}
+@keyframes odo-roll {
+  from {
+    transform: translateY(0);
+  }
+}
+
+/* PetalReveal trigger="load": pure CSS, starts partly open (LCP-safe), clip removed at the end. */
+.petal-load {
+  animation: petal-open 0.62s var(--ease-rise) backwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes petal-open {
+  from {
+    clip-path: ellipse(46% 40% at 50% 100%);
+  }
+  to {
+    clip-path: ellipse(84% 84% at 50% 50%);
+  }
+}
+.wipe-load {
+  animation: wipe-open 0.6s var(--ease-rise) backwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes wipe-open {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* CrocusBloom (icons.tsx): petals open from a bud, then the red stigmas draw in. Plays once. */
+.bloom .petal {
+  transform-origin: 20px 28.5px;
+  transform: rotate(var(--r));
+  animation: bud-open 0.9s var(--ease-rise) backwards;
+  animation-delay: calc(0.25s + var(--k, 0) * 70ms);
+}
+@keyframes bud-open {
+  from {
+    transform: rotate(calc(var(--r) * 0.08)) scale(0.5, 0.8);
+  }
+}
+.bloom .stig path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+  animation: stig-draw 0.45s ease-out backwards;
+  animation-delay: 0.95s;
+}
+@keyframes stig-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.bloom .anth {
+  animation: fade-in 0.3s ease-out backwards;
+  animation-delay: 1.25s;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* SaffronThread + TimelineRail. */
+.thread-line {
+  stroke: var(--color-thread);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.thread-guide {
+  stroke: var(--color-ink-2);
+  stroke-opacity: 0.22;
+  stroke-width: 1;
+  stroke-dasharray: 1.5 7;
+}
+.thread-knot {
+  stroke: var(--color-thread);
+  stroke-opacity: 0.6;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.rail-guide {
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--color-ink-2) 38%, transparent) 0 4px, transparent 4px 9px);
+}
+
+/* ─────────────────────────── Marquee (ledger ticker) ─────────────────────────── */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 64s linear infinite;
+}
+.marquee-track > ul {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+@media (hover: hover) {
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ─────────────────────────── Media placeholder: a blank specimen plate ─────────────────────────── */
+.media-ph {
+  background-color: var(--ph-bg);
+  background-image:
+    var(--grain-paper), linear-gradient(var(--ph-grid) 1px, transparent 1px), linear-gradient(90deg, var(--ph-grid) 1px, transparent 1px),
+    radial-gradient(70% 60% at 18% 14%, var(--wash-a), transparent 70%), radial-gradient(60% 60% at 86% 88%, var(--wash-b), transparent 70%);
+  background-size:
+    180px 180px,
+    22px 22px,
+    22px 22px,
+    auto,
+    auto;
+  color: var(--color-ink-2);
+}
+.media-fill {
+  background-color: var(--ph-bg);
+}
+
+/* ─────────────────────────── Hero (components/sections/Hero.tsx) ─────────────────────────── */
+/* Desktop headline lines sit on paper strips so they stay legible where they cross the photo edge. */
+.hero-strip .rise {
+  background: var(--color-paper);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.16em 0.03em;
+  margin-left: -0.16em;
+}
+.hero-scrim {
+  background: linear-gradient(to top, rgb(20 10 31 / 0.55), rgb(20 10 31 / 0.18) 55%, rgb(20 10 31 / 0));
+}
+
+/* ─────────────────────────── Top bar + mobile bar ─────────────────────────── */
+.topbar {
+  background: color-mix(in srgb, var(--color-ivory) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--rule-strong);
+  pointer-events: none;
+}
+.mcta-bar {
+  position: relative;
+  background: var(--color-paper);
+  border-top: 1px solid var(--rule-strong);
+  box-shadow: 0 -10px 30px -18px rgb(0 0 0 / 0.35);
+}
+.mcta-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+/* ─────────────────────────── Receipt (value stack) ─────────────────────────── */
+.receipt {
+  --z: 9px;
+  background:
+    var(--grain-paper),
+    linear-gradient(180deg, #fffdf9, #fbf6ee);
+  background-size:
+    180px 180px,
+    auto;
+  color: var(--color-ink);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--z)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) var(--z) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--z)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) var(--z) repeat-x;
+}
+.dotted-leader {
+  flex: 1;
+  min-width: 12px;
+  border-bottom: 1.5px dotted color-mix(in srgb, var(--color-ink-2) 45%, transparent);
+  transform: translateY(-4px);
+}
+
+/* ─────────────────────────── Ticket ─────────────────────────── */
+.ticket-main,
+.ticket-stub {
+  --r: 16px;
+}
+/* Mobile: stub sits below, notches on the horizontal perforation. */
+.ticket-main {
+  -webkit-mask:
+    radial-gradient(circle var(--r) at left bottom, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at right bottom, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--r) at left bottom, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at right bottom, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+.ticket-stub {
+  -webkit-mask:
+    radial-gradient(circle var(--r) at left top, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at right top, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--r) at left top, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at right top, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+/* Desktop: stub on the right, notches on the vertical perforation. */
+@media (min-width: 900px) {
+  .ticket-main {
+    -webkit-mask:
+      radial-gradient(circle var(--r) at right top, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 98%, #000) bottom / 100% 51% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at right top, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  }
+  .ticket-stub {
+    -webkit-mask:
+      radial-gradient(circle var(--r) at left top, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle var(--r) at left bottom, #0000 98%, #000) bottom / 100% 51% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at left top, #0000 98%, #000) top / 100% 51% no-repeat,
+      radial-gradient(circle var(--r) at left bottom, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  }
+}
+
+/* ─────────────────────────── FAQ (native <details>) ─────────────────────────── */
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq .faq-icon {
+  transition:
+    transform 0.35s var(--ease-soft),
+    background-color 0.35s var(--ease-soft);
+}
+.faq details[open] .faq-icon {
+  transform: rotate(45deg);
+  background-color: var(--color-gold-soft);
+}
+
+/* ─────────────────────────── Checkout form (components/CheckoutForm.tsx) ─────────────────────────── */
+.checkout {
+  display: grid;
+  gap: 14px;
+  position: relative;
+}
+.checkout .field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.checkout .field input {
+  font: inherit;
+  font-weight: 500;
+  font-size: 16px; /* ≥16px stops iOS zoom */
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 3px;
+  border: 1px solid var(--field-line);
+  background: var(--field-bg);
+  color: var(--color-ink);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.checkout .field input::placeholder {
+  color: var(--field-ph);
+}
+.checkout .field input:hover {
+  border-color: var(--field-line-hover);
+}
+.checkout .field input:focus {
+  outline: none;
+  border-color: var(--color-violet);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-violet) 24%, transparent);
+}
+.checkout .field input[aria-invalid="true"] {
+  border-color: var(--err);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 14%, transparent);
+}
+.checkout .check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.checkout .check:hover {
+  background: color-mix(in srgb, var(--color-lilac) 45%, transparent);
+}
+.checkout .check input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--color-saffron-deep);
+  cursor: pointer;
+}
+.checkout .check input[aria-invalid="true"] {
+  outline: 2px solid var(--err);
+  outline-offset: 2px;
+}
+.checkout .check a {
+  color: var(--color-violet-deep);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.checkout .submit {
+  width: 100%;
+  margin-top: 4px;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  min-height: 58px;
+}
+.checkout .submit:disabled {
+  cursor: progress;
+  opacity: 0.85;
+}
+.checkout .spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  animation: spin 0.8s linear infinite;
+}
+.checkout .note,
+.checkout .err {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: center;
+}
+.checkout .note {
+  color: var(--color-ink-2);
+}
+.checkout .err {
+  color: var(--err);
+  font-weight: 600;
+}
+
+} /* end @layer components */
+
+/* ─────────────────────────── Dark-theme safety net ───────────────────────────
+   Sections should use tokens (bg-paper, text-ink…). These catch literal white utilities that would
+   otherwise print bright white cards / light-on-light text in the dark theme. Light islands are exempt. */
+[data-theme="dark"]
+  :is(.bg-white, [class*="bg-white/"]):not(:where(.receipt, .checkout-card, .light-island, [data-theme="light"])):not(
+    :where(.receipt, .checkout-card, .light-island, [data-theme="light"]) *
+  ) {
+  background-color: color-mix(in srgb, var(--color-paper) 88%, transparent);
+}
+[data-theme="dark"]
+  :is([class*="from-white"]):not(:where(.receipt, .checkout-card, .light-island, [data-theme="light"])):not(
+    :where(.receipt, .checkout-card, .light-island, [data-theme="light"]) *
+  ) {
+  --tw-gradient-from: color-mix(in srgb, var(--color-paper) 90%, transparent);
+}
+[data-theme="dark"]
+  :is([class*="to-white"]):not(:where(.receipt, .checkout-card, .light-island, [data-theme="light"])):not(
+    :where(.receipt, .checkout-card, .light-island, [data-theme="light"]) *
+  ) {
+  --tw-gradient-to: color-mix(in srgb, var(--color-paper) 90%, transparent);
+}
+[data-theme="dark"]
+  :is([class*="border-white"], [class*="ring-white"]):not(:where(.receipt, .checkout-card, .light-island, [data-theme="light"])):not(
+    :where(.receipt, .checkout-card, .light-island, [data-theme="light"]) *
+  ) {
+  border-color: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+[data-theme="dark"]
+  :is(.bg-ink, .bg-saffron, .bg-saffron-deep, .bg-violet, .bg-violet-deep, .bg-gold, .bg-rose).text-white:not(
+    :where(.receipt, .checkout-card, .light-island, [data-theme="light"]) *
+  ) {
+  color: #1b0a12;
+}
+
+/* ─────────────────────────── Reduced motion: everything calm and final ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  .mesh > i,
+  .marquee-track,
+  .floaty,
+  .floaty-2,
+  .floaty-3,
+  .spin-slow,
+  .live-dot,
+  .rise-i,
+  .odo-strip,
+  .petal-load,
+  .wipe-load {
+    animation: none !important;
+  }
+  .rise-i {
+    transform: none !important;
+  }
+  .marquee-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .marquee-track > ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.5rem;
+  }
+  .marquee-track > ul[aria-hidden="true"] {
+    display: none;
+  }
+  .marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* Motion reveal wrappers render fully visible: no clip, no movement. */
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
+
+/* ─────────────────────────── Light / dark switch (top bar) ─────────────────────────── */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  /* Same cut-corner language as the CTA. */
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease-soft),
+    transform 0.15s var(--ease-press);
+}
+.theme-toggle:hover {
+  background: var(--color-lilac-2);
+}
+.theme-toggle:active {
+  transform: translateY(1px);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--color-violet-deep);
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────── Performance guard ───────────────────────────
+   The backdrop blobs are huge layers: animating them forever costs GPU on phones and laptops. They stay
+   as a static wash; small decorative loops only run on large screens. */
+.mesh > i {
+  animation: none !important;
+  will-change: auto !important;
+}
+@media (max-width: 1023px) {
+  .floaty,
+  .floaty-2,
+  .floaty-3,
+  .spin-slow {
+    animation: none !important;
+  }
+}
+
+/* ─────────────────────────── Theme-specific media ───────────────────────────
+   AI loops are rendered on each theme's own flat background; show the matching one. */
+.theme-root[data-theme="dark"] .only-light,
+.theme-root:not([data-theme="dark"]) .only-dark {
+  display: none;
+}
+
+/* ─────────────────────────── No visible page scrollbar (scrolling still works everywhere) ─────────────────────────── */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ─────────────────────────── PC only: larger top bar + small labels (phones keep their sizes) ─────────────────────────── */
+@media (min-width: 1024px) {
+  :root {
+    --topbar-h: 68px;
+  }
+  .topbar .wrap {
+    height: 68px;
+  }
+  .topbar a[href="#top"] .font-serif {
+    font-size: 1.55rem;
+  }
+  .topbar a[href="#top"] .font-mono {
+    font-size: 0.66rem;
+  }
+  .topbar p.lbl {
+    font-size: 0.84rem;
+  }
+  .topbar .cta-sm .cta-label {
+    font-size: 1rem;
+  }
+  .topbar .cta-sm .cta-price {
+    font-size: 0.95rem;
+  }
+}
+@layer components {
+  @media (min-width: 1024px) {
+    .lbl {
+      font-size: 0.8rem;
+    }
+    [data-type="bold"] .lbl-ledger {
+      font-size: 0.86rem;
+    }
+    .fj-mono {
+      font-size: 0.78rem;
+    }
+    .tag-c {
+      font-size: 0.66rem;
+    }
+  }
+}
+
+/* ─────────────────────────── Auto-scroll curtain (components/AdAutoScroll.tsx) ─────────────────────────── */
+.as-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: var(--color-ivory);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.as-curtain.is-on {
+  opacity: 1;
+}
+
+/* ─────────────────────────── Video spotlight (components/VideoSpotlight.tsx) ───────────────────────────
+   The frame is FLIP-animated from the page thumbnail (inline transform); the plum card art and the info
+   column fade in around it. Transform/opacity only. */
+html.vs-lock {
+  overflow: hidden;
+}
+.vs-thumb {
+  cursor: pointer;
+  background: #1a0e28;
+}
+.vs-thumb-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  translate: -50% -50%;
+  color: #fff;
+  background: var(--color-saffron-deep);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: transform 0.25s var(--ease-soft);
+}
+.vs-thumb:hover .vs-thumb-play,
+.vs-thumb:focus-visible .vs-thumb-play {
+  transform: scale(1.08);
+}
+.vs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.vs-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(20 10 31 / 0.74);
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+.vs-overlay.is-shown .vs-backdrop {
+  opacity: 1;
+}
+.vs-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 16px;
+}
+.vs-card-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 1px solid rgb(240 176 74 / 0.35);
+  background:
+    radial-gradient(60% 50% at 88% 12%, rgb(180 69 122 / 0.45), transparent 70%),
+    radial-gradient(55% 55% at 8% 92%, rgb(110 75 181 / 0.5), transparent 70%),
+    repeating-linear-gradient(180deg, transparent 0 27px, rgb(246 238 248 / 0.05) 27px 28px),
+    linear-gradient(160deg, #2b1640 0%, #3a1a4a 55%, #241634 100%);
+  box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.7);
+  clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+  opacity: 0;
+  transform: scale(0.94);
+  transition:
+    opacity 0.45s ease-out,
+    transform 0.6s var(--ease-soft);
+}
+.vs-overlay.is-shown .vs-card-art {
+  opacity: 1;
+  transform: none;
+}
+.vs-frame {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  height: min(70dvh, 70vh);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  background: #000;
+  transform-origin: top left;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  will-change: transform;
+}
+.vs-top,
+.vs-bottom {
+  position: absolute;
+  inset-inline: 0;
+  display: flex;
+  padding: 10px;
+  color: #fff;
+  transition: opacity 0.3s ease-out;
+}
+.vs-top {
+  top: 0;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(rgb(0 0 0 / 0.5), transparent);
+}
+.vs-bottom {
+  bottom: 0;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.6));
+}
+.vs-overlay:not(.is-shown) .vs-top,
+.vs-overlay:not(.is-shown) .vs-bottom {
+  opacity: 0;
+}
+.vs-badge {
+  padding: 5px 9px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgb(184 67 26 / 0.95);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.vs-btn,
+.vs-sound {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  color: #fff;
+  background: rgb(20 10 31 / 0.6);
+  border: 1px solid rgb(255 255 255 / 0.3);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  cursor: pointer;
+}
+.vs-btn {
+  width: 44px;
+}
+.vs-sound {
+  align-self: flex-start;
+  padding: 0 14px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.vs-sound.is-muted {
+  background: var(--color-saffron-deep);
+  border-color: transparent;
+}
+.vs-progress {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.25);
+}
+.vs-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #f0b04a;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: vs-progress 5s linear forwards;
+}
+@keyframes vs-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+.vs-info {
+  position: relative;
+  z-index: 1;
+  width: 300px;
+  color: #f6eef8;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s ease-out 0.2s,
+    transform 0.6s var(--ease-soft) 0.2s;
+}
+.vs-overlay.is-shown .vs-info {
+  opacity: 1;
+  transform: none;
+}
+.vs-overlay.is-out .vs-info,
+.vs-overlay.is-out .vs-card-art {
+  opacity: 0;
+  transition-delay: 0s;
+}
+.vs-overlay.is-out .vs-backdrop {
+  opacity: 0;
+}
+.vs-kicker {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f0b04a;
+}
+.vs-name {
+  margin-top: 0.6rem;
+  font-family: var(--font-serif);
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.vs-role {
+  margin-top: 0.5rem;
+  color: #c9b6d6;
+  font-weight: 600;
+}
+.vs-facts {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+  font-size: 0.98rem;
+}
+.vs-facts li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.vs-facts li::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  translate: 0 -1px;
+  background: #e0662b;
+}
+.vs-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  margin-top: 1.5rem;
+  padding: 0 22px;
+  color: #fff;
+  font-weight: 800;
+  background: #b8431a;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.vs-cta:hover {
+  background: #a33a15;
+}
+/* Phones and tablets: video (about 64% of the height) + the CTA under it, ~70% of the screen in total. */
+@media (max-width: 1023px) {
+  .vs-card {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .vs-frame {
+    height: min(64dvh, calc((100vw - 56px) * 16 / 9));
+  }
+  .vs-info {
+    width: 100%;
+  }
+  .vs-info > :not(.vs-cta) {
+    display: none;
+  }
+  .vs-cta {
+    width: 100%;
+    margin-top: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vs-backdrop,
+  .vs-card-art,
+  .vs-info,
+  .vs-top,
+  .vs-bottom {
+    transition: none;
+  }
+  .vs-progress::after {
+    animation-duration: 0s;
+  }
+}
+
+/* ─────────────────────────── Section opening animations (one-time, transform/clip only) ───────────────────────────
+   Keyed off the Fx states (components/sections/Fx.tsx): "armed" = below the fold after mount, "in" = scrolled into
+   view. No JS, reduced motion or already-visible sections stay "idle" = final state, no animation. */
+
+/* 2 · Webinar ticket: "print and tear". The ticket prints out top to bottom, then the ₹99 stub slides in
+   beside it (below it on phones) and settles; the postmark keeps its own stamp. */
+.fj-tix[data-fx="armed"] .fj-tix-main {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(22px);
+}
+.fj-tix[data-fx="in"] .fj-tix-main {
+  clip-path: inset(-60px);
+  transform: none;
+  transition:
+    clip-path 1s cubic-bezier(0.65, 0, 0.25, 1),
+    transform 1s var(--ease-soft);
+}
+.fj-tix[data-fx="armed"] .fj-tix-stub {
+  opacity: 0.001;
+  transform: translateY(-26px) rotate(-1.5deg);
+}
+.fj-tix[data-fx="in"] .fj-tix-stub {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.45s ease-out 0.75s,
+    transform 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) 0.75s;
+}
+@media (min-width: 900px) {
+  .fj-tix[data-fx="armed"] .fj-tix-stub {
+    transform: translateX(-46px) rotate(-3deg);
+  }
+}
+
+/* Hero copy column = size container on desktop (headline + bouquet are sized to it; see app/bold.css). */
+@media (min-width: 1024px) {
+  .hero-col {
+    container-type: inline-size;
+  }
+}
+
+/* Spotlight close button while locked (auto-open: first 5 s): a countdown, not clickable. */
+.vs-btn.is-locked {
+  cursor: default;
+  background: rgb(20 10 31 / 0.75);
+}
+.vs-count {
+  font-size: 1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

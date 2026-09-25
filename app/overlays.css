@@ -1,0 +1,68 @@
+/* ─────────────────────────── Review lightbox (components/ReviewLightbox.tsx) ─────────────────────────── */
+.rl-card {
+  padding: 14px;
+}
+.rl-frame {
+  position: relative;
+  z-index: 1;
+  height: min(82dvh, 82vh);
+  max-width: calc(100vw - 48px);
+  overflow: hidden;
+  background: #fff;
+  transform-origin: top left;
+  touch-action: pan-y;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  will-change: transform;
+}
+.rl-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  animation: rl-fade 0.28s ease-out;
+}
+@keyframes rl-fade {
+  from {
+    opacity: 0.35;
+  }
+}
+.rl-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 48px;
+  min-height: 48px;
+  translate: 0 -50%;
+}
+.rl-prev {
+  left: -58px;
+}
+.rl-next {
+  right: -58px;
+}
+.rl .vs-top {
+  opacity: 1;
+}
+@media (max-width: 767px) {
+  .rl-frame {
+    height: min(76dvh, calc((100vw - 48px) * 1.85));
+  }
+  .rl-prev {
+    left: 18px;
+    top: auto;
+    bottom: 18px;
+    translate: none;
+  }
+  .rl-next {
+    right: 18px;
+    top: auto;
+    bottom: 18px;
+    translate: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rl-img {
+    animation: none;
+  }
+}

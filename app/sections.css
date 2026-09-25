@@ -1,0 +1,1512 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Section styles (owned by the sections agent). Imported from globals.css.
+   "The Saffron Ledger": field-journal paper, ledger ruling, rubber stamps,
+   specimen tags, perforations. Every colour comes from the theme tokens
+   (var(--color-*)), so the dark theme flips these sections automatically.
+   Derived colours are declared on .fj-sec (each section root) and on light islands
+   inside it (receipt, admit card), NOT on :root, so they re-compute wherever
+   [data-theme] / .light-island swaps the tokens.
+   Motion is keyed off data-fx (see components/sections/Fx.tsx):
+   idle = final state (SSR, no JS, reduced motion) · armed = pre-state · in = play once.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* ───────────────────────── Shared ───────────────────────── */
+  .fj-sec,
+  .fj-sec .light-island {
+    --fj-rule: color-mix(in oklab, var(--color-violet) 22%, transparent);
+    --fj-rule-strong: color-mix(in oklab, var(--color-ink) 24%, transparent);
+    --fj-edge: color-mix(in oklab, var(--color-ink) 13%, transparent);
+    --fj-margin: color-mix(in oklab, var(--color-saffron) 55%, transparent);
+    --fj-shadow: color-mix(in oklab, var(--color-plum) 30%, transparent);
+    --fj-film: var(--color-plum);
+    --fj-err: var(--err, #b42318);
+    --fj-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --fj-thud: cubic-bezier(0.2, 0.9, 0.25, 1.25);
+    /* Worn rubber-stamp ink: speckled holes from fractal noise (data: URI, CSP img-src allows data:). */
+    --fj-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    --fj-ink-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.5 1.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  }
+  [data-theme="dark"] .fj-sec,
+  .fj-sec[data-theme="dark"] {
+    --fj-shadow: rgb(0 0 0 / 0.5);
+    --fj-rule: color-mix(in oklab, var(--color-violet) 30%, transparent);
+  }
+
+  .fj-mono {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+  .fj-num {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  /* "Handwritten" captions: the display serif in italic. */
+  .fj-hand {
+    font-family: var(--font-serif, Georgia, serif);
+    font-style: italic;
+    letter-spacing: 0;
+  }
+
+  /* Rubber stamp: double frame (border + inset outline), worn ink, set at an angle via `rotate`
+     (not transform) so the stamp-in keyframes can scale freely. */
+  .fj-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.55em 0.8em 0.5em;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    outline: 1px solid currentColor;
+    outline-offset: -5px;
+    color: var(--color-stamp, var(--color-saffron-deep));
+    mix-blend-mode: var(--stamp-blend, normal);
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 600;
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    rotate: -5deg;
+    -webkit-mask-image: var(--fj-ink);
+    mask-image: var(--fj-ink);
+    -webkit-mask-size: 160px 160px;
+    mask-size: 160px 160px;
+  }
+  .fj-stamp--violet {
+    color: var(--color-violet-deep);
+  }
+  .fj-stamp--muted {
+    color: var(--color-ink-2);
+  }
+  /* Small stamps carrying real words (e.g. the Cashfree trust line): lighter wear so they stay legible. */
+  .fj-stamp--sm {
+    font-size: 0.66rem;
+    rotate: -2deg;
+    -webkit-mask-image: var(--fj-ink-light);
+    mask-image: var(--fj-ink-light);
+  }
+  .fj-stamp--lg {
+    font-size: 1rem;
+    padding: 0.6em 0.9em 0.55em;
+    border-width: 3px;
+    outline-offset: -7px;
+  }
+
+  /* Washi tape strip with torn ends. */
+  .fj-tape {
+    position: absolute;
+    z-index: 2;
+    top: -12px;
+    left: 50%;
+    width: 86px;
+    height: 24px;
+    translate: -50% 0;
+    rotate: -4deg;
+    background-color: color-mix(in oklab, var(--tape, var(--color-gold)) 42%, transparent);
+    clip-path: polygon(0 0, 100% 0, 97% 20%, 100% 40%, 97% 60%, 100% 80%, 97% 100%, 0 100%, 3% 80%, 0 60%, 3% 40%, 0 20%);
+    pointer-events: none;
+  }
+  .fj-tape--rose {
+    --tape: var(--color-rose);
+  }
+  .fj-tape--violet {
+    --tape: var(--color-violet);
+  }
+
+  /* Ledger ruling (horizontal lines every --lh). */
+  .fj-ruled {
+    background-image: linear-gradient(to bottom, transparent calc(var(--lh, 32px) - 1px), var(--fj-rule) calc(var(--lh, 32px) - 1px));
+    background-size: 100% var(--lh, 32px);
+    background-position: 0 var(--lh-offset, 0);
+  }
+
+  /* Tick + pencil marks drawn with pathLength="1". */
+  .fj-draw path {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+  }
+
+  /* ───────────────────────── Motion (data-fx) ─────────────────────────
+     Fx blocks may nest (e.g. the receipt prints, then its seal stamps on its own trigger), so an
+     effect only plays once no Fx around it is still "armed". */
+  [data-fx="armed"] .fj-stamp-in {
+    opacity: 0;
+  }
+  [data-fx="in"] .fj-stamp-in:not([data-fx="armed"] .fj-stamp-in) {
+    animation: fj-stamp 0.5s var(--fj-thud) both;
+    animation-delay: calc(var(--i, 0) * 140ms + var(--d, 0ms));
+  }
+  [data-fx="armed"] .fj-strike {
+    background-size: 0% 2px;
+  }
+  [data-fx="in"] .fj-strike:not([data-fx="armed"] .fj-strike) {
+    animation: fj-strike 0.55s var(--fj-ease) both;
+    animation-delay: calc(var(--i, 0) * 160ms + 200ms);
+  }
+  [data-fx="armed"] .fj-draw path {
+    stroke-dashoffset: 1;
+  }
+  [data-fx="in"] .fj-draw path:not([data-fx="armed"] .fj-draw path) {
+    animation: fj-draw var(--dur, 0.7s) var(--fj-ease) both;
+    animation-delay: calc(var(--i, 0) * 160ms + var(--d, 450ms));
+  }
+  [data-fx="armed"] .fj-settle {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.03);
+  }
+  [data-fx="in"] .fj-settle:not([data-fx="armed"] .fj-settle) {
+    animation: fj-settle 0.6s var(--fj-ease) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+  [data-fx="armed"] .fj-print {
+    clip-path: inset(0 0 100% 0);
+  }
+  [data-fx="in"] .fj-print:not([data-fx="armed"] .fj-print) {
+    animation: fj-print 1.25s steps(18, end) both;
+  }
+  [data-fx="armed"] .fj-swing {
+    opacity: 0;
+  }
+  [data-fx="in"] .fj-swing:not([data-fx="armed"] .fj-swing) {
+    animation: fj-swing 1.5s var(--fj-ease) both;
+  }
+
+  /* ───────────────────────── 3 · Farm: contact sheet ───────────────────────── */
+  .fj-sheet {
+    position: relative;
+    background-color: var(--color-paper);
+    border: 1px solid var(--fj-edge);
+    padding: 12px 10px 16px;
+    box-shadow: 0 30px 60px -40px var(--fj-shadow);
+  }
+  @media (min-width: 768px) {
+    .fj-sheet {
+      padding: 18px 20px 24px;
+    }
+  }
+  .fj-frames {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0;
+    row-gap: 12px;
+  }
+  @media (min-width: 768px) {
+    .fj-frames {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: 18px;
+    }
+  }
+  .fj-frame {
+    position: relative;
+    margin: 0;
+    min-width: 0;
+  }
+  /* Film base with sprocket holes top + bottom; frames butt together so each row reads as one strip. */
+  .fj-film {
+    position: relative;
+    padding: 15px 4px 22px;
+    background-color: var(--fj-film);
+  }
+  .fj-film::before,
+  .fj-film::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background-image: linear-gradient(to right, transparent 3px, var(--color-paper) 3px 9px, transparent 9px);
+    background-size: 12px 100%;
+    opacity: 0.85;
+  }
+  .fj-film::before {
+    top: 5px;
+  }
+  .fj-film::after {
+    bottom: 4px;
+  }
+  .fj-frame figcaption {
+    padding: 7px 6px 0;
+    font-size: 0.98rem;
+    line-height: 1.2;
+    color: var(--color-ink-2);
+  }
+  /* Grease-pencil loop around the key frame. */
+  .fj-pencil {
+    position: absolute;
+    z-index: 2;
+    inset: -12px -10px -6px -10px;
+    width: calc(100% + 20px);
+    height: calc(100% + 18px);
+    overflow: visible;
+    pointer-events: none;
+    color: var(--color-saffron);
+  }
+
+  /* ───────────────────────── 4 · Problem: Dr. / Cr. ledger ───────────────────────── */
+  .fj-ledger {
+    position: relative;
+    background-color: var(--color-paper);
+    border: 1px solid var(--fj-edge);
+    box-shadow: 0 30px 60px -44px var(--fj-shadow);
+  }
+  .fj-ledger-head,
+  .fj-lrow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fj-ledger-head {
+    border-bottom: 2px solid var(--fj-rule-strong);
+    color: var(--color-ink-2);
+  }
+  .fj-ledger-head > *,
+  .fj-lrow > * {
+    padding: 11px 14px;
+  }
+  .fj-lrow {
+    border-bottom: 1px solid var(--fj-rule);
+  }
+  .fj-lcells {
+    display: grid;
+    gap: 6px;
+  }
+  .fj-dr,
+  .fj-cr {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    margin: 0;
+  }
+  .fj-dr {
+    color: var(--color-ink-2);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+  .fj-cr {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+  .fj-strike {
+    background-image: linear-gradient(var(--color-saffron-deep), var(--color-saffron-deep));
+    background-repeat: no-repeat;
+    background-position: 0 58%;
+    background-size: 100% 2px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .fj-lbal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    border-top: 1px solid var(--fj-rule-strong);
+  }
+  .fj-lbal > * {
+    padding: 14px 14px 16px;
+  }
+  .fj-double {
+    border-bottom: 4px double var(--color-saffron-deep);
+    padding-bottom: 2px;
+  }
+  @media (min-width: 768px) {
+    .fj-ledger-head,
+    .fj-lrow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .fj-ledger-head > *,
+    .fj-lrow > * {
+      padding: 13px 22px;
+    }
+    .fj-lcells {
+      display: contents;
+    }
+    .fj-lcells > .fj-cr,
+    .fj-ledger-head > :last-child {
+      border-left: 1px solid var(--fj-rule-strong);
+      padding: 13px 22px;
+    }
+    .fj-lcells > .fj-dr {
+      padding: 13px 22px;
+    }
+    .fj-dr,
+    .fj-cr {
+      font-size: 1.02rem;
+    }
+    .fj-lbal {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .fj-lbal > * {
+      padding: 16px 22px 18px;
+    }
+    .fj-lbal > :last-child {
+      border-left: 1px solid var(--fj-rule-strong);
+    }
+  }
+
+  /* ───────────────────────── 5 · Modules: swipe deck → sticky index pile ───────────────────────── */
+  .fj-deck {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 8px 16px 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+    list-style: none;
+  }
+  .fj-deck::-webkit-scrollbar {
+    display: none;
+  }
+  .fj-deck > li {
+    display: flex;
+    flex: 0 0 min(86%, 420px);
+    scroll-snap-align: start;
+  }
+  @media (min-width: 640px) {
+    .fj-deck {
+      margin: 0 -24px;
+      padding-inline: 24px;
+      scroll-padding-inline: 24px;
+    }
+    /* Tablets: wide enough for the two-column card (text | print) from ~768px. */
+    .fj-deck > li {
+      flex-basis: min(78%, 600px);
+    }
+  }
+  @media (min-width: 1024px) {
+    .fj-deck {
+      display: block;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+    }
+    /* Each card sticks one tab-height (56px) lower than the one before. */
+    .fj-deck > li {
+      position: sticky;
+      top: calc(var(--topbar-h, 60px) + 28px + var(--i, 0) * 56px);
+      margin-bottom: 22px;
+      filter: drop-shadow(0 -8px 14px color-mix(in oklab, var(--color-plum) 10%, transparent));
+    }
+    .fj-deck > li:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .fj-mod {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--fj-edge);
+    color: var(--color-ink);
+    overflow: hidden;
+    /* The card body switches to two columns by the card's own width (phones: print on top). */
+    container-type: inline-size;
+    /* punched hole in the tab row */
+    -webkit-mask-image: radial-gradient(circle 6px at calc(100% - 24px) 28px, #0000 95%, #000);
+    mask-image: radial-gradient(circle 6px at calc(100% - 24px) 28px, #0000 95%, #000);
+  }
+  .fj-mod-tab {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 48px 8px 16px;
+    border-bottom: 1px dashed var(--fj-rule-strong);
+  }
+  .fj-mod-tab::after {
+    /* reinforcement ring around the hole */
+    content: "";
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in oklab, var(--color-gold) 65%, transparent);
+  }
+  .fj-mod-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 14px;
+    padding: 14px 16px 18px;
+  }
+  /* The illustration as a taped print (phones: full width on top of the text). */
+  .fj-mod-art {
+    order: -1;
+    position: relative;
+    margin: 0;
+    padding: 5px;
+    background-color: var(--color-paper);
+    box-shadow:
+      0 0 0 1px var(--fj-edge),
+      0 12px 20px -14px var(--fj-shadow);
+    rotate: var(--tilt, -1deg);
+  }
+  .fj-mod-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .fj-mod-copy {
+    margin: 8px 0 0;
+    font-size: 1.06rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+  @container (min-width: 500px) {
+    .fj-mod-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 20px;
+      padding: 16px 18px 18px;
+    }
+    .fj-mod-art {
+      order: 0;
+    }
+    .fj-mod-copy {
+      font-size: 1.12rem;
+    }
+  }
+  @container (min-width: 640px) {
+    .fj-mod-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+      gap: 24px;
+      padding: 18px 20px 20px 22px;
+    }
+    .fj-mod-copy {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      line-height: 1.45;
+    }
+  }
+  .fj-deck-ctrl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .fj-deck-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border: 1.5px solid var(--fj-rule-strong);
+    border-radius: 3px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition:
+      opacity 0.2s,
+      border-color 0.2s;
+  }
+  .fj-deck-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .fj-deck-count {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-2);
+  }
+  .fj-deck-bar {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    background-color: var(--fj-rule);
+    overflow: hidden;
+  }
+  .fj-deck-bar > span {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-saffron-deep);
+    transform-origin: left;
+    transition: transform 0.45s var(--fj-ease);
+  }
+
+  /* ───────────────────────── 6 · Journey: diary pages ───────────────────────── */
+  .fj-diary {
+    display: grid;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 1024px) {
+    .fj-diary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      column-gap: 40px;
+      align-items: start;
+    }
+    .fj-entry:nth-child(2) {
+      margin-top: 26px;
+    }
+    .fj-entry:nth-child(3) {
+      margin-top: 8px;
+    }
+    .fj-entry:nth-child(4) {
+      margin-top: 34px;
+    }
+  }
+  .fj-entry {
+    position: relative;
+  }
+  /* The page is clipped (torn edge), so its shadow lives on this wrapper. */
+  .fj-page-wrap {
+    filter: drop-shadow(0 14px 16px color-mix(in oklab, var(--color-plum) 14%, transparent));
+  }
+  .fj-page {
+    position: relative;
+    padding: 14px 14px 26px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    rotate: var(--tilt, 0deg);
+    /* torn bottom edge */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 95% 100%, 90% calc(100% - 5px), 84% calc(100% - 1px), 79% calc(100% - 8px), 73% calc(100% - 2px), 67% calc(100% - 6px), 61% 100%, 55% calc(100% - 7px), 49% calc(100% - 3px), 43% calc(100% - 8px), 37% calc(100% - 1px), 31% calc(100% - 6px), 25% calc(100% - 2px), 19% calc(100% - 7px), 13% 100%, 7% calc(100% - 5px), 0 calc(100% - 2px));
+    --lh: 28px;
+    --lh-offset: 14px;
+  }
+  .fj-page::before {
+    /* red margin line */
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 30px;
+    width: 1px;
+    background-color: var(--fj-margin);
+  }
+  .fj-page--final {
+    background-color: var(--color-cream);
+  }
+  .fj-page-row {
+    display: grid;
+    grid-template-columns: 40% minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    margin-top: 12px;
+  }
+  @media (min-width: 1024px) {
+    .fj-page {
+      padding: 16px 16px 28px;
+    }
+    .fj-page-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+  .fj-snap {
+    position: relative;
+    margin: 0;
+    padding: 5px 5px 14px;
+    background-color: var(--color-paper);
+    box-shadow: 0 0 0 1px var(--fj-edge), 0 8px 14px -8px var(--fj-shadow);
+    rotate: 1.5deg;
+  }
+  .fj-gap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0 8px 22px;
+    color: var(--color-ink-2);
+  }
+  .fj-gap::before {
+    content: "";
+    width: 0;
+    height: 20px;
+    border-left: 2px dotted var(--fj-rule-strong);
+  }
+  @media (min-width: 1024px) {
+    .fj-gap {
+      position: absolute;
+      top: 34%;
+      right: -40px;
+      width: 40px;
+      padding: 0;
+      justify-content: center;
+      writing-mode: vertical-rl;
+    }
+    .fj-gap::before {
+      height: 18px;
+      width: 0;
+    }
+  }
+
+  /* ───────────────────────── 7 · Value stack: printed receipt + round seal ───────────────────────── */
+  .fj-receipt-wrap {
+    filter: drop-shadow(0 34px 34px rgb(8 2 18 / 0.45));
+  }
+  .fj-slot {
+    height: 12px;
+    margin: 0 -10px -6px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(0 0 0 / 0.35));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+  }
+  .fj-receipt {
+    --z: 9px;
+    position: relative;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+    -webkit-mask:
+      linear-gradient(#000 0 0) top / 100% calc(100% - var(--z)) no-repeat,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) var(--z) repeat-x;
+    mask:
+      linear-gradient(#000 0 0) top / 100% calc(100% - var(--z)) no-repeat,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) var(--z) repeat-x;
+  }
+  .fj-rline {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fj-leader {
+    flex: 1;
+    min-width: 14px;
+    border-bottom: 1.5px dotted color-mix(in oklab, var(--color-ink-2) 55%, transparent);
+    translate: 0 -4px;
+  }
+  .fj-dash {
+    border-top: 1.5px dashed var(--fj-rule-strong);
+  }
+  /* Worn-ink finish for the round postmarks (ui.tsx <Postmark/>, which sets colour + angle). */
+  .fj-seal {
+    display: block;
+    -webkit-mask-image: var(--fj-ink);
+    mask-image: var(--fj-ink);
+    -webkit-mask-size: 160px 160px;
+    mask-size: 160px 160px;
+  }
+  .fj-barcode {
+    height: 34px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--color-ink) 0 2px,
+      transparent 2px 4px,
+      var(--color-ink) 4px 5px,
+      transparent 5px 9px,
+      var(--color-ink) 9px 12px,
+      transparent 12px 14px,
+      var(--color-ink) 14px 15px,
+      transparent 15px 19px
+    );
+    opacity: 0.55;
+  }
+
+  /* ───────────────────────── 8 · Join: admit card + application form ───────────────────────── */
+  .fj-admit {
+    --r: 13px;
+    display: grid;
+  }
+  .fj-admit-form,
+  .fj-admit-stub {
+    position: relative;
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  }
+  .fj-admit-form {
+    background-color: var(--color-paper);
+    padding: 16px 16px 20px;
+    border-radius: 6px 6px 0 0;
+    -webkit-mask:
+      radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  .fj-admit-stub {
+    background-color: var(--color-cream);
+    padding: 18px 16px 18px;
+    border-radius: 0 0 6px 6px;
+    background-image: linear-gradient(to right, var(--fj-rule-strong) 50%, transparent 0);
+    background-size: 12px 2px;
+    background-repeat: repeat-x;
+    background-position: 0 0;
+    -webkit-mask:
+      radial-gradient(circle var(--r) at left top, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right top, #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at left top, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right top, #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  @media (min-width: 640px) {
+    .fj-admit-form {
+      padding: 22px 26px 26px;
+    }
+    .fj-admit-stub {
+      padding: 22px 26px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .fj-admit {
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+    /* Stub on the left, perforation runs vertically. */
+    .fj-admit-stub {
+      order: -1;
+      border-radius: 6px 0 0 6px;
+      padding: 30px 28px;
+      background-image: linear-gradient(to bottom, var(--fj-rule-strong) 50%, transparent 0);
+      background-size: 2px 12px;
+      background-repeat: repeat-y;
+      background-position: 100% 0;
+      -webkit-mask:
+        radial-gradient(circle var(--r) at right top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+      mask:
+        radial-gradient(circle var(--r) at right top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+    }
+    .fj-admit-form {
+      border-radius: 0 6px 6px 0;
+      padding: 28px 34px 30px;
+      -webkit-mask:
+        radial-gradient(circle var(--r) at left top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+      mask:
+        radial-gradient(circle var(--r) at left top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+    }
+  }
+  .fj-formhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 3px double var(--fj-rule-strong);
+  }
+
+  /* The form itself (components/CheckoutForm.tsx). */
+  .fj-form {
+    position: relative;
+    display: grid;
+    gap: 14px;
+  }
+  .fj-fields {
+    display: grid;
+    gap: 14px;
+  }
+  @media (min-width: 640px) {
+    .fj-fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 18px;
+    }
+    .fj-fields > :first-child {
+      grid-column: 1 / -1;
+    }
+  }
+  .fj-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+  .fj-field label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .fj-fieldno {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-saffron-deep);
+  }
+  .fj-form .fj-field input {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px 10px;
+    font: inherit;
+    font-size: 16px; /* ≥16px stops iOS zoom */
+    font-weight: 500;
+    color: var(--color-ink);
+    background-color: color-mix(in oklab, var(--color-lilac-2) 60%, var(--field-bg, var(--color-paper)));
+    border: 0;
+    border-bottom: 2px solid color-mix(in oklab, var(--color-ink) 60%, transparent);
+    border-radius: 3px 3px 0 0;
+    box-shadow: inset 0 0 0 1px var(--fj-edge);
+    transition:
+      border-color 0.2s,
+      background-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .fj-form .fj-field input::placeholder {
+    color: var(--field-ph, color-mix(in oklab, var(--color-ink-2) 75%, transparent));
+  }
+  .fj-form .fj-field input:focus {
+    outline: 2px solid color-mix(in oklab, var(--color-saffron-deep) 45%, transparent);
+    outline-offset: 2px;
+    background-color: var(--field-bg, var(--color-paper));
+    border-bottom-color: var(--color-saffron-deep);
+    box-shadow:
+      inset 0 0 0 1px var(--fj-edge),
+      inset 0 -2px 0 var(--color-saffron-deep);
+  }
+  .fj-form .fj-field input[aria-invalid="true"] {
+    border-bottom-color: var(--fj-err);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--fj-err) 55%, transparent),
+      inset 0 -2px 0 var(--fj-err);
+  }
+  .fj-ferr {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--fj-err);
+  }
+  .fj-checks {
+    display: grid;
+    gap: 2px;
+    margin: 0 -8px;
+  }
+  .fj-check {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 44px;
+    padding: 9px 8px;
+    border-radius: 3px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  @media (hover: hover) {
+    .fj-check:hover {
+      background-color: color-mix(in oklab, var(--color-lilac) 45%, transparent);
+    }
+  }
+  .fj-check input {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: none;
+    display: grid;
+    place-content: center;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    border: 2px solid color-mix(in oklab, var(--color-ink) 62%, transparent);
+    border-radius: 2px;
+    background-color: var(--color-paper);
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s;
+  }
+  .fj-check input:checked {
+    border-color: var(--color-saffron-deep);
+    background-color: var(--color-saffron-deep);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+    background-size: 16px 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .fj-check input:focus-visible {
+    outline: 2px solid var(--color-violet-deep);
+    outline-offset: 2px;
+  }
+  .fj-check input[aria-invalid="true"] {
+    border-color: var(--fj-err);
+    outline: 2px solid color-mix(in oklab, var(--fj-err) 60%, transparent);
+    outline-offset: 2px;
+  }
+  .fj-check a {
+    color: var(--color-violet-deep);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  @media (forced-colors: active) {
+    .fj-check input {
+      -webkit-appearance: auto;
+      appearance: auto;
+    }
+  }
+  .fj-form .fj-submit {
+    width: 100%;
+    min-height: 58px;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1.0625rem;
+  }
+  .fj-form .fj-submit:disabled {
+    cursor: progress;
+    opacity: 0.85;
+  }
+  .fj-form .fj-submit:disabled::after {
+    animation: none;
+  }
+  .fj-spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-top-color: currentColor;
+    animation: fj-spin 0.8s linear infinite;
+  }
+  .fj-trust {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 14px;
+    margin: 2px 0 0;
+    font-size: 0.78rem;
+    color: var(--color-ink-2);
+  }
+  .fj-status {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--fj-err);
+  }
+  /* Empty live region stays in the tree (so it can announce) but gives its grid gap back. */
+  .fj-status:empty {
+    margin-top: -14px;
+  }
+  .fj-steps {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* Tablets: three steps in a row under the card. Desktop: a column beside the heading (JoinSection). */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .fj-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+  }
+  .fj-steps > li {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    padding-top: 10px;
+    border-top: 1px solid rgb(255 255 255 / 0.16);
+  }
+
+  /* ───────────────────────── 9 · Reviews: taped prints ───────────────────────── */
+  .fj-print-card {
+    position: relative;
+    margin: 0;
+    padding: 7px 7px 10px;
+    background-color: var(--color-paper);
+    box-shadow:
+      0 0 0 1px var(--fj-edge),
+      0 16px 26px -18px var(--fj-shadow);
+    rotate: var(--tilt, 0deg);
+    transition: rotate 0.4s var(--fj-ease), translate 0.4s var(--fj-ease);
+  }
+  @media (hover: hover) {
+    .fj-print-card:hover {
+      rotate: 0deg;
+      translate: 0 -3px;
+    }
+  }
+  .fj-print-card:has(.fj-print-btn:focus-visible) {
+    rotate: 0deg;
+    translate: 0 -3px;
+  }
+  /* The whole screenshot is the button that opens the review viewer (components/ReviewLightbox.tsx). */
+  .fj-print-btn {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .fj-print-btn:focus-visible {
+    outline: 2px solid var(--color-violet-deep);
+    outline-offset: 3px;
+  }
+
+  /* ───────────────────────── 10 · Fit: stamped slips ───────────────────────── */
+  .fj-slip {
+    position: relative;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--fj-edge);
+    box-shadow: 0 24px 44px -34px var(--fj-shadow);
+    rotate: var(--tilt, 0deg);
+  }
+  .fj-slip--no {
+    background-color: var(--color-lilac-2);
+  }
+  .fj-slip-stamp {
+    position: absolute;
+    top: -14px;
+    right: 14px;
+    z-index: 2;
+  }
+  .fj-fitlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .fj-fitlist > li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--fj-rule);
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+  .fj-fitlist > li:last-child {
+    border-bottom: 0;
+  }
+  .fj-box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border: 1.5px solid var(--fj-rule-strong);
+    border-radius: 2px;
+  }
+
+  /* ───────────────────────── 11 · About: field ID card ───────────────────────── */
+  .fj-id-hang {
+    position: relative;
+    padding-top: 46px;
+    transform-origin: 50% 0;
+  }
+  .fj-strap {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 22px;
+    height: 62px;
+    margin-left: -11px;
+    background-color: var(--color-saffron-deep);
+    background-image: linear-gradient(to right, transparent 3px, rgb(255 255 255 / 0.45) 3px 4px, transparent 4px calc(100% - 4px), rgb(255 255 255 / 0.45) calc(100% - 4px) calc(100% - 3px), transparent calc(100% - 3px));
+    border-radius: 2px;
+  }
+  .fj-id {
+    position: relative;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--fj-edge);
+    border-radius: 12px;
+    padding: 30px 14px 16px;
+    box-shadow: 0 30px 50px -34px var(--fj-shadow);
+    rotate: -1.5deg;
+  }
+  .fj-id::before {
+    /* lanyard slot */
+    content: "";
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    width: 46px;
+    height: 9px;
+    margin-left: -23px;
+    border-radius: 9px;
+    background-color: var(--color-ivory);
+    box-shadow: inset 0 1px 2px var(--fj-shadow);
+  }
+  .fj-id-rows > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--fj-rule-strong);
+    font-size: 0.9rem;
+  }
+  .fj-id-rows > div:last-child {
+    border-bottom: 0;
+  }
+
+  /* ───────────────────────── 12 · FAQ: index cards ───────────────────────── */
+  /* Desktop: two columns; an opened card only grows its own row. */
+  .fj-faq {
+    display: grid;
+    gap: 12px 22px;
+    align-items: start;
+    interpolate-size: allow-keywords;
+  }
+  @media (min-width: 1024px) {
+    .fj-faq {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .fj-card {
+    position: relative;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--fj-edge);
+    border-radius: 4px;
+    box-shadow: 0 14px 26px -22px var(--fj-shadow);
+  }
+  .fj-card summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 60px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    /* the red top line of an index card */
+    border-bottom: 1px solid transparent;
+  }
+  .fj-card summary::-webkit-details-marker {
+    display: none;
+  }
+  .fj-card[open] summary {
+    border-bottom-color: var(--fj-margin);
+  }
+  .fj-toggle {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--fj-rule-strong);
+    border-radius: 2px;
+  }
+  .fj-toggle::before,
+  .fj-toggle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 2px;
+    margin: -1px 0 0 -6px;
+    background-color: currentColor;
+    transition: transform 0.3s var(--fj-ease);
+  }
+  .fj-toggle::after {
+    transform: rotate(90deg);
+  }
+  .fj-card[open] .fj-toggle::after {
+    transform: rotate(0deg);
+  }
+  .fj-card[open] .fj-toggle {
+    color: var(--color-saffron-deep);
+    border-color: currentColor;
+  }
+  .fj-card-a {
+    margin: 0;
+    padding: 6px 16px 18px;
+    --lh: 28px;
+    --lh-offset: 5px;
+    line-height: 28px;
+    font-size: 0.98rem;
+    color: var(--color-ink-2);
+  }
+  .fj-card::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 0.35s var(--fj-ease),
+      content-visibility 0.35s allow-discrete;
+  }
+  .fj-card[open]::details-content {
+    block-size: auto;
+  }
+  @media (min-width: 640px) {
+    .fj-card summary {
+      padding: 14px 20px;
+      font-size: 1.05rem;
+    }
+    .fj-card-a {
+      padding: 6px 56px 18px 20px;
+    }
+  }
+
+  /* ───────────────────────── 13 · Ticket: admit one ───────────────────────── */
+  .fj-tix {
+    --r: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(0 30px 40px color-mix(in oklab, var(--color-plum) 22%, transparent));
+  }
+  .fj-tix-main {
+    position: relative;
+    display: flex;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    border-radius: 10px 10px 0 0;
+    -webkit-mask:
+      radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  .fj-tix-stub {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 20px 22px;
+    border-radius: 0 0 10px 10px;
+    background-color: var(--color-plum);
+    background-image:
+      radial-gradient(60% 50% at 80% 10%, color-mix(in oklab, var(--color-rose) 30%, transparent), transparent 70%),
+      linear-gradient(to right, rgb(255 255 255 / 0.3) 50%, transparent 0);
+    background-size:
+      auto,
+      12px 2px;
+    background-repeat: no-repeat, repeat-x;
+    background-position:
+      0 0,
+      0 0;
+    color: #fff;
+    text-align: center;
+    -webkit-mask:
+      radial-gradient(circle var(--r) at left top, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right top, #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at left top, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at right top, #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  @media (min-width: 900px) {
+    .fj-tix {
+      flex-direction: row;
+    }
+    .fj-tix-main {
+      flex: 1;
+      border-radius: 10px 0 0 10px;
+      -webkit-mask:
+        radial-gradient(circle var(--r) at right top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+      mask:
+        radial-gradient(circle var(--r) at right top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at right bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+    }
+    .fj-tix-stub {
+      width: 330px;
+      justify-content: center;
+      border-radius: 0 10px 10px 0;
+      background-image:
+        radial-gradient(60% 50% at 80% 10%, color-mix(in oklab, var(--color-rose) 30%, transparent), transparent 70%),
+        linear-gradient(to bottom, rgb(255 255 255 / 0.3) 50%, transparent 0);
+      background-size:
+        auto,
+        2px 12px;
+      background-repeat: no-repeat, repeat-y;
+      -webkit-mask:
+        radial-gradient(circle var(--r) at left top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+      mask:
+        radial-gradient(circle var(--r) at left top, #0000 97%, #000) top / 100% 51% no-repeat,
+        radial-gradient(circle var(--r) at left bottom, #0000 97%, #000) bottom / 100% 51% no-repeat;
+    }
+  }
+  .fj-tix-rows {
+    display: grid;
+    margin: 0;
+  }
+  .fj-tix-rows > div {
+    display: grid;
+    grid-template-columns: 5.6rem minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--fj-rule);
+  }
+  .fj-tix-rows > div:last-child {
+    border-bottom: 0;
+  }
+  /* Wider tickets: fields in two columns (label over value); the long "Where" row spans both. */
+  @media (min-width: 640px) {
+    .fj-tix-rows {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 28px;
+    }
+    .fj-tix-rows > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3px;
+    }
+    .fj-tix-rows > div:nth-child(3) {
+      grid-column: 1 / -1;
+    }
+    .fj-tix-rows > div:nth-last-child(2) {
+      border-bottom: 0;
+    }
+  }
+
+  /* ───────────────────────── 14 · P.S. note + footer ───────────────────────── */
+  .fj-note {
+    position: relative;
+    padding: 40px 18px 26px 42px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    rotate: -0.6deg;
+    --lh: 32px;
+    --lh-offset: 12px;
+    /* spiral-notebook holes along the top */
+    -webkit-mask: radial-gradient(circle 5px at 14px 16px, #0000 95%, #000) 0 0 / 28px 100% repeat-x;
+    mask: radial-gradient(circle 5px at 14px 16px, #0000 95%, #000) 0 0 / 28px 100% repeat-x;
+  }
+  .fj-note::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 28px;
+    width: 1px;
+    background-color: var(--fj-margin);
+  }
+  .fj-note-wrap {
+    filter: drop-shadow(0 26px 30px color-mix(in oklab, var(--color-plum) 18%, transparent));
+  }
+  @media (min-width: 640px) {
+    .fj-note {
+      padding: 44px 40px 30px 70px;
+    }
+    .fj-note::before {
+      left: 50px;
+    }
+  }
+  .fj-flourish {
+    display: block;
+    color: var(--color-saffron-deep);
+    overflow: visible;
+  }
+}
+
+/* ───────────────────────── Keyframes ───────────────────────── */
+@keyframes fj-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(9deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-1deg);
+  }
+  78% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fj-strike {
+  from {
+    background-size: 0% 2px;
+  }
+  to {
+    background-size: 100% 2px;
+  }
+}
+@keyframes fj-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fj-settle {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fj-print {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes fj-swing {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-7deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0) rotate(4deg);
+  }
+  55% {
+    transform: rotate(-2.2deg);
+  }
+  78% {
+    transform: rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fj-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced motion: Fx never arms, but belt-and-braces: no effect ever plays or hides anything. */
+@media (prefers-reduced-motion: reduce) {
+  [data-fx] .fj-stamp-in,
+  [data-fx] .fj-strike,
+  [data-fx] .fj-draw path,
+  [data-fx] .fj-settle,
+  [data-fx] .fj-print,
+  [data-fx] .fj-swing {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    background-size: 100% 2px;
+    stroke-dashoffset: 0 !important;
+  }
+  .fj-deck-bar > span {
+    transition: none;
+  }
+}

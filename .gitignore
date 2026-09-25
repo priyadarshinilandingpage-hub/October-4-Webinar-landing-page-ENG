@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+.firebase
+firebase-debug.log
+*.log
+# Client source material (raw footage, Drive exports, unedited photos and screenshots, AI working files):
+# never commit or deploy. The site only uses the finished copies in public/media.
+assets-inbox/
+# Local Claude Code permissions
+.claude/settings.local.json
