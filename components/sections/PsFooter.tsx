@@ -41,7 +41,7 @@ export function Ps() {
   );
 }
 
-/** 14b · Footer with the policy links Cashfree KYC looks for, set like a ledger index. */
+/** 14b · Footer with the policy links Razorpay KYC looks for, set like a ledger index. */
 export function Footer() {
   return (
     <footer className="fj-sec pt-6 pb-28 md:pb-12">

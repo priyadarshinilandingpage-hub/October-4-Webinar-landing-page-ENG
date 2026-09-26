@@ -1,6 +1,5 @@
 "use client";
 
-import { load } from "@cashfreepayments/cashfree-js";
 import { useEffect, useId, useRef, useState } from "react";
 import { USER_FIELDS, leadSchema } from "@/lib/validation";
 import { CHECKOUT } from "./content";
@@ -10,6 +9,49 @@ import { checkoutValue, track } from "./MetaPixel";
 type Status = { kind: "idle" } | { kind: "loading" } | { kind: "error"; message: string; field?: string };
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+/** What POST /api/orders returns (server/routes/orders.ts). Everything here is safe for the browser. */
+interface OrderResponse {
+  orderId?: string;
+  keyId?: string;
+  amount?: number;
+  currency?: string;
+  name?: string;
+  description?: string;
+  prefill?: { name: string; email: string; contact: string };
+  callbackUrl?: string;
+  alreadyPaid?: boolean;
+  error?: string;
+  field?: string;
+}
+
+type RazorpayCtor = new (options: Record<string, unknown>) => { open: () => void };
+declare global {
+  interface Window {
+    Razorpay?: RazorpayCtor;
+  }
+}
+
+const CHECKOUT_JS = "https://checkout.razorpay.com/v1/checkout.js";
+let checkoutScript: Promise<RazorpayCtor> | undefined;
+
+/** Razorpay's official checkout script, loaded once, only when someone actually pays. */
+function loadRazorpay(): Promise<RazorpayCtor> {
+  if (window.Razorpay) return Promise.resolve(window.Razorpay);
+  checkoutScript ??= new Promise<RazorpayCtor>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = CHECKOUT_JS;
+    s.async = true;
+    s.onload = () => (window.Razorpay ? resolve(window.Razorpay) : reject(new Error("no Razorpay")));
+    s.onerror = () => {
+      checkoutScript = undefined;
+      s.remove();
+      reject(new Error("load failed"));
+    };
+    document.head.appendChild(s);
+  });
+  return checkoutScript;
+}
 
 /** Only the visible fields get inline errors; anything else (bot traps, utm) gets a generic message. */
 function userField(f: unknown): string | undefined {
@@ -25,9 +67,8 @@ function readUtm() {
 }
 
 /**
- * Lead form → server creates a fixed-price order → official Cashfree checkout. No PII is stored in the browser.
- * Styled as a numbered application form (styles: .fj-form in app/sections.css). The data contract
- * (field names, validation, POST /api/orders, Cashfree load/checkout, one order per click) is unchanged.
+ * Lead form → server creates a fixed-price Razorpay order → Razorpay's official checkout. No PII is stored in the
+ * browser. Styled as a numbered application form (styles: .fj-form in app/sections.css).
  */
 export function CheckoutForm() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -81,25 +122,40 @@ export function CheckoutForm() {
         body: JSON.stringify(input),
         credentials: "same-origin",
       });
-      const data = (await res.json()) as {
-        paymentSessionId?: string;
-        mode?: "sandbox" | "production";
-        alreadyPaid?: boolean;
-        error?: string;
-        field?: string;
-      };
+      const data = (await res.json().catch(() => ({}))) as OrderResponse;
       // This email or WhatsApp number already has a paid seat: no second payment.
       if (data.alreadyPaid) {
         window.location.assign("/already-paid");
         return;
       }
-      if (!res.ok || !data.paymentSessionId || !data.mode) {
+      if (!res.ok || !data.orderId || !data.keyId || !data.callbackUrl) {
         throw Object.assign(new Error(data.error ?? GENERIC_ERROR), { field: userField(data.field) });
       }
-      const cashfree = await load({ mode: data.mode });
-      if (!cashfree) throw new Error("Payment window couldn't open. Please refresh and try again.");
+      const Razorpay = await loadRazorpay().catch(() => {
+        throw new Error("Payment window couldn't open. Please check your connection and try again.");
+      });
       track("InitiateCheckout", checkoutValue);
-      await cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: "_self" });
+      // Redirect mode: after paying, Razorpay sends the buyer to our callback (then the thank-you page). This is
+      // the reliable flow inside Instagram/Facebook's in-app browsers and for UPI apps.
+      new Razorpay({
+        key: data.keyId,
+        order_id: data.orderId,
+        amount: data.amount,
+        currency: data.currency,
+        name: data.name,
+        description: data.description,
+        prefill: data.prefill,
+        readonly: { email: true, contact: true },
+        callback_url: data.callbackUrl,
+        redirect: true,
+        theme: { color: "#D9531E" },
+        modal: {
+          ondismiss: () => {
+            busy.current = false;
+            setStatus({ kind: "idle" });
+          },
+        },
+      }).open();
     } catch (err) {
       busy.current = false;
       const field = (err as { field?: string }).field;

@@ -198,7 +198,7 @@ export const HERO_MEDIA = {
 export const HERO_SHARED = {
   eyebrow: ["Live Tamil webinar", EVENT.shortDate, EVENT.timeLabel],
   cta: `Ippove register pannunga · ${EVENT.price}`,
-  trust: "Secure checkout by Cashfree · UPI, cards & netbanking",
+  trust: "Secure checkout by Razorpay · UPI, cards & netbanking",
   countdownLabel: "Starts in",
   /** Authority tags pinned on the hero photo (verified facts only). */
   badges: [
@@ -381,7 +381,7 @@ export const JOIN = {
   countdownLabel: "Session starts in",
   stepsTitle: "What happens next",
   steps: [
-    `Fill in your details and pay ${EVENT.price} on Cashfree's secure page.`,
+    `Fill in your details and pay ${EVENT.price} on Razorpay's secure page.`,
     "Get the joining details on your email & WhatsApp.",
     `Join live on ${EVENT.shortDate} at ${EVENT.timeLabel}.`,
   ],
@@ -406,9 +406,9 @@ export const CHECKOUT = {
   marketing: "(Optional) Send me future updates and offers. I can unsubscribe anytime.",
   button: `Reserve my seat · ${EVENT.price}`,
   loading: "Opening secure payment…",
-  note: "Secure payment by Cashfree · UPI, cards, netbanking",
+  note: "Secure payment by Razorpay · UPI, cards, netbanking",
   // The trust line, set as a small rubber stamp under the button.
-  stamp: "Secured by Cashfree",
+  stamp: "Secured by Razorpay",
   methods: "UPI · Cards · Netbanking",
 };
 
@@ -507,7 +507,7 @@ export const FAQ = {
     { q: `Why ${EVENT.price} and not free?`, a: "A small fee means the people who join are serious. That keeps the session focused and practical." },
     {
       q: "Is the payment safe?",
-      a: "Yes. Payment happens on Cashfree's secure checkout (UPI, cards, netbanking). We never see your card or UPI details.",
+      a: "Yes. Payment happens on Razorpay's secure checkout (UPI, cards, netbanking). We never see your card or UPI details.",
     },
     { q: "I paid but didn't get the details. What now?", a: "Check your spam folder first. Still nothing? Contact us and we'll sort it out." },
   ],

@@ -7,27 +7,21 @@ const lanHosts = Object.values(networkInterfaces())
   .filter((n) => n && n.family === "IPv4" && !n.internal)
   .map((n) => n!.address);
 
+// Cloudflare Pages: `next build` writes plain files to out/ (served free, unlimited, never asleep).
+// The payment steps are Cloudflare Pages Functions in functions/ (see README "Architecture").
+// Security headers are written to out/_headers by scripts/write-headers.mjs; redirects live in public/_redirects.
 const nextConfig: NextConfig = {
+  output: "export",
   poweredByHeader: false,
   reactStrictMode: true,
   allowedDevOrigins: lanHosts,
-  // Page security headers (CSP with a per-request nonce, HSTS, frame-ancestors, ...) are set in proxy.ts.
-  // API routes skip the proxy, so they get a fixed set here. They send no CORS headers: same-origin only.
-  async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Cache-Control", value: "no-store" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "no-referrer" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
-          { key: "X-Robots-Tag", value: "noindex" },
-        ],
-      },
-    ];
+  images: {
+    // No image server on a static host: scripts/make-images.mjs writes WebP copies at these widths at build time,
+    // and lib/image-loader.ts points next/image at them.
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
+    deviceSizes: [640, 828, 1080, 1600],
+    imageSizes: [128, 256, 384],
   },
 };
 

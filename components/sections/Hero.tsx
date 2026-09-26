@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { Countdown } from "../Countdown";
-import { HERO_MEDIA, HERO_SHARED, type HeroCopy } from "../content";
+import { HERO, HERO_MEDIA, HERO_SHARED, type HeroCopy } from "../content";
 import { CrocusBloom, Lock } from "../icons";
 import { Media } from "../Media";
 import { Odometer, PetalReveal, RiseText } from "../motion";
-import { CtaLink, Postmark } from "../ui";
+import { ByAd, CtaLink, Postmark } from "../ui";
 
 /**
  * 1 · Image-first hero. One DOM, two compositions (so the LCP photo is only loaded once):
@@ -14,15 +14,18 @@ import { CtaLink, Postmark } from "../ui";
  * - Desktop (lg+): editorial spread. Photo plate on the left with tags pinned across its bottom edge,
  *   a postmark on its corner and a figure caption; the oversized serif headline starts one column
  *   over the plate edge on paper strips; support, CTA + countdown and a margin note sit to the right.
- * The headline is message-matched to the ad (utm_content → LandingPage → copy).
+ * The headline is message-matched to the ad: both versions are in the page, <ByAd> shows the one for this visit.
  * `floral` (bold-type variant only, /bold): the crocus bouquet behind the headline (`crown`) and the blooms
  * on the photo plate (`plate`), from components/Flowers.tsx via LandingPage. Absent by default: the markup
  * is then exactly the ledger hero.
  */
-export function Hero({ copy, floral }: { copy: HeroCopy; floral?: { crown: ReactNode; plate: ReactNode } }) {
+export function Hero({ floral }: { floral?: { crown: ReactNode; plate: ReactNode } }) {
   const s = HERO_SHARED;
-  const long = copy.title.map((x) => x.t).join("").length > 60;
   const inset = HERO_MEDIA.inset;
+  /** Both ads' copy, one shown (see <ByAd>). */
+  const byAd = (pick: (c: HeroCopy) => ReactNode) => <ByAd a={pick(HERO.a)} b={pick(HERO.b)} />;
+  const titleSize = (c: HeroCopy) =>
+    c.title.map((x) => x.t).join("").length > 60 ? "text-[clamp(3rem,4.7vw,4.35rem)]" : "text-[clamp(3.3rem,5.6vw,5.4rem)]";
   return (
     <section id="hero" aria-labelledby="hero-title" className="feather tint-hero relative pb-12 sm:pb-16 lg:pt-10 lg:pb-24">
       <div className="wrap flex flex-col max-lg:px-0 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-6">
@@ -44,18 +47,20 @@ export function Hero({ copy, floral }: { copy: HeroCopy; floral?: { crown: React
 
           <h1 id="hero-title" className="mt-2.5 font-serif tracking-[-0.02em] text-ink lg:mt-5">
             <span className="block text-[clamp(2.1rem,9vw,3.4rem)] leading-[1.02] lg:hidden">
-              <RiseText segments={copy.short} trigger="load" emClassName="text-violet-deep" delay={0.12} />
+              {byAd((c) => (
+                <RiseText segments={c.short} trigger="load" emClassName="text-violet-deep" delay={0.12} />
+              ))}
             </span>
-            <span
-              className={`hero-strip hidden leading-[1.1] lg:block ${long ? "text-[clamp(3rem,4.7vw,4.35rem)]" : "text-[clamp(3.3rem,5.6vw,5.4rem)]"}`}
-            >
-              <RiseText segments={copy.title} trigger="load" emClassName="text-violet-deep" delay={0.1} />
-            </span>
+            {byAd((c) => (
+              <span className={`hero-strip hidden leading-[1.1] lg:block ${titleSize(c)}`}>
+                <RiseText segments={c.title} trigger="load" emClassName="text-violet-deep" delay={0.1} />
+              </span>
+            ))}
           </h1>
 
           <div className="lg:pl-[calc((100%_+_1.5rem)/7)]">
-            <p className="mt-2 max-w-md text-[0.98rem] leading-snug text-ink-2 lg:hidden">{copy.shortSub}</p>
-            <p className="mt-6 hidden max-w-xl text-[1.15rem] leading-relaxed font-medium text-ink lg:block">{copy.sub}</p>
+            <p className="mt-2 max-w-md text-[0.98rem] leading-snug text-ink-2 lg:hidden">{byAd((c) => c.shortSub)}</p>
+            <p className="mt-6 hidden max-w-xl text-[1.15rem] leading-relaxed font-medium text-ink lg:block">{byAd((c) => c.sub)}</p>
 
             <div className="mt-4 flex flex-col items-stretch gap-5 sm:flex-row sm:items-center lg:mt-8 lg:gap-7">
               <CtaLink size="lg" className="w-full sm:w-auto">
@@ -73,7 +78,11 @@ export function Hero({ copy, floral }: { copy: HeroCopy; floral?: { crown: React
             <aside className="mt-10 hidden max-w-md border-l border-line pl-4 lg:block">
               <p className="lbl text-saffron-deep">{s.noteLabel}</p>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-2">
-                {copy.detail} <strong className="font-semibold text-ink">{copy.evenIf}</strong>
+                {byAd((c) => (
+                  <>
+                    {c.detail} <strong className="font-semibold text-ink">{c.evenIf}</strong>
+                  </>
+                ))}
               </p>
             </aside>
           </div>

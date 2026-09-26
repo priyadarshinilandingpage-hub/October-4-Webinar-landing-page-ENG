@@ -14,6 +14,8 @@ export const OFFER = {
 } as const;
 
 export const ORDER_AMOUNT = OFFER.priceInr.toFixed(2); // "99.00"
+/** The same price in paise, the unit Razorpay uses. */
+export const AMOUNT_PAISE = Math.round(OFFER.priceInr * 100); // 9900
 
 /** "11:00 AM IST", read straight from the ISO time so it never depends on the server's time zone. */
 export function startTimeLabel(iso: string = OFFER.startsAtIso): string {

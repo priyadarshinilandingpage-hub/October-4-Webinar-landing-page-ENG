@@ -22,7 +22,7 @@ export default function RefundPage() {
         <ul>
           <li>
             <strong>Failed payment but money debited:</strong> if your payment failed but money left your account, it is
-            usually reversed automatically by your bank or Cashfree Payments within 5 to 7 working days. If it isn&apos;t,
+            usually reversed automatically by your bank or Razorpay within 5 to 7 working days. If it isn&apos;t,
             contact us and we will help.
           </li>
           <li>
@@ -63,7 +63,7 @@ export default function RefundPage() {
         <ul>
           <li>We reply to refund requests within 2 working days.</li>
           <li>
-            Approved refunds are sent through Cashfree Payments to the <strong>same account, card or UPI ID</strong> you
+            Approved refunds are sent through Razorpay to the <strong>same account, card or UPI ID</strong> you
             paid with. We don&apos;t refund in cash or to a different account.
           </li>
           <li>

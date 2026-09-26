@@ -2052,3 +2052,20 @@ html.vs-lock {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+
+/* Ad message match (components/ui.tsx <ByAd>): the page carries both ads' headlines. public/boot.js sets
+   <html data-variant="b"> for utm_content=creative_b before the first paint; everyone else sees ad A. */
+.v-a,
+.v-b {
+  display: contents;
+}
+.v-b {
+  display: none;
+}
+[data-variant="b"] .v-a {
+  display: none;
+}
+[data-variant="b"] .v-b {
+  display: contents;
+}

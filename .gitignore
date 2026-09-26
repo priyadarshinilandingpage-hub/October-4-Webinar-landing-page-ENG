@@ -16,3 +16,8 @@ firebase-debug.log
 assets-inbox/
 # Local Claude Code permissions
 .claude/settings.local.json
+
+# Static build output and generated image sizes (rebuilt on every deploy)
+out/
+public/_img/
+.wrangler/

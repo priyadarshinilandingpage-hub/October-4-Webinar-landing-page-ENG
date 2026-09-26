@@ -1,4 +1,4 @@
-// Business details shown on the policy pages (and required by Cashfree's website review).
+// Business details shown on the policy pages (and required by Razorpay's website review).
 // Safe to import from client or server. Replace EVERY [PLACEHOLDER] with real details before go-live;
 // never invent them. `npm run check:placeholders` lists any that are left.
 

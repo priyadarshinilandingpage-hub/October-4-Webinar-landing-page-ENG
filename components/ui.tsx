@@ -10,6 +10,20 @@ import { RiseText } from "./motion";
  * Every piece reads the colour tokens, so it flips automatically in the dark theme.
  */
 
+/**
+ * Ad message match on a pre-built page: renders both versions; CSS shows `b` only when public/boot.js has marked
+ * the visit as ad B (utm_content=creative_b → <html data-variant="b">). The hidden one is display:none, so screen
+ * readers and layout only ever see one.
+ */
+export function ByAd({ a, b }: { a: ReactNode; b: ReactNode }) {
+  return (
+    <>
+      <span className="v-a">{a}</span>
+      <span className="v-b">{b}</span>
+    </>
+  );
+}
+
 /** Typographic wordmark: serif name + crocus glyph + typed tagline (no logo file needed). */
 export function Wordmark({ tone = "ink", className = "" }: { tone?: "ink" | "light"; className?: string }) {
   const sub = tone === "light" ? "text-mist" : "text-ink-2";

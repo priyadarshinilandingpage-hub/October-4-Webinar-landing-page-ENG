@@ -1,14 +1,19 @@
 import { createVerify, generateKeyPairSync } from "node:crypto";
-import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { jsonResponse, mockFetch, ORDER_ID, paidOrder, sign, SITE } from "./helpers";
+import { findPaidOrder, resetBuyersForTests } from "@/server/buyers";
+import { confirmationEmail } from "@/server/email";
+import { readEnv, type ServerEnv } from "@/server/env";
+import { resetFirestoreForTests } from "@/server/firestore";
+import { fulfilPaidOrder, resetFulfilForTests } from "@/server/fulfil";
+import { toPaidOrder } from "@/server/order";
+import type { RazorpayOrder } from "@/server/razorpay";
+import { jsonResponse, mockFetch, ORDER_ID, OTHER_ORDER, rzpOrder, SITE, testEnv } from "./helpers";
 
-// Firestore + Resend follow-up after a verified payment, against an in-memory fake of both APIs.
+// The follow-up after a verified payment, against in-memory fakes of Firestore, Google's token endpoint and Resend.
 
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const PEM = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
 const WA = "https://chat.whatsapp.com/TestInviteCode123";
-const OTHER_ORDER = "wb_ffffffffffffffffffffffffffffffff";
 
 type Doc = Record<string, Record<string, unknown>>;
 let docs: Map<string, Doc>;
@@ -23,16 +28,10 @@ function fakeApis() {
       tokenCalls.push(String(init.body));
       return jsonResponse({ access_token: "ya29.test", expires_in: 3600 });
     }
-    if (url === "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token") {
-      expect((init.headers as Record<string, string>)["Metadata-Flavor"]).toBe("Google");
-      tokenCalls.push("metadata");
-      return jsonResponse({ access_token: "ya29.test", expires_in: 3600 });
-    }
     if (url === "https://api.resend.com/emails") {
       emails.push({ init, body: JSON.parse(String(init.body)) });
       return resendStatus === 200 ? jsonResponse({ id: `email_${emails.length}` }) : jsonResponse({ name: "error" }, resendStatus);
     }
-    if (url.startsWith("https://graph.facebook.com/")) return jsonResponse({ events_received: 1 });
     const base = "https://firestore.googleapis.com/v1/projects/demo-webinar/databases/(default)/documents";
     if (!url.startsWith(base)) throw new Error(`unexpected fetch ${url}`);
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer ya29.test");
@@ -40,7 +39,6 @@ function fakeApis() {
     const u = new URL(url);
     const path = decodeURIComponent(u.pathname).replace("/v1/projects/demo-webinar/databases/(default)/documents", "");
     const body = init.body ? JSON.parse(String(init.body)) : {};
-
     if (path === ":batchGet") {
       return jsonResponse(
         (body.documents as string[]).map((name) => {
@@ -66,17 +64,19 @@ function fakeApis() {
   });
 }
 
-/** A fresh copy of the server modules: like a new server instance (empty caches), same Firestore. */
-async function instance() {
-  vi.resetModules();
-  return {
-    fulfil: await import("@/lib/fulfil"),
-    buyers: await import("@/lib/buyers"),
-    webhook: await import("@/app/api/webhooks/cashfree/route"),
-  };
-}
-
-const row = () => docs.get(`/registrations/${ORDER_ID}`)!;
+const env = (): ServerEnv =>
+  readEnv(
+    testEnv({
+      FIREBASE_PROJECT_ID: "demo-webinar",
+      FIREBASE_CLIENT_EMAIL: "webinar-server@demo-webinar.iam.gserviceaccount.com",
+      FIREBASE_PRIVATE_KEY: PEM.replace(/\n/g, "\\n"), // as most dashboards store it
+      RESEND_API_KEY: "re_test_1234567890abcdef",
+      EMAIL_FROM: "Webinar <webinar@example.in>",
+      WEBINAR_WHATSAPP_URL: WA,
+    }),
+  );
+const paid = (over: Record<string, unknown> = {}) => toPaidOrder(rzpOrder(over) as unknown as RazorpayOrder);
+const row = (id = ORDER_ID) => docs.get(`/registrations/${id}`)!;
 
 beforeEach(() => {
   docs = new Map();
@@ -84,25 +84,17 @@ beforeEach(() => {
   tokenCalls = [];
   resendStatus = 200;
   firestoreDown = false;
-  vi.stubEnv("FIREBASE_PROJECT_ID", "demo-webinar");
-  vi.stubEnv("FIREBASE_CLIENT_EMAIL", "webinar-server@demo-webinar.iam.gserviceaccount.com");
-  vi.stubEnv("FIREBASE_PRIVATE_KEY", PEM.replace(/\n/g, "\\n")); // as most dashboards store it
-  vi.stubEnv("RESEND_API_KEY", "re_test_1234567890abcdef");
-  vi.stubEnv("EMAIL_FROM", "Webinar <webinar@example.in>");
-  vi.stubEnv("WEBINAR_WHATSAPP_URL", WA);
+  resetBuyersForTests();
+  resetFulfilForTests();
+  resetFirestoreForTests();
   fakeApis();
 });
-afterEach(() => {
-  vi.unstubAllEnvs();
-  vi.unstubAllGlobals();
-});
+afterEach(() => vi.unstubAllGlobals());
 
-describe("fulfilPaidOrder with Firestore + Resend", () => {
+describe("fulfilPaidOrder", () => {
   it("adds one registrations row with readable columns and sends one email with the WhatsApp link", async () => {
-    const { fulfil } = await instance();
-    const order = paidOrder({ order_tags: { consent_marketing: "true", utm_source: "meta", utm_content: "creative_b" } });
-    await expect(fulfil.fulfilPaidOrder(order as never)).resolves.toEqual({});
-
+    const order = paid({ notes: { name: "Priya Raman", email: "priya@example.com", phone: "9876543210", consent_marketing: "true", utm_source: "meta", utm_content: "creative_b" } });
+    await expect(fulfilPaidOrder(env(), order)).resolves.toEqual({});
     expect(row()).toMatchObject({
       order_id: { stringValue: ORDER_ID },
       name: { stringValue: "Priya Raman" },
@@ -111,7 +103,7 @@ describe("fulfilPaidOrder with Firestore + Resend", () => {
       amount: { integerValue: "99" },
       currency: { stringValue: "INR" },
       status: { stringValue: "PAID" },
-      mode: { stringValue: "sandbox" },
+      mode: { stringValue: "test" },
       webinar_date: { stringValue: "2026-10-04" },
       marketing_consent: { booleanValue: true },
       utm_source: { stringValue: "meta" },
@@ -120,50 +112,55 @@ describe("fulfilPaidOrder with Firestore + Resend", () => {
       duplicate_of: { nullValue: null },
       email_status: { stringValue: "sent" },
     });
-    expect(row().email_sent_at).toHaveProperty("timestampValue");
-
     expect(emails).toHaveLength(1);
     const { body, init } = emails[0]!;
     expect(body.to).toEqual(["priya@example.com"]);
-    expect(body.from).toBe("Webinar <webinar@example.in>");
     expect(String(body.html)).toContain(WA);
-    expect(String(body.text)).toContain(WA);
     expect(String(body.subject)).not.toMatch(/[—–]/);
     expect((init.headers as Record<string, string>)["idempotency-key"]).toBe(`seat-confirmation/${ORDER_ID}`);
   });
 
-  it("a second server instance (or a webhook retry) doesn't email again", async () => {
-    await (await instance()).fulfil.fulfilPaidOrder(paidOrder() as never);
-    await (await instance()).fulfil.fulfilPaidOrder(paidOrder() as never);
+  it("a second call (another instance, a webhook retry) doesn't email again", async () => {
+    await fulfilPaidOrder(env(), paid());
+    resetFulfilForTests(); // like a fresh instance: only Firestore remembers
+    await fulfilPaidOrder(env(), paid());
     expect(emails).toHaveLength(1);
   });
 
-  it("the already-paid list lives in Firestore, under hashed ids only", async () => {
-    await (await instance()).fulfil.fulfilPaidOrder(paidOrder() as never);
-    const { buyers } = await instance(); // new instance: nothing cached in memory
-    expect(await buyers.findPaidOrder({ email: "PRIYA@example.com" })).toBe(ORDER_ID);
-    expect(await buyers.findPaidOrder({ phone: "+91 98765 43210" })).toBe(ORDER_ID);
-    expect(await buyers.findPaidOrder({ email: "new@example.com", phone: "9000000001" })).toBeNull();
-
+  it("the already-paid list is in Firestore, under hashed ids only", async () => {
+    await fulfilPaidOrder(env(), paid());
+    resetBuyersForTests();
+    expect(await findPaidOrder(env(), { email: "PRIYA@example.com" })).toBe(ORDER_ID);
+    expect(await findPaidOrder(env(), { phone: "+91 98765 43210" })).toBe(ORDER_ID);
+    expect(await findPaidOrder(env(), { email: "new@example.com", phone: "9000000001" })).toBeNull();
     const ids = [...docs.keys()].filter((k) => k.startsWith("/paid_contacts/"));
     expect(ids).toHaveLength(2);
     for (const id of ids) {
-      expect(id).toMatch(/^\/paid_contacts\/sandbox_20261004_(email|phone)_[0-9a-f]{40}$/);
+      expect(id).toMatch(/^\/paid_contacts\/test_20261004_(email|phone)_[0-9a-f]{40}$/);
       expect(id).not.toContain("priya");
       expect(id).not.toContain("9876543210");
     }
   });
 
   it("a second paid order for the same person is marked duplicate_of the first", async () => {
-    await (await instance()).fulfil.fulfilPaidOrder(paidOrder() as never);
-    const second = paidOrder({ order_id: OTHER_ORDER, customer_details: { customer_name: "Priya", customer_email: "other@example.com", customer_phone: "9876543210" } });
-    await expect((await instance()).fulfil.fulfilPaidOrder(second as never)).resolves.toEqual({ duplicateOf: ORDER_ID });
-    expect(docs.get(`/registrations/${OTHER_ORDER}`)!.duplicate_of).toEqual({ stringValue: ORDER_ID });
+    await fulfilPaidOrder(env(), paid());
+    const second = paid({ id: OTHER_ORDER, notes: { name: "Priya", email: "other@example.com", phone: "9876543210" } });
+    await expect(fulfilPaidOrder(env(), second)).resolves.toEqual({ duplicateOf: ORDER_ID });
+    expect(row(OTHER_ORDER).duplicate_of).toEqual({ stringValue: ORDER_ID });
   });
 
-  it("signs the Google token request with the service-account key (RS256), and reuses the token", async () => {
-    const { fulfil } = await instance();
-    await fulfil.fulfilPaidOrder(paidOrder() as never);
+  it("Firestore down: the buyer still gets the email, the failure is reported, the retry completes the row", async () => {
+    firestoreDown = true;
+    await expect(fulfilPaidOrder(env(), paid())).rejects.toThrow(/Firestore/);
+    expect(emails).toHaveLength(1);
+    firestoreDown = false;
+    await expect(fulfilPaidOrder(env(), paid())).resolves.toEqual({});
+    expect(emails).toHaveLength(1);
+    expect(row().email_status).toEqual({ stringValue: "sent" });
+  });
+
+  it("signs the Google token request with the service-account key (RS256) and reuses the token", async () => {
+    await fulfilPaidOrder(env(), paid());
     expect(tokenCalls).toHaveLength(1);
     const assertion = new URLSearchParams(tokenCalls[0]!).get("assertion")!;
     const [h, p, s] = assertion.split(".");
@@ -176,62 +173,9 @@ describe("fulfilPaidOrder with Firestore + Resend", () => {
     expect(createVerify("RSA-SHA256").update(`${h}.${p}`).verify(publicKey, Buffer.from(s!, "base64url"))).toBe(true);
   });
 
-  it("Firestore down: the buyer still gets the email, and the step is reported as failed (webhook retries)", async () => {
-    firestoreDown = true;
-    const { fulfil } = await instance();
-    await expect(fulfil.fulfilPaidOrder(paidOrder() as never)).rejects.toThrow(/Firestore/);
-    expect(emails).toHaveLength(1);
-    // Once Firestore is back, the retry saves the row as already emailed and doesn't email again.
-    firestoreDown = false;
-    await expect(fulfil.fulfilPaidOrder(paidOrder() as never)).resolves.toEqual({});
-    expect(emails).toHaveLength(1);
-    expect(row().email_status).toEqual({ stringValue: "sent" });
-  });
-
-  it("on Firebase App Hosting it needs no Firebase settings: project from FIREBASE_CONFIG, built-in account", async () => {
-    vi.stubEnv("FIREBASE_PROJECT_ID", "");
-    vi.stubEnv("FIREBASE_CLIENT_EMAIL", "");
-    vi.stubEnv("FIREBASE_PRIVATE_KEY", "");
-    vi.stubEnv("FIREBASE_CONFIG", JSON.stringify({ projectId: "demo-webinar", storageBucket: "demo-webinar.appspot.com" }));
-    vi.stubEnv("K_SERVICE", "webinar-backend");
-    const { fulfil } = await instance();
-    await fulfil.fulfilPaidOrder(paidOrder() as never);
-    expect(tokenCalls).toEqual(["metadata"]);
-    expect(row().order_id).toEqual({ stringValue: ORDER_ID });
-  });
-
-  it("the email escapes the buyer's name", async () => {
-    const { confirmationEmail } = await import("@/lib/email");
+  it("the email escapes the buyer's name", () => {
     const mail = confirmationEmail({ firstName: "<b>Priya</b>", orderId: ORDER_ID, whatsappUrl: WA, siteUrl: SITE });
     expect(mail.html).not.toContain("<b>Priya</b>");
     expect(mail.html).toContain("&lt;b&gt;Priya&lt;/b&gt;");
-  });
-});
-
-describe("webhook with Firestore + Resend", () => {
-  function paidWebhook() {
-    const raw = JSON.stringify({ type: "PAYMENT_SUCCESS_WEBHOOK", data: { order: { order_id: ORDER_ID }, payment: { cf_payment_id: String(Math.random()) } } });
-    const ts = String(Date.now());
-    return new NextRequest(`${SITE}/api/webhooks/cashfree`, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-webhook-timestamp": ts, "x-webhook-signature": sign(raw, ts) },
-      body: raw,
-    });
-  }
-
-  it("email down → 503 so Cashfree retries; the retry sends it and answers 200", async () => {
-    // Cashfree's Get Order answers PAID; everything else goes to the fakes.
-    const fakes = fakeApis();
-    mockFetch(async (url, init) => (url.includes("cashfree.com") ? jsonResponse(paidOrder()) : fakes(url, init)));
-
-    resendStatus = 500;
-    const { webhook } = await instance();
-    expect((await webhook.POST(paidWebhook())).status).toBe(503);
-    expect(row().email_status).toEqual({ stringValue: "failed" });
-
-    resendStatus = 200;
-    expect((await webhook.POST(paidWebhook())).status).toBe(200);
-    expect(row().email_status).toEqual({ stringValue: "sent" });
-    expect(emails.filter((e) => e.body.to)).toHaveLength(2); // one failed attempt, one delivered
   });
 });

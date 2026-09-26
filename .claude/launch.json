@@ -8,16 +8,10 @@
       "port": 3000
     },
     {
-      "name": "web-standalone",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "set PORT=3100&& set HOSTNAME=127.0.0.1&& node .next/standalone/server.js"],
-      "port": 3100
-    },
-    {
-      "name": "web-prod",
+      "name": "preview",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start", "--", "-p", "3100"],
-      "port": 3100
+      "runtimeArgs": ["run", "preview"],
+      "port": 3300
     }
   ]
 }

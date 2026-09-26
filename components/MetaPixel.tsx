@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { OFFER } from "@/lib/offer";
 
-// Meta Pixel for ad measurement: PageView on every page, InitiateCheckout when the form opens Cashfree,
+// Meta Pixel for ad measurement: PageView on every page, InitiateCheckout when the form opens Razorpay,
 // Purchase on a verified thank-you page. Active only when NEXT_PUBLIC_META_PIXEL_ID is set at build time
-// (proxy.ts then opens the CSP for Meta's hosts). No personal data goes through the browser Pixel: the
-// server sends hashed email/phone for purchases (lib/meta-capi.ts), matched by the same event id.
+// (scripts/write-headers.mjs then opens the CSP for Meta's hosts). No personal data goes through the browser Pixel: the
+// server sends hashed email/phone for purchases (server/meta-capi.ts), matched by the same event id.
 // Meta's script (about 90 KB) loads only after the page has finished loading and gone idle, so the hero
 // and the ₹99 form are never slowed down; calls made before that wait in the queue below.
 

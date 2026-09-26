@@ -84,7 +84,7 @@
   .fj-stamp--muted {
     color: var(--color-ink-2);
   }
-  /* Small stamps carrying real words (e.g. the Cashfree trust line): lighter wear so they stay legible. */
+  /* Small stamps carrying real words (e.g. the Razorpay trust line): lighter wear so they stay legible. */
   .fj-stamp--sm {
     font-size: 0.66rem;
     rotate: -2deg;

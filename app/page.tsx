@@ -1,28 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
-import { LandingPage, pickTheme, pickVariant, THEME_COLOR } from "@/components/LandingPage";
-import { THEME_COOKIE } from "@/components/theme";
+import { LandingPage, THEME_COLOR } from "@/components/LandingPage";
 
-type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+// `/`: pre-built as a plain file. Light by default; public/boot.js applies ?theme= or the visitor's saved choice
+// and the ad-matched headline before the first paint.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
-async function themeFor(searchParams: Props["searchParams"]) {
-  const { theme } = await searchParams;
-  return pickTheme(theme, (await cookies()).get(THEME_COOKIE)?.value);
-}
+export const viewport: Viewport = {
+  themeColor: THEME_COLOR.light,
+};
 
-/** ?theme= is a duplicate of `/`: keep it out of search results. */
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { theme } = await searchParams;
-  return theme ? { robots: { index: false, follow: true } } : {};
-}
-
-/** Browser chrome colour follows the theme. */
-export async function generateViewport({ searchParams }: Props): Promise<Viewport> {
-  return { themeColor: THEME_COLOR[await themeFor(searchParams)] };
-}
-
-/** `/`: light by default; the visitor's toggle choice (cookie) or ?theme=dark switches it. utm_content picks the ad-matched hero. */
-export default async function Home({ searchParams }: Props) {
-  const { utm_content } = await searchParams;
-  return <LandingPage variant={pickVariant(utm_content)} theme={await themeFor(searchParams)} />;
+export default function Home() {
+  return <LandingPage />;
 }

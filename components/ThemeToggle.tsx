@@ -3,26 +3,29 @@
 import { useEffect, useState } from "react";
 import { THEME_COLOR, THEME_COOKIE, type Theme } from "./theme";
 
-function root(): HTMLElement | null {
-  return document.querySelector<HTMLElement>(".theme-root");
+/** The theme in force: the page wrapper's own setting (`/dark`), else <html> (set by public/boot.js). */
+function current(): Theme {
+  const t = document.querySelector<HTMLElement>(".theme-root")?.dataset.theme ?? document.documentElement.dataset.theme;
+  return t === "dark" ? "dark" : "light";
 }
 
 /**
- * Light / dark switch. Flips data-theme on the page wrapper (globals.css re-maps every token under it),
- * remembers the choice in a first-party cookie so the server renders the same theme next time (no flash),
+ * Light / dark switch. Sets data-theme on <html> and on the page wrapper (globals.css re-maps every token under
+ * it), remembers the choice in a first-party cookie so the next visit starts in the same theme (public/boot.js),
  * and drops a ?theme= override from the address bar so a reload keeps the visitor's choice.
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    setTheme(root()?.dataset.theme === "dark" ? "dark" : "light");
+    setTheme(current());
   }, []);
 
   function toggle() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    const el = root();
-    if (el) el.dataset.theme = next;
+    const next: Theme = current() === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    const wrapper = document.querySelector<HTMLElement>(".theme-root");
+    if (wrapper?.dataset.theme) wrapper.dataset.theme = next;
     setTheme(next);
 
     const secure = location.protocol === "https:" ? "; Secure" : "";

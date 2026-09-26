@@ -4,7 +4,7 @@ import { Biz, PolicyHeader, Section } from "../legal-ui";
 
 export const metadata: Metadata = { title: "Contact Us" };
 
-// Cashfree's website review looks for a business name, a physical address, an email and a phone number here.
+// Razorpay's website review looks for a business name, a physical address, an email and a phone number here.
 export default function ContactPage() {
   return (
     <article>

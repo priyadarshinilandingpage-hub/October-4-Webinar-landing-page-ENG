@@ -41,10 +41,10 @@ export default function TermsPage() {
             inclusive of all applicable taxes.
           </li>
           <li>
-            Payments are processed securely by Cashfree Payments. We never see your card, UPI or bank login details.
+            Payments are processed securely by Razorpay. We never see your card, UPI or bank login details.
           </li>
           <li>
-            Your seat is confirmed only after Cashfree confirms the payment. You will see a confirmation page and receive
+            Your seat is confirmed only after Razorpay confirms the payment. You will see a confirmation page and receive
             the joining details by email and WhatsApp.
           </li>
           <li>Refunds are covered by our <a href="/refund">Refund &amp; Cancellation Policy</a>.</li>

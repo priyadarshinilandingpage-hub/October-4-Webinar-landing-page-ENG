@@ -1,6 +1,6 @@
 # HANDOFF: Priyadharsini · Saffron & Business webinar landing page
 
-Last updated: 26 Sep 2026 (second chat: already-paid block, Firebase, Resend, Meta Pixel). Read this whole file before doing anything. It is the memory of the previous chat.
+Last updated: 26 Sep 2026 (second chat: moved to Cloudflare Pages + Razorpay; already-paid block, Firebase, Resend, Meta Pixel). Read this whole file before doing anything. It is the memory of the previous chats.
 
 ---
 
@@ -8,8 +8,8 @@ Last updated: 26 Sep 2026 (second chat: already-paid block, Firebase, Resend, Me
 
 ```
 Continue the Priyadharsini saffron webinar landing page in C:\Users\shyam\Downloads\PRIYADARSINI-LANDING-PAGE.
-First read HANDOFF.md in the project root fully, then PLAN.md §0b/§6, then run:
-  npx tsc --noEmit ; npx vitest run ; npx next build ; node scripts/check-client-bundle.mjs
+First read HANDOFF.md in the project root fully, then README.md ("Architecture"), then run:
+  npx tsc --noEmit ; npx vitest run ; npm run build
 Fix anything that fails. Then check the "OPEN ITEMS" list in HANDOFF.md §6 and continue from the first
 unchecked item. Follow the user's rules in HANDOFF.md §2 strictly (no em dashes, no "Nº", no "§", no "Fig",
 no AI-looking filler text, dense layouts, smooth on low-end phones, never move my browser view: test in a
@@ -21,8 +21,8 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 ## 1. What this is
 - A single-page, conversion-focused landing page selling a **₹99 live Tamil webinar** ("Start Small, Invest Smart, Build Wealth") by **Priyadharsini Subramaniam**, a startup strategist building an **indoor saffron (kunguma poo) farm in Tamil Nadu**. The date is **Sun 4 Oct 2026, 11:00 AM IST** (start time still to be confirmed by the client).
 - Traffic comes from **Meta ads** (two ads in the brief). The page message-matches `utm_content=creative_b` (women angle); everything else gets creative A (investor angle).
-- Payments go through **Cashfree** (the merchant account belongs to a third party; keys come later through env vars).
-- Deploy targets: **Vercel, Render, Firebase App Hosting** (configs exist).
+- **Payments: Razorpay** (decided 26 Sep 2026; Cashfree code removed). **Hosting: Cloudflare Pages** free plan (decided 26 Sep 2026 because it's free with no card, allows selling, and never sleeps; Vercel Hobby forbids payments, Netlify free pauses when credits run out, Render free sleeps).
+- **Repo:** github.com/priyadarshinilandingpage-hub/October-4-Webinar-landing-page (private). The user asked me to push; only push when they ask in that moment.
 
 ## 2. The user's rules and preferences (follow strictly)
 1. **Only the bold typography design**, in **light and dark**, with a **sun/moon toggle** in the top bar (cookie `theme`). `/dark` opens dark; `/bold` 308-redirects to `/`.
@@ -46,31 +46,17 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
     - Review screenshots are redacted (member count "329" hidden, names blurred); client consent is still needed.
 
 ## 3. Stack and key files
-- **Stack:** Next.js **16.3.6** (App Router, `proxy.ts` not middleware), React 19.3, Tailwind 4, TypeScript 5.9, motion 13, zod 4, vitest 5, `@nosecone/next` (CSP with nonce), `@cashfreepayments/cashfree-js`, `@upstash/ratelimit` (optional).
+- **Stack:** Next.js **16.3.6** with `output: "export"` (static files in `out/`), React 19.3, Tailwind 4, TypeScript 5.9, motion 13, zod 4, vitest 5, sharp (build-time image copies). No Node server: the payment steps are **Cloudflare Pages Functions** (`functions/api/*`, logic in `server/`, web-standard code only).
 - **Fonts** (next/font, self-hosted): Bricolage Grotesque (display), Fraunces italic (accent), DM Sans (body), IBM Plex Mono (labels, not preloaded).
-- **Page:** `app/page.tsx` → `components/LandingPage.tsx`. It always uses `data-type="bold"`, the theme comes from `?theme=` or the cookie, and the variant from `utm_content`.
-- **Copy and media slots:** `components/content.ts`. Price and date: `lib/offer.ts` (single source of truth, ₹99). Business details: `lib/business.ts` (placeholders still there).
+- **Page:** `app/page.tsx` → `components/LandingPage.tsx` (`/dark` passes `theme="dark"`). Both ads' headlines are in the page (`<ByAd>` in `components/ui.tsx`); `public/boot.js` (blocking, in `<head>`) sets `<html data-variant="b">` for `utm_content=creative_b` and applies `?theme=` / the `theme` cookie before paint. `components/ThemeToggle.tsx` flips `<html>` and the page wrapper.
+- **Copy and media slots:** `components/content.ts`. Price and date: `lib/offer.ts` (single source of truth, ₹99 = `AMOUNT_PAISE` 9900; `SESSION_MINUTES`, `startTimeLabel()`, `calendarUrl()`). Business details: `lib/business.ts` (placeholders still there).
 - **Sections:** `components/sections/*.tsx` (Hero, ProofMarquee, FarmBento, Problem, Modules, Journey, ValueStack, JoinSection, Reviews, Fit, About, Faq, Ticket, PsFooter), with helpers in `Fx.tsx` (data-fx idle/armed/in reveal states) and `fxStyle.ts`.
-- **Styles:**
-  - `app/globals.css`: tokens and dark theme, plus the appended blocks: scrollbar, PC text sizes, auto-scroll curtain, video spotlight, ticket print animation, theme toggle, performance guard.
-  - `app/sections.css`: section layouts.
-  - `app/bold.css`: bold typography, flowers, and hero headline sized with container queries `cqi` so the bouquet fits beside it.
-  - `app/overlays.css`: review lightbox.
-- **Media:** `components/Media.tsx` supports `srcDark`/`posterDark` (AI loops swap by theme); `components/LazyVideo.tsx`.
-- **Security (already done, don't weaken):**
-  - The server fixes the ₹99 price and re-verifies with Cashfree.
-  - Webhook HMAC is checked on the raw body; IDs are validated.
-  - CSP with nonce is set in `proxy.ts`; `next.config.ts` covers API headers and `allowedDevOrigins` for the LAN.
-  - Rate limits in `lib/ratelimit.ts`; no PII in URLs or localStorage.
-  - Tests are in `test/` (103 passing, 26 Sep 2026).
-  - `scripts/check-client-bundle.mjs` scans browser bundles for secrets.
-  - `scripts/check-placeholders.mjs` lists the remaining placeholders.
-- **After a payment (added 26 Sep 2026, details in README "After a payment"):** `lib/fulfil.ts` runs from the webhook and the thank-you page once Cashfree says PAID:
-  - `lib/buyers.ts`: the already-paid list (Firestore `paid_contacts`, hashed ids). The order API answers `409 { alreadyPaid: true }` for a known email **or** phone, and the form opens `/already-paid`. The user asked to match name/email/phone; name alone is deliberately NOT matched (many people share names).
-  - `lib/firestore.ts`: Firestore over REST, no SDK (service-account JWT, or the Google Cloud built-in account on App Hosting). The `registrations` collection is the "rows and columns" table the user asked for. `firestore.rules` denies all browser access.
-  - `lib/email.ts`: Resend over REST, no SDK. Seat-confirmation email with the WhatsApp button, once per order (idempotency key + `email_status`).
-  - A failed step makes the webhook answer 503 so Cashfree retries. The thank-you page shows the big "Join the WhatsApp group" step.
-- **Meta:** `components/MetaPixel.tsx` loads the Pixel on every page after the page is idle (PageView, InitiateCheckout on form submit, Purchase on the verified thank-you page, eventID = order id). The user chose **"track everyone, no asking"** (26 Sep 2026), so the Pixel has no consent gate, CAPI Purchase goes for every buyer, and the privacy page says so. `META_DOMAIN_VERIFICATION` adds the domain meta tag.
+- **Styles:** `app/globals.css` (tokens, dark theme, appended blocks incl. the `.v-a/.v-b` ad switch), `app/sections.css`, `app/bold.css`, `app/overlays.css`.
+- **Images:** `scripts/make-images.mjs` (prebuild) writes `public/_img/<w>/<path>.webp` at 128/256/384/640/828/1080/1600 (gitignored, rebuilt on deploy); `lib/image-loader.ts` is the next/image loader. `components/Media.tsx`, `components/LazyVideo.tsx` unchanged.
+- **Payment flow:** `components/CheckoutForm.tsx` → `POST /api/orders` (`server/routes/orders.ts`: validation, already-paid check, fixed-price Razorpay order with the buyer in `notes`) → Razorpay checkout.js in **redirect mode** (`callback_url`) → `/api/razorpay/callback` (signature check, follow-up in `waitUntil`) → `/thank-you` (`app/thank-you/ThankYou.tsx` polls `GET /api/verify`; WhatsApp link only when PAID) + `POST /api/webhooks/razorpay` (signed; re-reads the order).
+- **After a payment:** `server/fulfil.ts`: `server/buyers.ts` (already-paid list, Firestore `paid_contacts`, hashed ids; email OR phone, never name alone), Firestore `registrations` row (`server/firestore.ts`, REST + service-account JWT via Web Crypto), Resend email (`server/email.ts`). Steps independent; failures → webhook 503 → Razorpay retries. `firestore.rules` denies browser access.
+- **Meta:** `components/MetaPixel.tsx` (PageView, InitiateCheckout, Purchase with eventID = Razorpay order id) and `server/meta-capi.ts` (Purchase for every buyer). The user chose **"track everyone, no asking"** (26 Sep 2026); the privacy page says so.
+- **Security (don't weaken):** price fixed on the server; "paid" only from Razorpay's API (status paid, amount 9900, INR); checkout and webhook HMACs with constant-time compares; redirects only from `SITE_URL`; same-origin check on `/api/orders`; rate limits (`server/ratelimit.ts`, memory or Upstash REST); `out/_headers` from `scripts/write-headers.mjs` (CSP with `'unsafe-inline'` scripts because a static page can't use a per-request nonce; everything else pinned: Razorpay hosts, no framing, no plugins); `public/_routes.json` limits Functions to `/api/*`; `scripts/check-client-bundle.mjs` scans `out/` for secrets. Tests in `test/` (69 passing, 26 Sep 2026).
 
 ## 4. Media (all in `public/media/…`)
 - **Hero:**
@@ -98,43 +84,24 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - **Higgsfield:** 14 Seedance 2.0 videos and 14 uploaded start frames are still in the user's Higgsfield library. The connector has **no delete tool**; remind the user to delete them manually. Job IDs are in `assets-inbox/ai/video/jobs.json`.
 
 ## 5. How to run and preview
-- **Dev:** the preview config `.claude/launch.json` runs `npm run dev -- -H 0.0.0.0` on port 3000. `web-prod` runs the last `npm run build` with `next start` on port 3100: use it for QA when another chat's dev server holds port 3000 (stop it before rebuilding).
-- **Local payment test:** needs `.env.local` with Cashfree **sandbox** keys (none exist yet). Test UPI `testsuccess@gocash`; test card 4706 1312 1121 2123, 03/28, CVV 123, OTP 111000.
+- **Dev:** `.claude/launch.json` "web" runs `npm run dev -- -H 0.0.0.0` on port 3000 (pages only; `/api` Functions don't run in next dev).
+- **Built site:** `npm run build` then `npm run preview` (launch config "preview", port 3300) serves `out/` like Cloudflare (pretty URLs, 404.html). `/api/*` answers 404 there; the Functions are covered by `npx vitest run`.
 - **On the user's phone (same Wi-Fi):** `http://192.168.1.4:3000/` and `/dark`. The IP can change; check it with `ipconfig`.
-- **QA:** use a background browser tab (`tabs_create`, then `navigate`, then `resize_window` on that tab). The pane is often hidden, so screenshots can time out; rely on DOM measurements (getBoundingClientRect, elementFromPoint).
-- **Useful test URLs:**
-  - `/?utm_content=creative_b&fbclid=x` (ad B plus auto-scroll);
-  - `/?theme=dark`;
-  - to bypass auto-scroll, run `sessionStorage.setItem('as-join','1')` in the console.
+- **QA:** use a background browser tab (`tabs_create`, then `navigate`, then `resize_window` on that tab). The pane is often hidden, so screenshots can time out and videos pause; rely on DOM measurements.
+- **Useful test URLs:** `/?utm_content=creative_b&fbclid=x` (ad B plus auto-scroll); `/?theme=dark`; to bypass auto-scroll, `sessionStorage.setItem('as-join','1')`.
+- **Razorpay test payments** (Test Mode keys): UPI `success@razorpay` / `failure@razorpay`; card 4111 1111 1111 1111.
+- **Offline review copy:** a single-file HTML (`C:\Users\shyam\Downloads\Priyadharsini-Webinar-Preview.html`, 18 MB) was made from the OLD Cashfree build for the user's reviewers; the builder lived in the session scratchpad (gone). Rebuild it only if asked.
 
 ## 6. OPEN ITEMS (continue from the first unchecked one)
-- [x] **Density pass, mostly verified 26 Sep 2026** (production build, background tab, DOM measurements): no horizontal scroll at 375 / 768 / 1024 / 1280 / 1440 / 1920 in light and dark; no em dashes, "Nº", "§" or "Fig" in visible text; `#learn-title` is 3 lines (375 and 1280); the plum band is at least 91% opaque behind its first and last text, so contrast is fine; the FarmBento note overlaps no caption. **Still open:** the floral-divider clearance (`-my-14`, about 8 px) was not measured.
-- [x] **Leftovers removed (user's call, 26 Sep 2026):** "← idhu dhaan!" (the pencil circle stays), the FAQ "Q.01" tabs (card gap now 12 px), the Problem ledger's number column and "=" sign, and "Admit one" on both stubs and the LIVE seal. Don't bring them back.
-- [x] **Duplicate-payment note** on the thank-you page only points to Contact; it promises no refund (user's call).
-- [x] **Hero bouquet verified:** the headline ends 22 px (1024) and 26 px (1280 / 1440 / 1920) before the bouquet.
-- [x] **Built:** the already-paid block, Firestore registrations, the Resend confirmation email, the WhatsApp step on the thank-you page, the Meta Pixel and CAPI for all buyers (see §3). Needs real keys to test end to end (§8).
-- [x] **Ready for GitHub + Firebase App Hosting (26 Sep 2026):**
-  - A standalone build (what App Hosting runs; `NEXT_PRIVATE_STANDALONE=true npm run build`, launch config `web-standalone`) serves every page with the CSP/HSTS headers from `proxy.ts`, plus the media, `/icon.svg` (new tab icon), `/og.jpg` and `/api/health`. Without keys, `/api/orders` answers 503 and the webhook 401. No CSP errors in the console.
-  - `git init -b main` is done, with **no commit yet**: the user commits and pushes. `git add --dry-run .` gives 175 files, 24 MB (largest 8.3 MB). A scan of those files found no secrets.
-  - `apphosting.yaml`: the first rollout needs no secrets (the Cashfree blocks are commented out, with step-by-step notes). Firestore on App Hosting needs no settings: the project comes from the automatic `FIREBASE_CONFIG`.
-  - `lib/fulfil.ts`: the steps are independent, so the email still goes out if Firestore is down.
-- [ ] **Verify the journey pages.** They must have **no** flying animation (PaperFlight was deleted). Code check done 26 Sep: nothing references `pf-`/`PaperFlight`. Still to look at in a browser.
-- [ ] **Verify the video spotlight in a real browser.**
-  - The FLIP open animation from the thumbnail works.
-  - The countdown locks close for 5 s.
-  - Sound toggle, Esc and backdrop work only after unlock.
-  - It re-opens on every refresh.
-  - It never opens during the auto-scroll.
-  - Mobile layout: video plus CTA under it.
-- [ ] **Verify the review lightbox:** open, next/previous, swipe, close, and focus return.
-- [ ] **Performance check** on a throttled mobile profile (Lighthouse or DevTools CPU 4×). The auto-scroll glide must be smooth.
-- [ ] **Client inputs still missing** (see `npm run check:placeholders`):
-  - business legal name, address, support email and phone, grievance officer name and email, city, GSTIN (`lib/business.ts`);
-  - confirm the 11:00 AM start time (`lib/offer.ts`) and the session length (`app/thank-you/page.tsx`);
-  - a buyers-only WhatsApp group link (`WEBINAR_WHATSAPP_URL`).
-- [ ] **Keys the user must create:** Cashfree sandbox keys, a Firebase project (Blaze plan) with Firestore in `asia-south1` and `firestore.rules` published, Resend (verified sending domain, API key, `EMAIL_FROM`), Meta Pixel ID + CAPI token (+ domain verification code). Full list in `.env.example`.
-- [ ] **Not built:** WhatsApp *messages* to buyers (only the group link on the page and in the email). Refunds for a `duplicate_of` order are manual in the Cashfree dashboard.
-- [ ] **Deploy** (§8), then do one real **Cashfree sandbox payment** end to end (row in `registrations`, email arrives, paying again opens `/already-paid`, Events Manager shows Purchase), then switch to production keys.
+- [x] Density pass, leftovers removal, hero bouquet, already-paid block, Firebase rows, Resend email, WhatsApp step, Meta Pixel + CAPI: all done 26 Sep 2026 (see git history).
+- [x] **Moved to Cloudflare Pages + Razorpay (26 Sep 2026):** static export + Functions, both ad headlines + boot.js, WebP image copies, `_headers`/`_routes.json`/`_redirects`, Cashfree/Vercel/Render/App Hosting files removed. Verified with `npm run preview`: all pages build, ad B and dark work before paint, images load, 404 page, thank-you shows "Payment not completed" without an order.
+- [ ] **Razorpay account ownership (IMPORTANT, raised 26 Sep 2026):** the user created the Razorpay account on **their own personal PAN** but the webinar is **Priyadharsini's**. Razorpay rejected a brand name like "Indoor Saffron Farming" (must match the PAN name or the site's domain). Collecting another person's sales in your own merchant account breaks Razorpay's terms (and RBI's 2025 payment-aggregator rules: the account holder must be the real seller). Recommended: **she opens the Razorpay account on her own PAN** (individual, no GST needed under ₹20 lakh), adds the user as a team member; or the user becomes the seller on paper (the user's name on the policy pages; the user pays her separately). The code doesn't change either way: only the keys and `lib/business.ts`.
+- [ ] **Cloudflare deploy** (§8), then one Razorpay Test Mode payment end to end, then live keys.
+- [ ] **Verify in a real, visible browser** after deploy: the video spotlight (FLIP open, 5 s lock, sound, Esc, re-opens on refresh, never during auto-scroll), the review lightbox (open, next/prev, swipe, close, focus return), journey pages (no flying animation), a throttled-mobile performance run (auto-scroll glide smooth).
+- [ ] **Hero portrait:** the user will send a new one; replace `public/media/hero/hero-portrait.jpg` (same name) and rebuild. (`/_img/` copies regenerate automatically because the source is newer.)
+- [ ] **Client inputs still missing** (`npm run check:placeholders`): business legal name, address, support email and phone, grievance officer, city, GSTIN or "Not registered" (`lib/business.ts`); confirm 11:00 AM and the session length (`lib/offer.ts`); the buyers-only WhatsApp group link (`WEBINAR_WHATSAPP_URL`).
+- [ ] **Keys to create:** Razorpay (test, then live; webhook with secret; automatic capture), Firebase project (Spark) with Firestore `asia-south1` + rules + service-account key, Resend (verified domain), Meta Pixel ID + CAPI token (+ domain verification), a custom domain (e.g. oakpace.in: checked free 26 Sep 2026; "Oakpace" had no trademark in WIPO).
+- [ ] **Not built:** WhatsApp *messages* to buyers (only the group link). Refunds for a `duplicate_of` order are manual in the Razorpay dashboard.
 
 ## 7. Known facts and decisions (don't re-ask)
 - **Price ₹99** (the ads say ₹99). Language Tamil. Only the **general authority creative** is used on the page.
@@ -143,22 +110,10 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - **Bonuses:** none shown. The `BONUSES` list in `content.ts` is deliberately empty until the client confirms.
 
 ## 8. Deploy guide (short; full steps in README.md)
-1. **Buy or choose a custom domain.** Cashfree production only works on an https custom domain that the Cashfree account owner whitelists (approval takes about 24 h). `*.vercel.app` may be rejected.
-2. **Env vars** (see `.env.example`):
-   - `CASHFREE_CLIENT_ID`, `CASHFREE_CLIENT_SECRET`, `CASHFREE_ENV` (sandbox → production), `CASHFREE_API_VERSION` (2025-01-01);
-   - `SITE_URL` (the exact https origin);
-   - `WEBINAR_WHATSAPP_URL`;
-   - optional: `UPSTASH_REDIS_REST_URL`/`TOKEN`, Meta vars.
-   - Never prefix secrets with `NEXT_PUBLIC_`.
-3. **Pick a host.** The user is leaning to **Firebase App Hosting** (from GitHub). Facts checked 26 Sep 2026: it needs the Blaze (pay-as-you-go) plan with a card; there is no Mumbai region (closest is `asia-southeast1` Singapore; put Firestore in `asia-south1` Mumbai); free monthly allowance is 2M requests, 180k vCPU-s, 360k GiB-s, 10 GiB bandwidth (then about $0.15/GiB); classic Firebase Hosting (free Spark plan) can't run this app because it needs a server. The whole `assets-inbox/` folder is now in `.gitignore`.
-   - **Vercel:** import the folder or repo; `vercel.json` sets the region to Mumbai. `.vercelignore` already excludes `assets-inbox`, so the 26 GB of zips aren't uploaded.
-   - **Render:** `render.yaml` (Node web service; build `npm ci && npm run build`, start `npm start`).
-   - **Firebase App Hosting:** `apphosting.yaml` (secrets via Cloud Secret Manager).
-4. If using git: `.gitignore` already excludes `assets-inbox/_raw`, zips, heic and mp4/mov in the inbox. Commit `public/media` (about 25 MB).
-5. **In the Cashfree dashboard:** add the webhook URL `https://<domain>/api/webhooks/cashfree` and whitelist the domain.
-6. **After deploying, check:**
-   - the security headers (`curl -I https://<domain>/`);
-   - `/api/health`;
-   - a sandbox payment;
-   - the thank-you page shows "Seat confirmed" only after Cashfree marks the order PAID.
-7. **Share preview:** test the link in WhatsApp or the Facebook Sharing Debugger (the og:image needs the absolute `SITE_URL`).
+1. **Cloudflare Pages:** Workers & Pages → Create → Pages → Connect to Git → the repo, branch `main`. Framework preset **None**, build command `npm run build`, output directory `out`. `.node-version` pins Node 22. Functions in `functions/` are picked up automatically.
+2. **Settings** (Settings → Variables and Secrets; see `.env.example`): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` (Secret), `RAZORPAY_WEBHOOK_SECRET` (Secret), optional `RAZORPAY_BRAND_NAME`, `SITE_URL` (also as a build variable), `WEBINAR_WHATSAPP_URL`, `FIREBASE_*`, `RESEND_API_KEY`/`EMAIL_FROM`/`EMAIL_REPLY_TO`, optional Upstash, Meta; build variables `NEXT_PUBLIC_META_PIXEL_ID`, `META_DOMAIN_VERIFICATION`. Redeploy after changes.
+3. **Custom domain:** the project → Custom domains. Then set `SITE_URL` to it and redeploy.
+4. **Razorpay:** webhook `https://<domain>/api/webhooks/razorpay` (events order.paid + payment.captured, secret = `RAZORPAY_WEBHOOK_SECRET`); payment capture Automatic; website details = the domain.
+5. **Firestore:** Native mode, `asia-south1`, publish `firestore.rules`, service-account key into the three `FIREBASE_*` settings.
+6. **After deploying, check:** headers (`curl -I https://<domain>/`), `/api/health`, a Test Mode payment (row in `registrations`, email, `/already-paid` on a repeat), and that `/thank-you` shows "confirmed" only for a PAID order.
+7. **Share preview:** test the link in WhatsApp or the Facebook Sharing Debugger (og:image uses `SITE_URL` from the build).

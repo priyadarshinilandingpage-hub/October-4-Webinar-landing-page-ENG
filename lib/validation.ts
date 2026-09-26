@@ -26,7 +26,7 @@ export const leadSchema = z
           .max(60, "Name is too long")
           .regex(/^[\p{L}\p{M} .'-]+$/u, "Please use letters only"),
       ),
-    // Cashfree accepts at most 100 characters.
+    // Razorpay notes hold at most 256 characters; 100 keeps emails sane.
     email: z.string().trim().toLowerCase().max(100, "Email is too long").pipe(z.email("Please enter a valid email")),
     phone: z
       .string()

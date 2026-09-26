@@ -35,9 +35,9 @@ export default function PrivacyPage() {
             and whether you ticked the consent boxes.
           </li>
           <li>
-            <strong>Payment status:</strong> Cashfree Payments tells us whether your payment succeeded, the amount, and
+            <strong>Payment status:</strong> Razorpay tells us whether your payment succeeded, the amount, and
             a payment reference. <strong>We never see or store your card, UPI PIN or bank login details.</strong> You
-            enter those on Cashfree&apos;s secure checkout, not on our website.
+            enter those on Razorpay&apos;s secure checkout, not on our website.
           </li>
           <li>
             <strong>Campaign information:</strong> if you arrived from an ad, the campaign name in the link (for example
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
             paid for this session, we show you that instead of starting a second payment.
           </li>
           <li>To send you the joining link, reminders and any change to the schedule, by email and WhatsApp.</li>
-          <li>To process your payment and any refund through Cashfree Payments, and to keep records required by law (for example, tax and accounting records).</li>
+          <li>To process your payment and any refund through Razorpay, and to keep records required by law (for example, tax and accounting records).</li>
           <li>To answer your questions and resolve complaints.</li>
           <li>To keep the website secure and prevent fraud or misuse.</li>
           <li>To measure which of our Meta (Facebook/Instagram) ads bring visitors and registrations (see section 5).</li>
@@ -81,8 +81,8 @@ export default function PrivacyPage() {
         <p>We do not sell your personal data. We share it only with service providers who process it for us:</p>
         <ul>
           <li>
-            <strong>Cashfree Payments India Pvt. Ltd.</strong>: payment processing. Your name, email and phone number
-            are sent to Cashfree to create your payment.
+            <strong>Razorpay Software Pvt. Ltd.</strong>: payment processing. Your name, email and phone number
+            are sent to Razorpay to create your payment.
           </li>
           <li>
             <strong>Website hosting:</strong> our website hosting provider runs
@@ -168,7 +168,7 @@ export default function PrivacyPage() {
 
       <Section title="9. Security">
         <p>
-          The website uses HTTPS encryption. Payments happen on Cashfree&apos;s PCI DSS certified checkout. Access to
+          The website uses HTTPS encryption. Payments happen on Razorpay&apos;s PCI DSS certified checkout. Access to
           registration data is limited to the people who run the webinar. If a personal data breach happens, we will
           inform the Data Protection Board of India and affected people as the law requires.
         </p>

@@ -1,7 +1,7 @@
 import { CheckoutForm } from "../CheckoutForm";
 import { Countdown } from "../Countdown";
 import { EVENT, JOIN } from "../content";
-import { Kicker, TextLink } from "../ui";
+import { ByAd, Kicker, TextLink } from "../ui";
 
 /**
  * 8 · #join, the conversion point (Meta-ad traffic auto-scrolls here). Built as an admit card:
@@ -11,7 +11,7 @@ import { Kicker, TextLink } from "../ui";
  * them, and "What happens next" moves up beside the heading (grid placement only; DOM order unchanged).
  * No entrance animation here: the form must be usable the instant anyone lands.
  */
-export function JoinSection({ variant }: { variant: "a" | "b" }) {
+export function JoinSection() {
   return (
     <section id="join" aria-labelledby="join-title" className="fj-sec pt-6 pb-20 md:pt-8 md:pb-24">
       <div className="wrap lg:grid lg:grid-cols-12 lg:gap-x-10">
@@ -21,7 +21,7 @@ export function JoinSection({ variant }: { variant: "a" | "b" }) {
             {JOIN.kicker}
           </Kicker>
           <h2 id="join-title" className="font-serif text-[clamp(1.8rem,5vw,3.6rem)] leading-[1.04] tracking-[-0.015em] text-white sm:mt-4">
-            {JOIN.title[variant]}
+            <ByAd a={JOIN.title.a} b={JOIN.title.b} />
           </h2>
           <p className="mt-3 hidden max-w-xl text-[1.06rem] leading-relaxed text-white/75 sm:block">{JOIN.lead}</p>
         </div>

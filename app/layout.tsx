@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, DM_Sans, Fraunces, IBM_Plex_Mono } from "next/font/google";
-import { connection } from "next/server";
 import { Backdrop } from "@/components/Backdrop";
 import { MetaPixel } from "@/components/MetaPixel";
 import { OFFER } from "@/lib/offer";
@@ -45,8 +44,9 @@ const META_DOMAIN_VERIFICATION = /^[a-z0-9]{10,64}$/.test(process.env.META_DOMAI
   : undefined;
 
 export const metadata: Metadata = {
-  // Absolute URLs for the share preview (og:image). SITE_URL is set per deployment; localhost for dev.
-  metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
+  // Absolute URLs for the share preview (og:image), fixed at build time: SITE_URL (set it in Cloudflare Pages for
+  // the build too), else Cloudflare's own address for this deployment, else localhost for dev.
+  metadataBase: new URL(process.env.SITE_URL || process.env.CF_PAGES_URL || "http://localhost:3000"),
   title: "Start Small, Invest Smart, Build Wealth · Live Webinar with Priyadharsini",
   description: `Live Tamil webinar on ${OFFER.dateLabel}: investment planning, capital management, market opportunities, loans & subsidies. Registration ₹${OFFER.priceInr}.`,
   robots: { index: true, follow: true },
@@ -71,14 +71,19 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Render per request so every page gets a fresh CSP nonce.
-  await connection();
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en-IN"
       className={`${ledger.variable} ${boldDisplay.variable} ${boldAccent.variable} ${boldBody.variable}`}
+      // public/boot.js sets data-theme / data-variant on <html> before React starts.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Blocking on purpose (tiny, same origin, cached): picks the ad headline and saved theme before paint. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/boot.js" />
+      </head>
       <body className="min-h-dvh bg-ivory font-sans text-ink antialiased">
         {/* Without JS, scroll-reveal wrappers must still be visible. (A <style> is allowed by style-src 'unsafe-inline'.) */}
         <noscript>
