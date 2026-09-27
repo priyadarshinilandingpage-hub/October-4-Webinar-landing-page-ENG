@@ -64,7 +64,16 @@ export async function readBodyLimited(req: Request, maxBytes: number): Promise<U
   return out;
 }
 
-/** Client IP as Cloudflare sees it (set by Cloudflare's edge; the visitor can't spoof it). */
+/**
+ * Best-effort client IP for rate limiting. Behind Cloudflare: cf-connecting-ip. Behind nginx or another reverse
+ * proxy: x-real-ip, else the first x-forwarded-for entry (set `proxy_set_header X-Real-IP $remote_addr;`).
+ */
 export function clientIp(req: Request): string {
-  return req.headers.get("cf-connecting-ip")?.trim() || "unknown";
+  const h = req.headers;
+  return (
+    h.get("cf-connecting-ip")?.trim() ||
+    h.get("x-real-ip")?.trim() ||
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown"
+  );
 }

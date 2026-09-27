@@ -8,10 +8,10 @@
       "port": 3000
     },
     {
-      "name": "preview",
+      "name": "prod",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview"],
-      "port": 3300
+      "runtimeArgs": ["run", "start", "--", "-p", "3100"],
+      "port": 3100
     }
   ]
 }

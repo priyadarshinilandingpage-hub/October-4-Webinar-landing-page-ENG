@@ -1,6 +1,5 @@
-// Runs after `next build`: scans everything that will be published (out/) for server-only secrets: the values of
-// secret env vars (when set at build time) and code markers that only server code has. The Pages Functions
-// (functions/, server/) are bundled separately by Cloudflare and never land in out/.
+// Runs after `next build`: scans the browser bundles (.next/static) for server-only secrets: the values of secret env
+// vars (when set at build time) and code markers that only server code has (server/ runs only on the server).
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -24,11 +23,11 @@ function* files(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) yield* files(p);
-    else if (/\.(js|mjs|json|html|txt|map|css)$/.test(name) || name === "_headers" || name === "_redirects") yield p;
+    else if (/\.(js|mjs|json|html|txt|map|css)$/.test(name)) yield p;
   }
 }
 
-const root = join(process.cwd(), "out");
+const root = join(process.cwd(), ".next", "static");
 let found = 0;
 try {
   for (const file of files(root)) {

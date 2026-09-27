@@ -10,8 +10,8 @@
     "dev": "next dev",
     "prebuild": "node scripts/check-public-env.mjs && node scripts/make-images.mjs",
     "build": "next build",
-    "postbuild": "node scripts/write-headers.mjs && node scripts/check-client-bundle.mjs",
-    "preview": "node scripts/serve-out.mjs",
+    "postbuild": "node scripts/check-client-bundle.mjs",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check:placeholders": "node scripts/check-placeholders.mjs"

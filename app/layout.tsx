@@ -44,9 +44,8 @@ const META_DOMAIN_VERIFICATION = /^[a-z0-9]{10,64}$/.test(process.env.META_DOMAI
   : undefined;
 
 export const metadata: Metadata = {
-  // Absolute URLs for the share preview (og:image), fixed at build time: SITE_URL (set it in Cloudflare Pages for
-  // the build too), else Cloudflare's own address for this deployment, else localhost for dev.
-  metadataBase: new URL(process.env.SITE_URL || process.env.CF_PAGES_URL || "http://localhost:3000"),
+  // Absolute URLs for the share preview (og:image), fixed at build time from SITE_URL in .env (localhost for dev).
+  metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
   title: "Start Small, Invest Smart, Build Wealth · Live Webinar with Priyadharsini",
   description: `Live Tamil webinar on ${OFFER.dateLabel}: investment planning, capital management, market opportunities, loans & subsidies. Registration ₹${OFFER.priceInr}.`,
   robots: { index: true, follow: true },
