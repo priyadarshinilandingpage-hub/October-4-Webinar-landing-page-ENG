@@ -1,4 +1,4 @@
-import { AdAutoScroll } from "@/components/AdAutoScroll";
+import { WarmImages } from "@/components/WarmImages";
 import { FloralDivider, FlowerDefs, HeroCrown, HeroPlateBlooms } from "@/components/Flowers";
 import { MobileCta } from "@/components/MobileCta";
 import { MotionProvider, SaffronThread } from "@/components/motion";
@@ -37,7 +37,7 @@ export function LandingPage({ theme }: { theme?: Theme }) {
         <TopBar />
         <main id="top" className="ledger-page relative overflow-x-clip">
           <SaffronThread />
-          <AdAutoScroll />
+          <WarmImages />
           <FlowerDefs />
           <Hero floral={{ crown: <HeroCrown />, plate: <HeroPlateBlooms /> }} />
           <ProofMarquee />

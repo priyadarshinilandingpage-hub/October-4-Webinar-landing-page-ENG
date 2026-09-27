@@ -4,7 +4,7 @@ import { EVENT, JOIN } from "../content";
 import { ByAd, Kicker, TextLink } from "../ui";
 
 /**
- * 8 · #join, the conversion point (Meta-ad traffic auto-scrolls here). Built as an admit card:
+ * 8 · #join, the conversion point (every Register button scrolls here). Built as an admit card:
  * the application form on top (numbered, ledger-ruled fields) and a perforated tear-off stub holding
  * the price, the date and the live countdown. Phones: one short heading line, then the fields, then
  * "What happens next". Desktop: the stub sits to the left of the form, perforation running down between

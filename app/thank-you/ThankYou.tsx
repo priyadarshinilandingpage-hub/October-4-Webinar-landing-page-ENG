@@ -97,21 +97,11 @@ export function ThankYou() {
                   <Chat className="size-5" />
                   Join the WhatsApp group
                 </a>
-                <p className="mt-3 text-sm text-[#5B5270]">Join now or take a screenshot: this button is only shown on this page.</p>
+                <p className="mt-3 text-sm text-[#5B5270]">
+                  Closed this page by mistake? Fill in the form again with the same email or number to see this button.
+                </p>
               </section>
             )}
-            {result.duplicate && (
-              <p className="mt-5 rounded-2xl border border-[#D9531E]/30 bg-[#D9531E]/5 px-5 py-4 text-[#1E1530]">
-                This email or WhatsApp number had already paid once, so this is a second payment for the same seat.{" "}
-                <a className="font-semibold underline" href="/contact">
-                  Contact us
-                </a>{" "}
-                with this page&apos;s link.
-              </p>
-            )}
-            <p className="mt-10 text-sm text-[#5B5270]">
-              Keep this page&apos;s link private. Questions? See the <a className="underline" href="/contact">contact page</a>.
-            </p>
           </>
         )}
 
@@ -139,9 +129,6 @@ export function ThankYou() {
             <a href="/#join" className={`${btn} mt-10 bg-[#D9531E] text-white`}>
               Try again · ₹{OFFER.priceInr}
             </a>
-            <p className="mt-10 text-sm text-[#5B5270]">
-              Paid but seeing this? <a className="underline" href="/contact">Contact us</a> with your payment reference.
-            </p>
           </>
         )}
       </div>

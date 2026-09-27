@@ -1285,9 +1285,9 @@ main[id][tabindex="-1"]:focus {
 
 /* ─────────────────────────── Top bar + mobile bar ─────────────────────────── */
 .topbar {
-  background: color-mix(in srgb, var(--color-ivory) 90%, transparent);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  backdrop-filter: blur(10px) saturate(1.2);
+  /* Solid instead of a live backdrop blur: a blur behind a pinned bar is recomputed on every scroll frame,
+     the main scroll-lag source on laptops. */
+  background: var(--color-ivory);
   border-bottom: 1px solid var(--rule-strong);
 }
 .topbar::after {
@@ -1712,20 +1712,6 @@ body::-webkit-scrollbar {
       font-size: 0.66rem;
     }
   }
-}
-
-/* ─────────────────────────── Auto-scroll curtain (components/AdAutoScroll.tsx) ─────────────────────────── */
-.as-curtain {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  pointer-events: none;
-  background: var(--color-ivory);
-  opacity: 0;
-  transition: opacity 200ms ease-out;
-}
-.as-curtain.is-on {
-  opacity: 1;
 }
 
 /* ─────────────────────────── Video spotlight (components/VideoSpotlight.tsx) ───────────────────────────

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import imageLoader from "@/lib/image-loader";
 import type { MediaSlot } from "./content";
 import { CrocusSketch, ImageIcon, VideoIcon } from "./icons";
 import { LazyVideo } from "./LazyVideo";
@@ -49,25 +50,62 @@ export function Media({ slot, className = "", sizes = "100vw", eager = false, co
     );
   }
 
+  const video = (src: string, poster: string | undefined) => (
+    <VideoWithStill src={src} poster={poster} label={slot.alt} sizes={sizes} eager={eager} controls={controls} />
+  );
+
   // AI loops come in two renders (light + dark background). CSS shows the one matching the theme; the hidden
-  // one never intersects the viewport, so LazyVideo neither downloads nor plays it.
+  // one never intersects the viewport, so neither its video nor its still image is downloaded.
   if (slot.srcDark) {
     return (
       <div className={`media-fill relative overflow-hidden ${className}`}>
-        <div className="only-light absolute inset-0">
-          <LazyVideo src={slot.src} poster={slot.poster} label={slot.alt} eager={eager} controls={controls} />
-        </div>
-        <div className="only-dark absolute inset-0">
-          <LazyVideo src={slot.srcDark} poster={slot.posterDark ?? slot.poster} label={slot.alt} eager={eager} controls={controls} />
-        </div>
+        <div className="only-light absolute inset-0">{video(slot.src, slot.poster)}</div>
+        <div className="only-dark absolute inset-0">{video(slot.srcDark, slot.posterDark ?? slot.poster)}</div>
       </div>
     );
   }
 
+  return <div className={`media-fill relative overflow-hidden ${className}`}>{video(slot.src, slot.poster)}</div>;
+}
+
+/**
+ * A video over its still frame. The still is a resized WebP loaded lazily by the browser (like any image), not a
+ * `poster` attribute: posters download on page load even far below the fold and for the hidden theme, at full
+ * size. The video fades in over it once it plays.
+ */
+function VideoWithStill({
+  src,
+  poster,
+  label,
+  sizes,
+  eager,
+  controls,
+}: {
+  src: string;
+  poster?: string;
+  label: string;
+  sizes: string;
+  eager: boolean;
+  controls: boolean;
+}) {
+  const posterUrl = poster ? imageLoader({ src: poster, width: 828 }) : undefined;
+  if (controls) return <LazyVideo src={src} poster={posterUrl} label={label} controls />;
   return (
-    <div className={`media-fill relative overflow-hidden ${className}`}>
-      <LazyVideo src={slot.src} poster={slot.poster} label={slot.alt} eager={eager} controls={controls} />
-    </div>
+    <>
+      {poster && (
+        <Image
+          src={poster}
+          alt=""
+          aria-hidden
+          fill
+          sizes={sizes}
+          preload={eager}
+          loading={eager ? "eager" : "lazy"}
+          className="object-cover"
+        />
+      )}
+      <LazyVideo src={src} poster={posterUrl} label={label} eager={eager} />
+    </>
   );
 }
 

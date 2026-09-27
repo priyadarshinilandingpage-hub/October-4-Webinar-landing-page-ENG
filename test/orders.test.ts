@@ -121,6 +121,19 @@ describe("POST /api/orders", () => {
     expect(f).toHaveBeenCalledTimes(1);
   });
 
+  it("already paid: the WhatsApp group link comes back with the 409 when it is configured", async () => {
+    const env = testEnv({ WEBINAR_WHATSAPP_URL: "https://chat.whatsapp.com/TestGroupLink" });
+    await rememberBuyer(readEnv(env), ORDER_ID, { email: "paid@example.com" });
+    const f = razorpayOk();
+    const a = await post(req(lead({ email: "paid@example.com" })), env);
+    expect(a.status).toBe(409);
+    expect(await a.json()).toEqual({ alreadyPaid: true, error: "You have already paid for this webinar.", whatsapp: "https://chat.whatsapp.com/TestGroupLink" });
+    const b = await post(req(lead({ email: "new.buyer@example.com" })), env);
+    expect(b.status).toBe(200);
+    expect(JSON.stringify(await b.json())).not.toContain("whatsapp");
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it("a double submit returns the same checkout instead of a second order", async () => {
     const f = razorpayOk();
     const same = lead();

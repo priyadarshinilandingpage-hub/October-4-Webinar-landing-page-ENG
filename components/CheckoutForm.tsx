@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { WA_KEY } from "@/lib/already-paid";
 import { USER_FIELDS, leadSchema } from "@/lib/validation";
 import { CHECKOUT } from "./content";
 import { Lock, ThreadArrow } from "./icons";
@@ -21,6 +22,8 @@ interface OrderResponse {
   prefill?: { name: string; email: string; contact: string };
   callbackUrl?: string;
   alreadyPaid?: boolean;
+  /** Only with alreadyPaid: the buyers' WhatsApp group link, shown on /already-paid. */
+  whatsapp?: string;
   error?: string;
   field?: string;
 }
@@ -123,8 +126,11 @@ export function CheckoutForm() {
         credentials: "same-origin",
       });
       const data = (await res.json().catch(() => ({}))) as OrderResponse;
-      // This email or WhatsApp number already has a paid seat: no second payment.
+      // This email or WhatsApp number already has a paid seat: no second payment, show the group button again.
       if (data.alreadyPaid) {
+        try {
+          if (data.whatsapp) sessionStorage.setItem(WA_KEY, data.whatsapp);
+        } catch {}
         window.location.assign("/already-paid");
         return;
       }

@@ -394,7 +394,9 @@
       position: sticky;
       top: calc(var(--topbar-h, 60px) + 28px + var(--i, 0) * 56px);
       margin-bottom: 22px;
-      filter: drop-shadow(0 -8px 14px color-mix(in oklab, var(--color-plum) 10%, transparent));
+      /* box-shadow, not filter: drop-shadow. A filter over a card that holds a playing video (and sticks while
+         scrolling) is recomputed on every frame. */
+      box-shadow: 0 -8px 14px color-mix(in oklab, var(--color-plum) 10%, transparent);
     }
     .fj-deck > li:last-child {
       margin-bottom: 0;
@@ -571,9 +573,10 @@
   .fj-entry {
     position: relative;
   }
-  /* The page is clipped (torn edge), so its shadow lives on this wrapper. */
+  /* The page is clipped (torn edge), so its shadow lives on this wrapper. box-shadow, not filter: drop-shadow:
+     the page holds a playing video, and a filter over it is recomputed on every video frame. */
   .fj-page-wrap {
-    filter: drop-shadow(0 14px 16px color-mix(in oklab, var(--color-plum) 14%, transparent));
+    box-shadow: 0 14px 16px -6px color-mix(in oklab, var(--color-plum) 14%, transparent);
   }
   .fj-page {
     position: relative;

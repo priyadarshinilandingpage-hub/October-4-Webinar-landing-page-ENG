@@ -30,7 +30,8 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSPropert
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const VIEWPORT = { once: true, margin: "0px 0px -8% 0px" } as const;
+// Starts a little BEFORE the element scrolls in (bottom margin +12%), so fast scrolling never meets a blank area.
+const VIEWPORT = { once: true, margin: "0px 0px 12% 0px" } as const;
 
 function prefersReduced() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

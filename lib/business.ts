@@ -1,21 +1,9 @@
-// Business details shown on the policy pages (and required by Razorpay's website review).
-// Safe to import from client or server. Replace EVERY [PLACEHOLDER] with real details before go-live;
-// never invent them. `npm run check:placeholders` lists any that are left.
+// Business details. Safe to import from client or server.
 
 export const BUSINESS = {
-  legalName: "[BUSINESS LEGAL NAME]",
-  /** Brand shown to buyers. */
+  /** Brand shown to buyers: policy page footers and the Razorpay checkout (unless RAZORPAY_BRAND_NAME is set). */
   brand: "Priyadharsini · Saffron",
-  address: "[ADDRESS]",
-  supportEmail: "[SUPPORT EMAIL]",
-  supportPhone: "[SUPPORT PHONE]",
-  supportHours: "Monday to Saturday, 10 am to 6 pm IST",
-  grievanceOfficer: "[GRIEVANCE OFFICER]",
-  grievanceEmail: "[GRIEVANCE EMAIL]",
-  /** City for the courts clause in the Terms. */
-  jurisdictionCity: "[CITY]",
-  gstin: "[GSTIN, if registered]",
 } as const;
 
-/** Date shown as "Last updated" on the policy pages. Change it whenever the text changes. */
+/** Date shown as "Last updated" on a policy page that uses it. Change it whenever the text changes. */
 export const POLICIES_UPDATED = "26 September 2026";

@@ -51,7 +51,8 @@ export function Fx({
           io.disconnect();
         }
       },
-      { rootMargin: "0px 0px -14% 0px" },
+      // A little before it scrolls in, so fast scrolling never meets a section still in its pre-state.
+      { rootMargin: "0px 0px 12% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();

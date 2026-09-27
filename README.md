@@ -153,6 +153,8 @@ sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d your-domain.in -d www.your-domain.in --redirect
 ```
 
+Then turn on **HTTP/2**, which lets browsers download many files at once and makes the page noticeably faster on mobile data. In `/etc/nginx/sites-available/webinar`, change the `listen 443 ssl;` line that certbot added to `listen 443 ssl http2;` (on nginx 1.25.1 or newer, add a separate line `http2 on;` instead), then run `sudo nginx -t && sudo systemctl reload nginx`. Caddy uses HTTP/2 automatically.
+
 **Example: Caddy.** Caddy obtains the certificate automatically. The complete `Caddyfile`:
 
 ```
@@ -208,7 +210,7 @@ The test payments appear under Razorpay Dashboard → Test Mode → Orders. Test
 
 ### Go-live checklist
 
-- [ ] The Privacy Policy, Terms & Conditions and Refund & Cancellation pages have their text, and `npm run check:placeholders` reports nothing left to fill.
+- [ ] The Privacy Policy, Terms & Conditions and Refund & Cancellation pages have their text.
 - [ ] The price, date and start time in `lib/offer.ts` match the ads.
 - [ ] The site opens at `https://your-domain.in`, and `SITE_URL` matches it exactly.
 - [ ] Live keys are in `.env`, and the webhook is added in Live Mode.
@@ -270,7 +272,7 @@ Every start prints `[startup]` lines. They name settings only, never their value
 These parts of the site hold business content, not settings:
 
 - **Policy pages.** The Privacy Policy (`app/(legal)/privacy/page.tsx`), Terms & Conditions (`app/(legal)/terms/page.tsx`) and Refund & Cancellation (`app/(legal)/refund/page.tsx`) pages currently show their titles only. Razorpay reviews these pages before approving live payments. The privacy text should mention that the site uses Meta (Facebook) ads tracking if it is enabled, and that it remembers each buyer's email and WhatsApp number to prevent double payments.
-- **Business details.** `lib/business.ts` holds the legal name, address, support email and phone, grievance officer and GSTIN shown on the Contact page. They must match the Razorpay account holder. `npm run check:placeholders` lists anything still unfilled.
+- **Business details.** The site has no separate Contact page. Razorpay's website review usually expects the business name and contact details to be visible on the site, so include them in one of the policy pages. They must match the Razorpay account holder.
 - **Webinar details.** `lib/offer.ts` holds the title, price, date and start time. Page text is in `components/content.ts`.
 
 After editing any of these files, run `npm run build` and restart.
@@ -288,7 +290,7 @@ app/                    Pages: landing (/ and /dark), /thank-you, /already-paid,
 app/api/                Payment endpoints (thin wrappers around server/routes)
 components/             Page sections and UI; page text in components/content.ts
 lib/offer.ts            Webinar title, price, date and time (single source of truth)
-lib/business.ts         Business details for the Contact and policy pages
+lib/business.ts         Brand name shown on the checkout and policy pages
 server/                 Payment logic: Razorpay client, route handlers, settings, startup check
 public/media/           Images and videos
 scripts/                Build helpers: image sizes and safety checks
@@ -317,7 +319,7 @@ functions/              Optional Cloudflare Pages adapter, not used on a Node.js
 | `npm start` | Production server, with the startup check |
 | `npm test` | Automated tests for orders, payment confirmation, webhooks, the already-paid list and settings |
 | `npm run typecheck` | TypeScript check |
-| `npm run check:placeholders` | Lists business details still to fill (values in `[SQUARE BRACKETS]`) and open notes in `lib/offer.ts` |
+| `npm run check:placeholders` | Lists open notes still to confirm (for example the start time in `lib/offer.ts`) |
 
 To try payments on your own computer, put Test Mode keys in `.env` with `SITE_URL=http://localhost:3000`, then run `npm run build` and `npm start`. Everything works except the webhook, which Razorpay can't deliver to a local computer; the thank-you page confirms payments on its own.
 

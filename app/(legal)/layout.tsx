@@ -5,7 +5,6 @@ const LINKS = [
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms & Conditions" },
   { href: "/refund", label: "Refund & Cancellation" },
-  { href: "/contact", label: "Contact Us" },
 ] as const;
 
 // Wrapper for the policy pages. Renders inside the root layout; sets its own light background.

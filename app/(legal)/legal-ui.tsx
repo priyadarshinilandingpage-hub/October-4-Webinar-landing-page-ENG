@@ -1,17 +1,7 @@
 import type { ReactNode } from "react";
-import { BUSINESS, POLICIES_UPDATED } from "@/lib/business";
+import { POLICIES_UPDATED } from "@/lib/business";
 
 // Small building blocks for the policy pages. Plain server components, light theme.
-
-/** Renders a business detail; unfilled [PLACEHOLDERS] are highlighted so nobody misses them. */
-export function Biz({ k }: { k: keyof typeof BUSINESS }) {
-  const v = BUSINESS[k];
-  return v.startsWith("[") ? <mark className="rounded bg-amber-100 px-1 text-[#1E1530]">{v}</mark> : <>{v}</>;
-}
-
-export function Todo({ children }: { children: ReactNode }) {
-  return <mark className="rounded bg-amber-100 px-1 text-[#1E1530]">{children}</mark>;
-}
 
 export function PolicyHeader({ title, intro, updated = true }: { title: string; intro?: ReactNode; updated?: boolean }) {
   return (

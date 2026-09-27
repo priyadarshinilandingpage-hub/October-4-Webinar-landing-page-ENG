@@ -70,9 +70,10 @@ export async function handleCreateOrder({ request, env: envRaw }: Ctx, now = Dat
   // Bots: a filled hidden field or an instant submit. Generic answer, no Razorpay call.
   if (lead.website !== "" || lead.elapsedMs < MIN_FILL_MS) return fail(400, "Please try again.");
 
-  // Already paid with this email or WhatsApp number: no second order. The browser learns only "already paid".
+  // Already paid with this email or WhatsApp number: no second order. The buyer gets the WhatsApp group button
+  // again (client's call, 27 Sep 2026), so a closed confirmation page is never a dead end.
   if (await findPaidOrder(env, { email: lead.email, phone: lead.phone })) {
-    return json({ alreadyPaid: true, error: "You have already paid for this webinar." }, 409);
+    return json({ alreadyPaid: true, error: "You have already paid for this webinar.", whatsapp: env.WEBINAR_WHATSAPP_URL }, 409);
   }
 
   const dedupeKey = await sha256Hex(JSON.stringify([lead.name, lead.email, lead.phone, lead.marketingConsent]));

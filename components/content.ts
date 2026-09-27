@@ -22,7 +22,7 @@
  *   ediitnSpeaking        /media/proof/ediitn-speaking.jpg            About
  *   day02 / day15 / day58 /media/journey/day-02.mp4, day-15.mp4, day-58.mp4   Journey timeline
  *   reviews[0..9]         /media/reviews/review-01.png … review-10.png Reviews wall
- *   aboutPortrait         /media/about/about-portrait.jpg             About
+ *   aboutPortrait         /media/hero/hero-portrait.jpg               About (same photo as the hero)
  *   intro                 /media/intro/intro-60s.mp4 (+ intro-60s.jpg) About (with sound + controls)
  *   AI_ART.*              /media/ai/<name>.jpg  (names TBD)            Optional decoration: hidden when missing
  *
@@ -102,7 +102,7 @@ export const MEDIA = {
   day15: vid("/media/journey/day-15.mp4", "Priyadharsini walking into the empty room that became her grow room", true, "/media/journey/day-15.jpg", true),
   day58: vid("/media/journey/day-58.mp4", "Priyadharsini in goggles welding the metal racks for her grow room", true, "/media/journey/day-58.jpg", true),
 
-  aboutPortrait: img("/media/about/about-portrait.jpg", "Portrait of Priyadharsini Subramaniam", true),
+  aboutPortrait: img("/media/hero/hero-portrait.jpg", "Portrait of Priyadharsini Subramaniam", true),
   // The general (authority) ad creative, with sound + controls.
   intro: vid("/media/creatives/general.mp4", "Priyadharsini on the saffron farm she is building and the 4 October webinar", true, "/media/creatives/general.jpg", true),
 } satisfies Record<string, MediaSlot>;
@@ -487,8 +487,6 @@ export const ABOUT = {
 export const FAQ = {
   kicker: "FAQ",
   title: "Questions? Answers.",
-  lead: "Still unsure about something?",
-  contactLabel: "Contact us",
   items: [
     { q: "What language is the webinar in?", a: `${EVENT.language}, with simple English words where needed. No jargon.` },
     { q: "When is it?", a: `${EVENT.dateLabel}, ${EVENT.timeLabel}. It's live, so please join on time.` },
@@ -511,7 +509,7 @@ export const FAQ = {
     },
     {
       q: "I paid but didn't get the details. What now?",
-      a: "The WhatsApp group button is on the page you see right after paying. Closed it too soon? Contact us and we'll sort it out.",
+      a: "The WhatsApp group button is on the page you see right after paying. Closed it too soon? Fill in the form again with the same email or WhatsApp number and the button shows again.",
     },
   ],
 };
@@ -549,7 +547,6 @@ export const FOOTER = {
     { href: "/privacy", label: "Privacy Policy" },
     { href: "/terms", label: "Terms & Conditions" },
     { href: "/refund", label: "Refund Policy" },
-    { href: "/contact", label: "Contact Us" },
   ],
   disclaimer:
     "This webinar is for education only. It is not financial or investment advice, and no income or returns are promised. Results depend on your own decisions and effort.",

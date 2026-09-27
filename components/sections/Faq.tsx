@@ -16,15 +16,6 @@ export function Faq() {
           id="faq-title"
           kicker={FAQ.kicker}
           title={FAQ.title}
-          lead={
-            <>
-              {FAQ.lead}{" "}
-              <a href="/contact" className="font-semibold text-violet-deep underline decoration-violet/40 underline-offset-4 hover:decoration-violet-deep">
-                {FAQ.contactLabel}
-              </a>
-              .
-            </>
-          }
         />
 
         <div className="fj-faq mt-5 md:mt-6">

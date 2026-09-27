@@ -3,7 +3,7 @@
 // - on the landing page, ?theme= or the visitor's saved choice (cookie "theme") picks light or dark;
 // - on the landing page, the address bar never shows "#join" or any other "#section": in-page links scroll
 //   without changing it, and an address that arrives with one (the thank-you page's "Try again") is cleaned
-//   before the first paint, then the page opens at that section. <html data-jump> tells AdAutoScroll.
+//   before the first paint, then the page opens at that section.
 // No personal data, no network requests.
 (function () {
   try {
@@ -33,7 +33,6 @@
     if (location.hash) {
       history.replaceState(history.state, "", location.pathname + location.search);
       if (/^[A-Za-z][\w-]*$/.test(id)) {
-        document.documentElement.setAttribute("data-jump", id);
         document.addEventListener("DOMContentLoaded", function () {
           var el = document.getElementById(id);
           if (el) show(el, "instant");

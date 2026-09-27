@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import imageLoader from "@/lib/image-loader";
 
 type Props = {
   src: string;
@@ -28,7 +29,7 @@ const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
  *   (muted if the browser blocks sound, with a "Tap for sound" button) and can only be closed after 5 s
  *   (the close button counts down 5-4-3-2-1). It stays open until the visitor closes it.
  * - Tapping the thumbnail opens it with sound and can be closed any time.
- * - Close (✕, Esc, backdrop), sound toggle, and the ₹99 CTA. Never opens during the auto-scroll, never
+ * - Close (✕, Esc, backdrop), sound toggle, and the ₹99 CTA. Never
  *   auto-opens for reduced-motion users. Transform/opacity animation only (smooth on budget phones).
  */
 export function VideoSpotlight({ src, poster, label, name, role, facts, ctaLabel, ctaHref, className = "" }: Props) {
@@ -161,7 +162,7 @@ export function VideoSpotlight({ src, poster, label, name, role, facts, ctaLabel
         window.clearTimeout(dwell);
         if (!e.isIntersecting || e.intersectionRatio < 0.6) return;
         dwell = window.setTimeout(() => {
-          if (document.documentElement.dataset.autoscroll || document.visibilityState !== "visible") return;
+          if (document.visibilityState !== "visible") return;
           io.disconnect(); // once per page load
           setOpen("auto");
         }, 450);
@@ -194,7 +195,17 @@ export function VideoSpotlight({ src, poster, label, name, role, facts, ctaLabel
         aria-label={`Play video: ${label}`}
         className={`vs-thumb group relative block w-full overflow-hidden ${className}`}
       >
-        {poster && <img src={poster} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+        {poster && (
+          <img
+            src={imageLoader({ src: poster, width: 640 })}
+            srcSet={`${imageLoader({ src: poster, width: 384 })} 384w, ${imageLoader({ src: poster, width: 640 })} 640w`}
+            sizes="210px"
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
         <span aria-hidden="true" className="vs-thumb-play">
           <svg viewBox="0 0 24 24" width="22" height="22">
             <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
@@ -213,7 +224,7 @@ export function VideoSpotlight({ src, poster, label, name, role, facts, ctaLabel
                 <video
                   ref={videoRef}
                   src={src}
-                  poster={poster}
+                  poster={poster ? imageLoader({ src: poster, width: 828 }) : undefined}
                   playsInline
                   preload="auto"
                   onClick={toggleSound}
