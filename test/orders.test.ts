@@ -81,6 +81,14 @@ describe("POST /api/orders", () => {
     expect(f).not.toHaveBeenCalled();
   });
 
+  it("the www. and bare forms of the site address both work", async () => {
+    const f = razorpayOk();
+    expect((await post(req(lead(), { origin: "https://www.webinar.example.in" }))).status).toBe(200);
+    expect((await post(req(lead(), { origin: "https://www.evil.example" }))).status).toBe(403);
+    expect((await post(req(lead(), { origin: "http://webinar.example.in" }))).status).toBe(403);
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it("wrong content type → 415, bad JSON → 400, oversized → 413", async () => {
     razorpayOk();
     expect((await post(req("name=x", { "content-type": "application/x-www-form-urlencoded" }))).status).toBe(415);
@@ -137,6 +145,18 @@ describe("POST /api/orders", () => {
     expect(statuses[10]).toBe(429);
   });
 
+  it("no real visitor address (the proxy didn't pass it): not limited, so buyers never block each other", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    razorpayOk();
+    const statuses: number[] = [];
+    for (const ip of ["127.0.0.1", "::1", "10.0.0.2", "192.168.1.9", "unknown"]) {
+      for (let i = 0; i < 3; i++) statuses.push((await post(req(lead(), { "cf-connecting-ip": ip }))).status);
+    }
+    for (let i = 0; i < 11; i++) statuses.push((await post(req(lead(), { "cf-connecting-ip": "127.0.0.1" }))).status);
+    expect(statuses.every((s) => s === 200)).toBe(true);
+    warn.mockRestore();
+  });
+
   it("after the session has started (+30 min) → 410", async () => {
     vi.setSystemTime(new Date("2026-10-04T12:00:00+05:30"));
     const f = razorpayOk();
@@ -146,6 +166,21 @@ describe("POST /api/orders", () => {
 
   it("missing or bad keys → 503, never a crash", async () => {
     expect((await post(req(lead()), testEnv({ RAZORPAY_KEY_ID: "not-a-key" }))).status).toBe(503);
+    expect((await post(req(lead()), testEnv({ RAZORPAY_KEY_SECRET: "" }))).status).toBe(503);
+    expect((await post(req(lead()), testEnv({ SITE_URL: "my-site.in" }))).status).toBe(503);
+  });
+
+  it("a malformed OPTIONAL setting is ignored with a warning; payments keep working", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    razorpayOk();
+    const env = testEnv({ WEBINAR_WHATSAPP_URL: "chat.whatsapp.com/abc", META_PIXEL_ID: "not-a-number" });
+    expect((await post(req(lead()), env)).status).toBe(200);
+    const parsed = readEnv(env);
+    expect([...parsed.ignored].sort()).toEqual(["META_PIXEL_ID", "WEBINAR_WHATSAPP_URL"]);
+    expect(parsed.WEBINAR_WHATSAPP_URL).toBeUndefined();
+    expect(parsed.RAZORPAY_KEY_ID).toBe(KEY_ID);
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 
   it("live keys require an https SITE_URL", async () => {

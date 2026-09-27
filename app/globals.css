@@ -295,6 +295,11 @@ section[id],
 main[id] {
   scroll-margin-top: calc(var(--topbar-h) + 12px);
 }
+/* public/boot.js focuses the section a link scrolls to (for keyboards and screen readers); no ring around it. */
+section[id][tabindex="-1"]:focus,
+main[id][tabindex="-1"]:focus {
+  outline: none;
+}
 
 .no-scrollbar {
   scrollbar-width: none;

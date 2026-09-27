@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { calendarUrl, OFFER, startTimeLabel } from "@/lib/offer";
+import { OFFER, startTimeLabel } from "@/lib/offer";
 
 export const metadata: Metadata = {
   title: "Already registered · Webinar",
@@ -25,10 +25,7 @@ export default function AlreadyPaid() {
           link is shared in the WhatsApp group from your confirmation page.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <a href={calendarUrl()} rel="noopener noreferrer" target="_blank" className={`${btn} bg-[#1E1530] text-white`}>
-            Add to Google Calendar
-          </a>
-          <a href="/contact" className={`${btn} border border-[#1E1530]/15 text-[#1E1530]`}>
+          <a href="/contact" className={`${btn} bg-[#1E1530] text-white`}>
             Lost the WhatsApp link? Contact us
           </a>
         </div>

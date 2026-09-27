@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-// Server configuration for the Cloudflare Pages Functions. Cloudflare passes the variables and secrets set in
-// the dashboard (Settings → Variables and Secrets) as `context.env`. Validated once per env object; a missing
-// or malformed key fails loudly (the key's NAME is logged, never its value).
+// Server configuration: `.env` on the Node server (process.env), or `context.env` in the optional Cloudflare
+// adapter. Validated once per env object; only key NAMES are ever logged, never values.
+// - A missing or malformed REQUIRED key (Razorpay keys, SITE_URL) turns payments off (503) until it's fixed.
+// - A malformed OPTIONAL key is ignored with a warning, so one typo (say, in the WhatsApp link) never stops sales.
 
 /** Treats "" (a blank line copied from .env.example) the same as "not set". */
 const optional = <T extends z.ZodType>(schema: T) =>
@@ -36,24 +37,32 @@ const schema = z.object({
   META_GRAPH_API_VERSION: optional(z.string().regex(/^v\d{2,3}\.\d$/)).transform((v) => v ?? "v24.0"),
 });
 
-export type ServerEnv = z.infer<typeof schema> & { mode: "test" | "live" };
+/** `ignored`: optional keys that were set but malformed, so they are treated as not set. */
+export type ServerEnv = z.infer<typeof schema> & { mode: "test" | "live"; ignored: string[] };
 export type RawEnv = Record<string, unknown>;
 
+const REQUIRED = new Set(["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "SITE_URL"]);
 const cache = new WeakMap<object, ServerEnv>();
+const badKeys = (err: z.ZodError) => [...new Set(err.issues.map((i) => String(i.path[0] ?? "")))];
 
 export function readEnv(raw: RawEnv): ServerEnv {
   const hit = cache.get(raw);
   if (hit) return hit;
-  const parsed = schema.safeParse(raw);
+  let parsed = schema.safeParse(raw);
+  let ignored: string[] = [];
   if (!parsed.success) {
-    const keys = [...new Set(parsed.error.issues.map((i) => i.path.join(".")))].join(", ");
-    throw new Error(`Invalid server configuration: ${keys}`);
+    const bad = badKeys(parsed.error);
+    if (bad.some((k) => REQUIRED.has(k))) throw new Error(`Invalid server configuration: ${bad.join(", ")}`);
+    ignored = bad;
+    parsed = schema.safeParse(Object.fromEntries(Object.entries(raw).filter(([k]) => !ignored.includes(k))));
+    if (!parsed.success) throw new Error(`Invalid server configuration: ${badKeys(parsed.error).join(", ")}`);
+    console.warn(`[config] ignoring malformed optional settings (fix them in .env): ${ignored.join(", ")}`);
   }
   const mode = parsed.data.RAZORPAY_KEY_ID.startsWith("rzp_live_") ? "live" : "test";
   if (mode === "live" && !parsed.data.SITE_URL.startsWith("https://")) {
     throw new Error("Invalid server configuration: SITE_URL must be https with live keys");
   }
-  const env = { ...parsed.data, mode } as ServerEnv;
+  const env = { ...parsed.data, mode, ignored } as ServerEnv;
   cache.set(raw, env);
   return env;
 }

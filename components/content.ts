@@ -509,11 +509,11 @@ export const FAQ = {
       q: "Is the payment safe?",
       a: "Yes. Payment happens on Razorpay's secure checkout (UPI, cards, netbanking). We never see your card or UPI details.",
     },
-    { q: "I paid but didn't get the details. What now?", a: "Check your spam folder first. Still nothing? Contact us and we'll sort it out." },
+    {
+      q: "I paid but didn't get the details. What now?",
+      a: "The WhatsApp group button is on the page you see right after paying. Closed it too soon? Contact us and we'll sort it out.",
+    },
   ],
-  refundQ: "Can I get a refund?",
-  refundA: "Please read our Refund Policy before you pay.",
-  refundLink: "Read the Refund Policy",
 };
 
 /* ───────────────────────── Final ticket ───────────────────────── */

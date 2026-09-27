@@ -13,11 +13,11 @@ export function Todo({ children }: { children: ReactNode }) {
   return <mark className="rounded bg-amber-100 px-1 text-[#1E1530]">{children}</mark>;
 }
 
-export function PolicyHeader({ title, intro }: { title: string; intro?: ReactNode }) {
+export function PolicyHeader({ title, intro, updated = true }: { title: string; intro?: ReactNode; updated?: boolean }) {
   return (
     <header>
       <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{title}</h1>
-      <p className="mt-3 text-sm text-[#5B5270]">Last updated: {POLICIES_UPDATED}</p>
+      {updated && <p className="mt-3 text-sm text-[#5B5270]">Last updated: {POLICIES_UPDATED}</p>}
       {intro && <div className="mt-6 text-[#3D3452] leading-relaxed">{intro}</div>}
     </header>
   );

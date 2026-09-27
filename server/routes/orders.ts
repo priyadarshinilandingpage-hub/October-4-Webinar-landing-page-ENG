@@ -22,6 +22,7 @@ const FB_COOKIE_RE = /^fb\.\d\.\d{10,16}\.[A-Za-z0-9_.-]{1,200}$/;
 
 const recent = new Map<string, { at: number; body: unknown }>();
 const printable = (v: string, max: number) => v.replace(/[^\x20-\x7E]/g, "").slice(0, max);
+const noWww = (origin: string) => origin.replace("://www.", "://");
 
 function cookie(req: Request, name: string): string | undefined {
   for (const part of (req.headers.get("cookie") ?? "").split(";")) {
@@ -40,9 +41,10 @@ export async function handleCreateOrder({ request, env: envRaw }: Ctx, now = Dat
     return fail(503, "Registration is temporarily unavailable. Please try again shortly.");
   }
 
-  // Same-origin only (CSRF): other sites can't start orders through this endpoint.
+  // Same-origin only (CSRF): other sites can't start orders through this endpoint. The www. and bare forms of
+  // SITE_URL are the same site (buyers type either).
   const origin = request.headers.get("origin");
-  if (!origin || (origin !== new URL(request.url).origin && origin !== env.SITE_URL)) return fail(403, "Forbidden");
+  if (!origin || (origin !== new URL(request.url).origin && noWww(origin) !== noWww(env.SITE_URL))) return fail(403, "Forbidden");
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) return fail(415, "Unsupported request");
   if (now > CLOSES_AT) return fail(410, "Registrations for this session have closed.");
   if (!(await allow(env, "order", clientIp(request), now))) return fail(429, "Too many attempts. Please wait a few minutes and try again.");

@@ -22,20 +22,3 @@ export function startTimeLabel(iso: string = OFFER.startsAtIso): string {
   const [h, m] = iso.slice(11, 16).split(":").map(Number) as [number, number];
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"} IST`;
 }
-
-/** Session length in minutes, for calendar invites. TODO(client): confirm the session length (the plan says about 2 hours). */
-export const SESSION_MINUTES = 120;
-
-/** Google Calendar "add event" link for the session. */
-export function calendarUrl(): string {
-  const start = new Date(OFFER.startsAtIso);
-  const end = new Date(start.getTime() + SESSION_MINUTES * 60_000);
-  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const p = new URLSearchParams({
-    action: "TEMPLATE",
-    text: OFFER.title,
-    dates: `${fmt(start)}/${fmt(end)}`,
-    details: `Live ${OFFER.language} webinar with ${OFFER.host}. Joining link: sent on email/WhatsApp.`,
-  });
-  return `https://calendar.google.com/calendar/render?${p.toString()}`;
-}

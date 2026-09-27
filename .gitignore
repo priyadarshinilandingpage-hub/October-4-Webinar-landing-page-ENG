@@ -21,3 +21,6 @@ assets-inbox/
 out/
 public/_img/
 .wrangler/
+
+# Already-paid list when Firestore is not set up (server/local-store.ts). Server data: never commit.
+data/

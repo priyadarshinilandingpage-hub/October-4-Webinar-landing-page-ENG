@@ -1,8 +1,8 @@
 import type { ServerEnv } from "./env";
 
-// Per-IP limits for the payment endpoints. With Upstash configured, counts are shared by every Cloudflare
-// location (fixed window, INCR + EXPIRE over the REST API). Without it, each running instance counts on its own,
-// which still stops a single script hammering one location. Fails open: a limiter problem never blocks buyers.
+// Per-IP limits for the payment endpoints. With Upstash configured, counts are shared by every server process
+// (fixed window, INCR + EXPIRE over the REST API). Without it, each process counts on its own, which still stops
+// a single script hammering the site. Fails open: a limiter problem never blocks buyers.
 
 export type Bucket = "order" | "verify";
 
@@ -12,6 +12,13 @@ const LIMITS: Record<Bucket, { limit: number; windowS: number }> = {
 };
 
 const memory = new Map<string, { count: number; resetAt: number }>();
+
+/**
+ * No real visitor address: the request came through a proxy (nginx) that didn't pass it on, so every buyer
+ * would share one address and hit the limit together. Such requests are not limited (a warning is logged once).
+ */
+const NO_VISITOR_IP = /^(unknown|::1|(::ffff:)?(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|f[cd][0-9a-f]{2}:|fe80:)/i;
+let warned = false;
 
 function memoryAllow(key: string, limit: number, windowS: number, now: number): boolean {
   const cur = memory.get(key);
@@ -42,6 +49,13 @@ async function upstashAllow(env: ServerEnv, key: string, limit: number, windowS:
 
 /** True if this IP may proceed. */
 export async function allow(env: ServerEnv, bucket: Bucket, ip: string, now = Date.now()): Promise<boolean> {
+  if (NO_VISITOR_IP.test(ip)) {
+    if (!warned) {
+      warned = true;
+      console.warn("[ratelimit] visitor address missing, limits are off. In nginx add: proxy_set_header X-Real-IP $remote_addr;");
+    }
+    return true;
+  }
   const { limit, windowS } = LIMITS[bucket];
   const key = `rl:${bucket}:${ip}`;
   try {

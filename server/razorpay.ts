@@ -91,6 +91,17 @@ async function getPayments(env: ServerEnv, orderId: string): Promise<RazorpayPay
   return Array.isArray(list.items) ? list.items : [];
 }
 
+/** For the startup check: false if Razorpay rejects the key id + secret. Throws if Razorpay can't be reached. */
+export async function keysWork(env: ServerEnv): Promise<boolean> {
+  try {
+    await call(env, "/orders?count=1", { method: "GET" });
+    return true;
+  } catch (err) {
+    if (err instanceof RazorpayError && (err.status === 401 || err.status === 403)) return false;
+    throw err;
+  }
+}
+
 /** True only if Razorpay says PAID for exactly our price in INR. */
 export function isPaidAtOfferPrice(order: RazorpayOrder): boolean {
   return order.status === "paid" && order.amount === AMOUNT_PAISE && order.amount_paid === AMOUNT_PAISE && order.currency === OFFER.currency;

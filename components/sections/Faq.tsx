@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { FAQ } from "../content";
 import { SectionHead } from "../ui";
 
@@ -8,20 +7,7 @@ import { SectionHead } from "../ui";
  * the heading.
  */
 export function Faq() {
-  const items: { q: string; a: ReactNode }[] = [
-    ...FAQ.items,
-    {
-      q: FAQ.refundQ,
-      a: (
-        <>
-          {FAQ.refundA}{" "}
-          <a href="/refund" className="font-semibold text-violet-deep underline underline-offset-4">
-            {FAQ.refundLink}
-          </a>
-        </>
-      ),
-    },
-  ];
+  const items = FAQ.items;
 
   return (
     <section id="faq" aria-labelledby="faq-title" className="fj-sec feather tint-cream py-12 md:py-16">

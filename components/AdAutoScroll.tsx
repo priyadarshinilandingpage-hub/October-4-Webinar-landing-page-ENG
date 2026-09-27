@@ -19,11 +19,12 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
  * hidden, the curtain fades out, and a short eased glide (~520 px) lands on the form. Cheap everywhere.
  * - Cancelled the moment the visitor scrolls, swipes, clicks, or presses a key: we never fight the user.
  * - Runs once per browser session, so coming back from the payment page doesn't jump again.
- * - Skipped when the URL already targets a section (#join, #faq…), which the browser handles itself.
+ * - Skipped when the address targeted a section (/#join, /#faq…): public/boot.js removes it from the address,
+ *   opens the page there and marks <html data-jump>.
  */
 export function AdAutoScroll({ targetId = "join" }: { targetId?: string }) {
   useEffect(() => {
-    if (window.location.hash) return;
+    if (document.documentElement.dataset.jump || window.location.hash) return;
     try {
       if (sessionStorage.getItem(SEEN_KEY)) return;
     } catch {}

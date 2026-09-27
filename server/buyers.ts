@@ -11,7 +11,8 @@ import { createDoc, firestoreEnabled, getDoc, getDocs } from "./firestore";
 //   create-only writes: if two payments race, the first one stays on record.
 // - Ids include the Razorpay mode and the session date: test payments never block real buyers, and a new
 //   webinar date starts with a clean list.
-// - Without Firestore (tests, local runs) each server instance keeps the list in memory.
+// - Without Firestore the list is kept in memory, and on the Node server also in a small file
+//   (server/local-store.ts, data/paid-contacts.json), so it survives restarts and updates.
 
 export const PAID_CONTACTS = "paid_contacts";
 const MEMORY_MAX = 100_000;
@@ -21,7 +22,29 @@ export interface Contact {
   phone?: string | null;
 }
 
+/** A durable copy of the in-memory list (hashed ids → first paid order id). */
+export interface LocalStore {
+  load(): Iterable<[string, string]>;
+  save(entries: Map<string, string>): void;
+}
+
 const memory = new Map<string, string>();
+let store: LocalStore | undefined;
+let loaded = false;
+
+/** Called once by the Node server (server/next-adapter.ts). Without it the list lives in memory only. */
+export function setLocalStore(s: LocalStore) {
+  store = s;
+  loaded = false;
+}
+
+function mem(): Map<string, string> {
+  if (!loaded && store) {
+    loaded = true;
+    for (const [k, v] of store.load()) if (!memory.has(k)) memory.set(k, v);
+  }
+  return memory;
+}
 
 async function idsFor(env: ServerEnv, contact: Contact): Promise<string[]> {
   const prefix = `${env.mode}_${OFFER.startsAtIso.slice(0, 10).replace(/-/g, "")}`;
@@ -36,9 +59,13 @@ async function idsFor(env: ServerEnv, contact: Contact): Promise<string[]> {
 
 async function claim(env: ServerEnv, id: string, orderId: string): Promise<string> {
   if (!firestoreEnabled(env)) {
-    const cur = memory.get(id);
+    const list = mem();
+    const cur = list.get(id);
     if (cur) return cur;
-    if (memory.size < MEMORY_MAX) memory.set(id, orderId);
+    if (list.size < MEMORY_MAX) {
+      list.set(id, orderId);
+      store?.save(list);
+    }
     return orderId;
   }
   const kind = id.includes("_email_") ? "email" : "phone";
@@ -53,7 +80,8 @@ export async function findPaidOrder(env: ServerEnv, contact: Contact): Promise<s
   if (ids.length === 0) return null;
   try {
     if (!firestoreEnabled(env)) {
-      for (const id of ids) if (memory.get(id)) return memory.get(id)!;
+      const list = mem();
+      for (const id of ids) if (list.get(id)) return list.get(id)!;
       return null;
     }
     const docs = await getDocs(env, PAID_CONTACTS, ids);
@@ -79,7 +107,9 @@ export async function rememberBuyer(env: ServerEnv, orderId: string, contact: Co
   return duplicateOf ? { duplicateOf } : {};
 }
 
-/** Test hook. */
-export function resetBuyersForTests() {
+/** Test hook. `keepStore` simulates a server restart: memory is cleared, the store is read again. */
+export function resetBuyersForTests(keepStore = false) {
   memory.clear();
+  loaded = false;
+  if (!keepStore) store = undefined;
 }

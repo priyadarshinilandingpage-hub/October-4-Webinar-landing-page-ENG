@@ -1169,6 +1169,10 @@
     .fj-faq {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+    /* An odd last card spans both columns instead of leaving a hole. */
+    .fj-faq > .fj-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
   }
   .fj-card {
     position: relative;

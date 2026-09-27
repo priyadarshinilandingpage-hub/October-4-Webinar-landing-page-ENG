@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Chat } from "@/components/icons";
 import { PixelEvent } from "@/components/MetaPixel";
-import { calendarUrl, OFFER, startTimeLabel } from "@/lib/offer";
+import { OFFER, startTimeLabel } from "@/lib/offer";
 
 type Result =
   | { status: "loading" | "pending" | "unpaid" | "failed" | "not_found" }
@@ -109,11 +109,6 @@ export function ThankYou() {
                 with this page&apos;s link.
               </p>
             )}
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a href={calendarUrl()} rel="noopener noreferrer" target="_blank" className={`${btn} border border-[#1E1530]/15 text-[#1E1530]`}>
-                Add to Google Calendar
-              </a>
-            </div>
             <p className="mt-10 text-sm text-[#5B5270]">
               Keep this page&apos;s link private. Questions? See the <a className="underline" href="/contact">contact page</a>.
             </p>

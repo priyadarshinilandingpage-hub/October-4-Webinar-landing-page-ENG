@@ -12,14 +12,15 @@ const lanHosts = Object.values(networkInterfaces())
 // Settings come from a `.env` file next to package.json (see .env.example); Next loads it automatically.
 
 // Security headers for every page. A pre-built page can't carry a fresh nonce per visit, so inline scripts are
-// allowed by 'unsafe-inline'; everything else is pinned: scripts only from this site and Razorpay's checkout,
-// frames only from Razorpay, no plugins, no framing of this site. Meta's hosts only when a Pixel ID is set.
+// allowed by 'unsafe-inline'; everything else is pinned: scripts only from this site and Razorpay (checkout.js
+// also loads its risk check from cdn.razorpay.com), frames only from Razorpay, no plugins, no framing of this
+// site. Meta's hosts only when a Pixel ID is set.
 const pixel = Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
 const https = (process.env.SITE_URL ?? "").startsWith("https://");
 const RZP = "https://*.razorpay.com";
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com${pixel ? " https://connect.facebook.net" : ""}`,
+  `script-src 'self' 'unsafe-inline' ${RZP}${pixel ? " https://connect.facebook.net" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${RZP}${pixel ? " https://www.facebook.com" : ""}`,
   "font-src 'self' data:",
