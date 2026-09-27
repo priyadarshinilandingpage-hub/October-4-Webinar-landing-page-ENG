@@ -41,7 +41,7 @@ npm start                 # http://localhost:3000   (another port: npm start -- 
 | `npm run dev` | Development server on port 3000 |
 | `npm run build` | `prebuild` (blocks secret-looking `NEXT_PUBLIC_*` vars, makes image copies), `next build`, `postbuild` (scans browser files for secrets) |
 | `npm start` | Production server |
-| `npm test` | Order creation, callback, verification, webhook signatures, Firestore + Resend follow-up, Meta CAPI, validation |
+| `npm test` | Order creation, callback, verification, webhook signatures, Firestore follow-up, Meta CAPI, validation |
 | `npm run check:placeholders` | Lists every `[PLACEHOLDER]` still on the policy pages. Must print nothing before go-live |
 
 ## Settings (`.env`)
@@ -55,9 +55,8 @@ npm start                 # http://localhost:3000   (another port: npm start -- 
 | `RAZORPAY_WEBHOOK_SECRET` | yes | **yes** | The secret you type when adding the webhook in Razorpay |
 | `RAZORPAY_BRAND_NAME` | no | no | Name at the top of the checkout (must match the Razorpay account's business name or the site's domain) |
 | `SITE_URL` | yes | no | `https://your-domain.in`, exactly as in the browser. Used at build time too |
-| `WEBINAR_WHATSAPP_URL` | recommended | keep private | Buyers-only WhatsApp group: verified thank-you page and confirmation email only |
+| `WEBINAR_WHATSAPP_URL` | **yes** | keep private | Buyers-only WhatsApp group invite link. Shown only on the verified thank-you page |
 | `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | recommended | key **yes** | Firestore `registrations` table + already-paid list (service-account key; the free Spark plan is enough) |
-| `RESEND_API_KEY` / `EMAIL_FROM` / `EMAIL_REPLY_TO` | recommended | key **yes** | Seat-confirmation email |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | no | token **yes** | Rate limits shared by several server processes |
 | `META_PIXEL_ID` / `META_CAPI_TOKEN` | for ads | token **yes** | Server-side Meta "Purchase" for every verified buyer |
 | `NEXT_PUBLIC_META_PIXEL_ID` | for ads | no (public) | Build value: the browser Pixel, and opens the CSP for Meta |
@@ -65,10 +64,9 @@ npm start                 # http://localhost:3000   (another port: npm start -- 
 
 ## After a payment
 
-Once Razorpay says an order is PAID for exactly 9900 paise INR, `server/fulfil.ts` runs three steps (from the callback, the thank-you check and the webhook; each is safe to repeat, and a failure in one doesn't stop the others):
+Once Razorpay says an order is PAID for exactly 9900 paise INR, the thank-you page shows the **WhatsApp group button** (from `WEBINAR_WHATSAPP_URL`; no email is sent), and `server/fulfil.ts` runs two steps (from the callback, the thank-you check and the webhook; each is safe to repeat, and a failure in one doesn't stop the other):
 1. **Already-paid list**: email and WhatsApp number saved as hashes in Firestore `paid_contacts`. A later form submit with the same email **or** number opens `/already-paid` instead of a second payment. Names are not matched.
-2. **Registrations table**: one Firestore document per order in `registrations` (`order_id, name, email, phone, amount, currency, status, mode, webinar_date, confirmed_at, marketing_consent, utm_source, utm_campaign, utm_content, duplicate_of, email_status, email_sent_at`). As a table: Firebase console → Firestore → **Query builder**. Every payment is also in the Razorpay dashboard (the buyer's details are in each order's notes).
-3. **Confirmation email** through Resend with the WhatsApp button and a calendar link, once per order.
+2. **Registrations table**: one Firestore document per order in `registrations` (`order_id, name, email, phone, amount, currency, status, mode, webinar_date, confirmed_at, marketing_consent, utm_source, utm_campaign, utm_content, duplicate_of`). As a table: Firebase console → Firestore → **Query builder**. Every payment is also in the Razorpay dashboard (the buyer's details are in each order's notes).
 
 `duplicate_of` marks a second paid order by the same person: refund it from the Razorpay dashboard. Publish `firestore.rules` (denies all browser access).
 
@@ -97,7 +95,7 @@ Test Mode payments: UPI `success@razorpay` (success) or `failure@razorpay` (fail
 - [ ] Price, date and start time in `lib/offer.ts` match the ads.
 - [ ] HTTPS works and `SITE_URL` equals the address exactly (then `npm run build` again).
 - [ ] Live keys in `.env`; webhook added in Live Mode with the same secret.
-- [ ] One real payment: "confirmed" on the thank-you page, a row in `registrations`, the email arrives, paying again with the same email opens `/already-paid`; then refund it.
+- [ ] One real payment: "confirmed" and the WhatsApp button on the thank-you page, a row in `registrations`, paying again with the same email opens `/already-paid`; then refund it.
 - [ ] `curl -X POST https://your-domain.in/api/webhooks/razorpay` answers 401.
 - [ ] Headers checked (securityheaders.com): CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy.
 - [ ] Meta Events Manager shows PageView, InitiateCheckout and Purchase (browser + server, deduplicated).

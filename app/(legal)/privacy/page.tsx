@@ -97,8 +97,7 @@ export default function PrivacyPage() {
             address to limit repeated attempts.
           </li>
           <li>
-            <strong>Communication tools:</strong> Resend, which sends our confirmation emails, and our WhatsApp tools,
-            used to send you the joining details and reminders.
+            <strong>Communication tools:</strong> WhatsApp, used to share the joining details and reminders.
           </li>
           <li>
             <strong>Webinar platform:</strong> the online video platform used for the session, when you join it.

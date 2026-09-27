@@ -147,7 +147,7 @@ export const EVENT = {
   title: OFFER.title,
   // TODO(client): confirm platform. Keep it generic until then.
   platform: "Online, live",
-  platformNote: "Joining link sent to your email & WhatsApp",
+  platformNote: "Joining link shared in the buyers' WhatsApp group",
 };
 
 /* ───────────────────────── Brand ───────────────────────── */
@@ -382,7 +382,7 @@ export const JOIN = {
   stepsTitle: "What happens next",
   steps: [
     `Fill in your details and pay ${EVENT.price} on Razorpay's secure page.`,
-    "Get the joining details on your email & WhatsApp.",
+    "Tap the WhatsApp button on the confirmation page to join the group.",
     `Join live on ${EVENT.shortDate} at ${EVENT.timeLabel}.`,
   ],
   backLink: "New here? See who's teaching",
@@ -493,7 +493,7 @@ export const FAQ = {
     { q: "What language is the webinar in?", a: `${EVENT.language}, with simple English words where needed. No jargon.` },
     { q: "When is it?", a: `${EVENT.dateLabel}, ${EVENT.timeLabel}. It's live, so please join on time.` },
     // TODO(client): name the platform (Zoom / Google Meet / YouTube Live).
-    { q: "Where do I join?", a: "It's online. After you pay, the joining link is sent to your email and WhatsApp." },
+    { q: "Where do I join?", a: "It's online. After you pay, you get a button to join the WhatsApp group, and the joining link is shared there." },
     {
       q: "Is this a saffron-farming course?",
       a: "No. It's about starting and growing a business with smart money decisions: planning, capital, market, loans & subsidies. Her saffron farm is the real-life example.",

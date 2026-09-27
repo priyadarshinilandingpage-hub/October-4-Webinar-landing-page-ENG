@@ -18,7 +18,7 @@ const schema = z.object({
   RAZORPAY_WEBHOOK_SECRET: optional(z.string().trim().min(8)),
   /** Name shown on the Razorpay checkout. */
   RAZORPAY_BRAND_NAME: optional(z.string().trim().min(2).max(40)),
-  /** Public origin of this site, e.g. https://example.in. Redirects and email links are built from it. */
+  /** Public origin of this site, e.g. https://example.in. Payment redirects are built from it. */
   SITE_URL: z.url().transform((u) => new URL(u).origin),
   /** Buyers-only WhatsApp group. Revealed only after the server verifies the payment. */
   WEBINAR_WHATSAPP_URL: optional(httpsUrl),
@@ -26,10 +26,6 @@ const schema = z.object({
   FIREBASE_PROJECT_ID: optional(z.string().regex(/^[a-z][a-z0-9-]{4,29}$/)),
   FIREBASE_CLIENT_EMAIL: optional(z.email()),
   FIREBASE_PRIVATE_KEY: optional(z.string().min(100)).transform((v) => v?.replace(/\\n/g, "\n")),
-  /** Resend: the seat-confirmation email. */
-  RESEND_API_KEY: optional(z.string().regex(/^re_[A-Za-z0-9_]{10,}$/)),
-  EMAIL_FROM: optional(z.string().min(5).max(200)),
-  EMAIL_REPLY_TO: optional(z.email()),
   /** Optional shared rate limiting (free Upstash Redis). */
   UPSTASH_REDIS_REST_URL: optional(httpsUrl),
   UPSTASH_REDIS_REST_TOKEN: optional(z.string().min(10)),

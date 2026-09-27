@@ -1,6 +1,6 @@
 # HANDOFF: Priyadharsini · Saffron & Business webinar landing page
 
-Last updated: 27 Sep 2026 (second chat: Razorpay on her own account, self-hosted Node server, new hero photo; earlier: already-paid block, Firebase, Resend, Meta Pixel). Read this whole file before doing anything. It is the memory of the previous chats.
+Last updated: 27 Sep 2026 (second chat: Razorpay on her own account, self-hosted Node server, new hero photo; no confirmation email (27 Sep: the user wants only the WhatsApp link after payment); earlier: already-paid block, Firebase, Meta Pixel). Read this whole file before doing anything. It is the memory of the previous chats.
 
 ---
 
@@ -55,7 +55,7 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - **Styles:** `app/globals.css` (tokens, dark theme, appended blocks incl. the `.v-a/.v-b` ad switch), `app/sections.css`, `app/bold.css`, `app/overlays.css`.
 - **Images:** `scripts/make-images.mjs` (prebuild) writes `public/_img/<w>/<path>.webp` at 128/256/384/640/828/1080/1600 (gitignored, rebuilt on deploy); `lib/image-loader.ts` is the next/image loader. `components/Media.tsx`, `components/LazyVideo.tsx` unchanged.
 - **Payment flow:** `components/CheckoutForm.tsx` → `POST /api/orders` (`server/routes/orders.ts`: validation, already-paid check, fixed-price Razorpay order with the buyer in `notes`) → Razorpay checkout.js in **redirect mode** (`callback_url`) → `/api/razorpay/callback` (signature check, follow-up in `waitUntil`) → `/thank-you` (`app/thank-you/ThankYou.tsx` polls `GET /api/verify`; WhatsApp link only when PAID) + `POST /api/webhooks/razorpay` (signed; re-reads the order).
-- **After a payment:** `server/fulfil.ts`: `server/buyers.ts` (already-paid list, Firestore `paid_contacts`, hashed ids; email OR phone, never name alone), Firestore `registrations` row (`server/firestore.ts`, REST + service-account JWT via Web Crypto), Resend email (`server/email.ts`). Steps independent; failures → webhook 503 → Razorpay retries. `firestore.rules` denies browser access.
+- **After a payment:** the verified thank-you page shows the WhatsApp group button (`WEBINAR_WHATSAPP_URL`). **No email is sent** (user's call, 27 Sep 2026; Resend code removed). `server/fulfil.ts`: `server/buyers.ts` (already-paid list, Firestore `paid_contacts`, hashed ids; email OR phone, never name alone) + the Firestore `registrations` row (`server/firestore.ts`, REST + service-account JWT via Web Crypto). Steps independent; failures → webhook 503 → Razorpay retries. `firestore.rules` denies browser access.
 - **Meta:** `components/MetaPixel.tsx` (PageView, InitiateCheckout, Purchase with eventID = Razorpay order id) and `server/meta-capi.ts` (Purchase for every buyer). The user chose **"track everyone, no asking"** (26 Sep 2026); the privacy page says so.
 - **Security (don't weaken):** price fixed on the server; "paid" only from Razorpay's API (status paid, amount 9900, INR); checkout and webhook HMACs with constant-time compares; redirects only from `SITE_URL`; same-origin check on `/api/orders`; rate limits (`server/ratelimit.ts`, memory or Upstash REST); CSP etc. in `next.config.ts` headers (`'unsafe-inline'` scripts because pre-built pages can't use a per-request nonce; everything else pinned: Razorpay hosts, no framing, no plugins; `upgrade-insecure-requests` only when `SITE_URL` is https at build); `server/http.ts` `clientIp` reads cf-connecting-ip / x-real-ip / x-forwarded-for; `scripts/check-client-bundle.mjs` scans `.next/static` for secrets. Tests in `test/` (69 passing, 26 Sep 2026).
 
@@ -94,16 +94,16 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - **Offline review copy:** a single-file HTML (`C:\Users\shyam\Downloads\Priyadharsini-Webinar-Preview.html`, 18 MB) was made from the OLD Cashfree build for the user's reviewers. Rebuild it only if asked.
 
 ## 6. OPEN ITEMS (continue from the first unchecked one)
-- [x] Density pass, leftovers removal, hero bouquet, already-paid block, Firebase rows, Resend email, WhatsApp step, Meta Pixel + CAPI, Razorpay integration: done 26 Sep 2026 (see git history).
+- [x] Density pass, leftovers removal, hero bouquet, already-paid block, Firebase rows, WhatsApp step, Meta Pixel + CAPI, Razorpay integration: done 26 Sep 2026 (see git history).
 - [x] **Self-hosted Node version (27 Sep 2026):** pre-built pages + `app/api/*` route files for verify, callback, webhook and health; headers and `/bold` redirect in `next.config.ts`; Cloudflare-only files removed (`functions/` kept, unused). Verified with `npm start`: pages, new hero photo (phone and desktop), CSP/X-Frame-Options headers, `/bold` redirect, `/api/health`.
 - [x] **Hero photo replaced** with the real photo the user sent (27 Sep 2026).
 - [x] **Razorpay ownership resolved:** Priyadharsini has her own Razorpay account; her husband adds the keys.
 - [ ] **`app/api/orders/route.ts` is MISSING (27 Sep 2026):** the app's safety checker blocked me from creating it ("real-world transactions"). It's the short route file that calls the existing, tested `server/routes/orders.ts` (same pattern as the other `app/api/*/route.ts` files, through `server/next-adapter.ts`). Without it the ₹99 form can't start a payment on the self-hosted server. The user was told and has to approve it (or add it) before this is done.
 - [ ] **Server deploy** (§8), then one Razorpay Test Mode payment end to end, then live keys.
-- [ ] **WhatsApp group:** the user is creating it and will send the invite link → `WEBINAR_WHATSAPP_URL` in `.env` (not in git).
+- [x] **WhatsApp group link received (27 Sep 2026)** in chat: it goes ONLY in the server's `.env` as `WEBINAR_WHATSAPP_URL` (never in git).
 - [ ] **Verify in a real, visible browser** after deploy: the video spotlight (FLIP open, 5 s lock, sound, Esc, re-opens on refresh, never during auto-scroll), the review lightbox (open, next/prev, swipe, close, focus return), journey pages (no flying animation), a throttled-mobile performance run (auto-scroll glide smooth).
 - [ ] **Client inputs still missing** (`npm run check:placeholders`): business legal name, address, support email and phone, grievance officer, city, GSTIN or "Not registered" (`lib/business.ts`, must match her Razorpay account); confirm 11:00 AM and the session length (`lib/offer.ts`). The user said the privacy policy is their concern.
-- [ ] **Keys to create:** Razorpay (test, then live; webhook with secret; automatic capture), Firebase project (Spark) with Firestore `asia-south1` + rules + service-account key, Resend (verified domain), Meta Pixel ID + CAPI token (+ domain verification), the domain + HTTPS on their server.
+- [ ] **Keys to create:** Razorpay (test, then live; webhook with secret; automatic capture), Firebase project (Spark) with Firestore `asia-south1` + rules + service-account key, Meta Pixel ID + CAPI token (+ domain verification), the domain + HTTPS on their server.
 - [ ] **Not built:** WhatsApp *messages* to buyers (only the group link). Refunds for a `duplicate_of` order are manual in the Razorpay dashboard.
 ## 7. Known facts and decisions (don't re-ask)
 - **Price ₹99** (the ads say ₹99). Language Tamil. Only the **general authority creative** is used on the page.
@@ -113,10 +113,10 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 
 ## 8. Deploy guide (short; full steps in README.md "Run it on a server")
 1. **Server:** Node.js 20.9+ (22 LTS) and git. `git clone` the repo (private: add her husband's GitHub account as a collaborator, or use a deploy key).
-2. **Settings:** `cp .env.example .env` and fill in `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SITE_URL`, `WEBINAR_WHATSAPP_URL`, optional `RAZORPAY_BRAND_NAME`, `FIREBASE_*`, `RESEND_*`/`EMAIL_*`, Meta, Upstash.
+2. **Settings:** `cp .env.example .env` and fill in `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SITE_URL`, `WEBINAR_WHATSAPP_URL`, optional `RAZORPAY_BRAND_NAME`, `FIREBASE_*`, Meta, Upstash.
 3. **Build and run:** `npm ci && npm run build && npm start` (port 3000; `npm start -- -p 8080` for another). Keep it running with pm2 (`pm2 start npm --name webinar -- start`, `pm2 save`, `pm2 startup`).
 4. **HTTPS:** nginx or Caddy in front with Let's Encrypt, proxy to `127.0.0.1:3000`, pass `X-Real-IP` and `X-Forwarded-For`.
 5. **Razorpay:** webhook `https://<domain>/api/webhooks/razorpay` (order.paid + payment.captured, secret = `RAZORPAY_WEBHOOK_SECRET`); payment capture Automatic.
 6. **Firestore:** Native mode, `asia-south1`, publish `firestore.rules`, service-account key into the three `FIREBASE_*` settings.
-7. **After deploying, check:** `curl -I https://<domain>/` (headers), `/api/health`, a Test Mode payment (row in `registrations`, email, `/already-paid` on a repeat), `/thank-you` "confirmed" only for a PAID order, and the share preview (Facebook Sharing Debugger).
+7. **After deploying, check:** `curl -I https://<domain>/` (headers), `/api/health`, a Test Mode payment (WhatsApp button on the thank-you page, row in `registrations`, `/already-paid` on a repeat), `/thank-you` "confirmed" only for a PAID order, and the share preview (Facebook Sharing Debugger).
 8. **Updates:** `git pull && npm ci && npm run build && pm2 restart webinar`.

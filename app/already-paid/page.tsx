@@ -22,14 +22,14 @@ export default function AlreadyPaid() {
             {OFFER.dateLabel}, {startTimeLabel()}
           </strong>
           . You don&apos;t need to pay again. The joining
-          link and reminders come to the email and WhatsApp number you paid with.
+          link is shared in the WhatsApp group from your confirmation page.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
           <a href={calendarUrl()} rel="noopener noreferrer" target="_blank" className={`${btn} bg-[#1E1530] text-white`}>
             Add to Google Calendar
           </a>
           <a href="/contact" className={`${btn} border border-[#1E1530]/15 text-[#1E1530]`}>
-            Didn&apos;t get the link? Contact us
+            Lost the WhatsApp link? Contact us
           </a>
         </div>
         <p className="mt-10 text-sm text-[#5B5270]">

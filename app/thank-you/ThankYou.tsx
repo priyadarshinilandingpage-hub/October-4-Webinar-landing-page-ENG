@@ -7,7 +7,7 @@ import { calendarUrl, OFFER, startTimeLabel } from "@/lib/offer";
 
 type Result =
   | { status: "loading" | "pending" | "unpaid" | "failed" | "not_found" }
-  | { status: "paid"; firstName?: string; whatsapp?: string; emailOn?: boolean; duplicate?: boolean };
+  | { status: "paid"; firstName?: string; whatsapp?: string; duplicate?: boolean };
 
 const btn = "inline-flex items-center justify-center rounded-2xl px-6 py-4 font-semibold transition-opacity hover:opacity-90";
 const ORDER_ID_RE = /^order_[A-Za-z0-9]{14}$/;
@@ -73,7 +73,7 @@ export function ThankYou() {
                 {OFFER.dateLabel}, {startTimeLabel()}
               </strong>
               , in {OFFER.language}.
-              {!result.whatsapp && " The joining link and reminders will come to your email and WhatsApp."}
+              {!result.whatsapp && " The joining link will be shared with you on WhatsApp."}
             </p>
             {result.whatsapp && (
               <section aria-labelledby="wa-step" className="mt-8 rounded-3xl border-2 border-[#128C4A]/30 bg-[#128C4A]/[0.06] p-5 sm:p-6">
@@ -97,7 +97,7 @@ export function ThankYou() {
                   <Chat className="size-5" />
                   Join the WhatsApp group
                 </a>
-                {result.emailOn && <p className="mt-3 text-sm text-[#5B5270]">A copy of this link is also on its way to your email.</p>}
+                <p className="mt-3 text-sm text-[#5B5270]">Join now or take a screenshot: this button is only shown on this page.</p>
               </section>
             )}
             {result.duplicate && (
@@ -124,8 +124,9 @@ export function ThankYou() {
           <>
             <h1 className="font-serif text-3xl leading-tight sm:text-4xl">Confirming your payment…</h1>
             <p className="mt-5 text-lg text-[#5B5270]">
-              Your bank is still confirming this payment. This page checks again every few seconds. If money was
-              debited, your seat is safe and we&apos;ll confirm on email and WhatsApp.
+              Your bank is still confirming this payment. Keep this page open: it checks again every few seconds
+              and shows the WhatsApp group button as soon as the payment is confirmed. If money was debited, your
+              seat is safe.
             </p>
             <a href="" className={`${btn} mt-10 bg-[#1E1530] text-white`}>
               Check again

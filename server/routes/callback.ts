@@ -7,7 +7,7 @@ import { isPaidAtOfferPrice, getOrder, ORDER_ID_RE, verifyPaymentSignature } fro
 
 // POST (or GET) /api/razorpay/callback: where Razorpay's checkout sends the buyer after paying (redirect mode,
 // reliable in Instagram/Facebook in-app browsers). A valid signature starts the follow-up straight away (so the
-// email goes out even if the buyer closes the tab); then the buyer lands on the thank-you page, which checks
+// buyer is saved even if they close the tab); then the buyer lands on the thank-you page, which checks
 // the order with Razorpay again. Redirects are always built from SITE_URL, never from the request.
 
 const MAX_BODY_BYTES = 8_192;

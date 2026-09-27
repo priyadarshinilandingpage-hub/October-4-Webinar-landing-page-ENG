@@ -1,4 +1,3 @@
-import { emailEnabled } from "../email";
 import { readEnv, type ServerEnv } from "../env";
 import { fulfilPaidOrder } from "../fulfil";
 import { clientIp, fail, json, type Ctx } from "../http";
@@ -43,7 +42,6 @@ export async function handleVerify({ request, env: envRaw }: Ctx): Promise<Respo
     status: "paid",
     firstName: order.customer.name?.trim().split(/\s+/)[0] || undefined,
     whatsapp: env.WEBINAR_WHATSAPP_URL,
-    emailOn: emailEnabled(env),
     duplicate,
   });
 }

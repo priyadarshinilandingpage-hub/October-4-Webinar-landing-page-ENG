@@ -1,25 +1,22 @@
 import { createVerify, generateKeyPairSync } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { findPaidOrder, resetBuyersForTests } from "@/server/buyers";
-import { confirmationEmail } from "@/server/email";
 import { readEnv, type ServerEnv } from "@/server/env";
 import { resetFirestoreForTests } from "@/server/firestore";
 import { fulfilPaidOrder, resetFulfilForTests } from "@/server/fulfil";
 import { toPaidOrder } from "@/server/order";
 import type { RazorpayOrder } from "@/server/razorpay";
-import { jsonResponse, mockFetch, ORDER_ID, OTHER_ORDER, rzpOrder, SITE, testEnv } from "./helpers";
+import { jsonResponse, mockFetch, ORDER_ID, OTHER_ORDER, rzpOrder, testEnv } from "./helpers";
 
-// The follow-up after a verified payment, against in-memory fakes of Firestore, Google's token endpoint and Resend.
+// The follow-up after a verified payment, against in-memory fakes of Firestore and Google's token endpoint.
+// Any other request (an email service, anything) fails the test: nothing else is contacted.
 
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const PEM = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
-const WA = "https://chat.whatsapp.com/TestInviteCode123";
 
 type Doc = Record<string, Record<string, unknown>>;
 let docs: Map<string, Doc>;
-let emails: { init: RequestInit; body: Record<string, unknown> }[];
 let tokenCalls: string[];
-let resendStatus: number;
 let firestoreDown: boolean;
 
 function fakeApis() {
@@ -27,10 +24,6 @@ function fakeApis() {
     if (url === "https://oauth2.googleapis.com/token") {
       tokenCalls.push(String(init.body));
       return jsonResponse({ access_token: "ya29.test", expires_in: 3600 });
-    }
-    if (url === "https://api.resend.com/emails") {
-      emails.push({ init, body: JSON.parse(String(init.body)) });
-      return resendStatus === 200 ? jsonResponse({ id: `email_${emails.length}` }) : jsonResponse({ name: "error" }, resendStatus);
     }
     const base = "https://firestore.googleapis.com/v1/projects/demo-webinar/databases/(default)/documents";
     if (!url.startsWith(base)) throw new Error(`unexpected fetch ${url}`);
@@ -53,12 +46,6 @@ function fakeApis() {
       docs.set(key, body.fields);
       return jsonResponse({ name: key, fields: body.fields });
     }
-    if (init.method === "PATCH") {
-      const d = docs.get(path);
-      if (!d) return jsonResponse({ error: { status: "NOT_FOUND" } }, 404);
-      docs.set(path, { ...d, ...body.fields });
-      return jsonResponse({});
-    }
     const d = docs.get(path);
     return d ? jsonResponse({ name: path, fields: d }) : jsonResponse({ error: { status: "NOT_FOUND" } }, 404);
   });
@@ -70,9 +57,6 @@ const env = (): ServerEnv =>
       FIREBASE_PROJECT_ID: "demo-webinar",
       FIREBASE_CLIENT_EMAIL: "webinar-server@demo-webinar.iam.gserviceaccount.com",
       FIREBASE_PRIVATE_KEY: PEM.replace(/\n/g, "\\n"), // as most dashboards store it
-      RESEND_API_KEY: "re_test_1234567890abcdef",
-      EMAIL_FROM: "Webinar <webinar@example.in>",
-      WEBINAR_WHATSAPP_URL: WA,
     }),
   );
 const paid = (over: Record<string, unknown> = {}) => toPaidOrder(rzpOrder(over) as unknown as RazorpayOrder);
@@ -80,9 +64,7 @@ const row = (id = ORDER_ID) => docs.get(`/registrations/${id}`)!;
 
 beforeEach(() => {
   docs = new Map();
-  emails = [];
   tokenCalls = [];
-  resendStatus = 200;
   firestoreDown = false;
   resetBuyersForTests();
   resetFulfilForTests();
@@ -92,7 +74,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("fulfilPaidOrder", () => {
-  it("adds one registrations row with readable columns and sends one email with the WhatsApp link", async () => {
+  it("adds one registrations row with readable columns (and contacts nothing but Firestore)", async () => {
     const order = paid({ notes: { name: "Priya Raman", email: "priya@example.com", phone: "9876543210", consent_marketing: "true", utm_source: "meta", utm_content: "creative_b" } });
     await expect(fulfilPaidOrder(env(), order)).resolves.toEqual({});
     expect(row()).toMatchObject({
@@ -110,21 +92,15 @@ describe("fulfilPaidOrder", () => {
       utm_content: { stringValue: "creative_b" },
       utm_campaign: { nullValue: null },
       duplicate_of: { nullValue: null },
-      email_status: { stringValue: "sent" },
     });
-    expect(emails).toHaveLength(1);
-    const { body, init } = emails[0]!;
-    expect(body.to).toEqual(["priya@example.com"]);
-    expect(String(body.html)).toContain(WA);
-    expect(String(body.subject)).not.toMatch(/[—–]/);
-    expect((init.headers as Record<string, string>)["idempotency-key"]).toBe(`seat-confirmation/${ORDER_ID}`);
+    expect(row()).not.toHaveProperty("email_status");
   });
 
-  it("a second call (another instance, a webhook retry) doesn't email again", async () => {
+  it("repeat calls (a webhook retry, another instance) keep one row", async () => {
     await fulfilPaidOrder(env(), paid());
     resetFulfilForTests(); // like a fresh instance: only Firestore remembers
-    await fulfilPaidOrder(env(), paid());
-    expect(emails).toHaveLength(1);
+    await expect(fulfilPaidOrder(env(), paid())).resolves.toEqual({});
+    expect([...docs.keys()].filter((k) => k.startsWith("/registrations/"))).toHaveLength(1);
   });
 
   it("the already-paid list is in Firestore, under hashed ids only", async () => {
@@ -149,14 +125,12 @@ describe("fulfilPaidOrder", () => {
     expect(row(OTHER_ORDER).duplicate_of).toEqual({ stringValue: ORDER_ID });
   });
 
-  it("Firestore down: the buyer still gets the email, the failure is reported, the retry completes the row", async () => {
+  it("Firestore down: the failure is reported (so the webhook retries); the retry saves the row", async () => {
     firestoreDown = true;
     await expect(fulfilPaidOrder(env(), paid())).rejects.toThrow(/Firestore/);
-    expect(emails).toHaveLength(1);
     firestoreDown = false;
     await expect(fulfilPaidOrder(env(), paid())).resolves.toEqual({});
-    expect(emails).toHaveLength(1);
-    expect(row().email_status).toEqual({ stringValue: "sent" });
+    expect(row().order_id).toEqual({ stringValue: ORDER_ID });
   });
 
   it("signs the Google token request with the service-account key (RS256) and reuses the token", async () => {
@@ -171,11 +145,5 @@ describe("fulfilPaidOrder", () => {
       aud: "https://oauth2.googleapis.com/token",
     });
     expect(createVerify("RSA-SHA256").update(`${h}.${p}`).verify(publicKey, Buffer.from(s!, "base64url"))).toBe(true);
-  });
-
-  it("the email escapes the buyer's name", () => {
-    const mail = confirmationEmail({ firstName: "<b>Priya</b>", orderId: ORDER_ID, whatsappUrl: WA, siteUrl: SITE });
-    expect(mail.html).not.toContain("<b>Priya</b>");
-    expect(mail.html).toContain("&lt;b&gt;Priya&lt;/b&gt;");
   });
 });
