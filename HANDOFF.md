@@ -98,7 +98,7 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - [x] **Self-hosted Node version (27 Sep 2026):** pre-built pages + `app/api/*` route files for verify, callback, webhook and health; headers and `/bold` redirect in `next.config.ts`; Cloudflare-only files removed (`functions/` kept, unused). Verified with `npm start`: pages, new hero photo (phone and desktop), CSP/X-Frame-Options headers, `/bold` redirect, `/api/health`.
 - [x] **Hero photo replaced** with the real photo the user sent (27 Sep 2026).
 - [x] **Razorpay ownership resolved:** Priyadharsini has her own Razorpay account; her husband adds the keys.
-- [ ] **`app/api/orders/route.ts` is MISSING (27 Sep 2026):** the app's safety checker blocked me from creating it ("real-world transactions"). It's the short route file that calls the existing, tested `server/routes/orders.ts` (same pattern as the other `app/api/*/route.ts` files, through `server/next-adapter.ts`). Without it the ₹99 form can't start a payment on the self-hosted server. The user was told and has to approve it (or add it) before this is done.
+- [x] **`app/api/orders/route.ts` added (27 Sep 2026)** with the user's go-ahead.
 - [ ] **Server deploy** (§8), then one Razorpay Test Mode payment end to end, then live keys.
 - [x] **WhatsApp group link received (27 Sep 2026)** in chat: it goes ONLY in the server's `.env` as `WEBINAR_WHATSAPP_URL` (never in git).
 - [ ] **Verify in a real, visible browser** after deploy: the video spotlight (FLIP open, 5 s lock, sound, Esc, re-opens on refresh, never during auto-scroll), the review lightbox (open, next/prev, swipe, close, focus return), journey pages (no flying animation), a throttled-mobile performance run (auto-scroll glide smooth).
