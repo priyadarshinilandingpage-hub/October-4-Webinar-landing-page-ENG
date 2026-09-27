@@ -115,7 +115,7 @@ background tab). When I say "deploy", follow HANDOFF.md §8.
 - **Refund policy:** the user writes it (page emptied 27 Sep 2026). The FAQ has no refund question (removed at the user's request).
 - **Bonuses:** none shown. The `BONUSES` list in `content.ts` is deliberately empty until the client confirms.
 
-## 8. Deploy guide (short; the copy-paste version for the server owner is README.md "Run it on a server (step by step)", incl. the nginx file, certbot and the 3-step Test Mode payment)
+## 8. Deploy guide (short; the copy-paste version for the server owner is README.md (rewritten 27 Sep 2026 as a general, professional GitHub README: How it works, Requirements, Settings, Deployment with nginx/Caddy examples, Test Mode, Going live, Running the site, Startup messages, Troubleshooting, Content to complete, Technical reference). Keep it host-neutral and written for whoever runs the site.)
 1. **Server:** Node.js 20.9+ (22 LTS) and git. `git clone` the repo (private: add her husband's GitHub account as a collaborator, or use a deploy key).
 2. **Settings:** `cp .env.example .env` and fill in `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SITE_URL`, `WEBINAR_WHATSAPP_URL`, optional `RAZORPAY_BRAND_NAME`, `FIREBASE_*` (not needed: the already-paid list falls back to `data/`), Meta, Upstash. `pm2 logs webinar` must show `[startup] Razorpay keys: working. Payments are ready.`
 3. **Build and run:** `npm ci && npm run build && npm start` (port 3000; `npm start -- -p 8080` for another). Keep it running with pm2 (`pm2 start npm --name webinar -- start`, `pm2 save`, `pm2 startup`).
