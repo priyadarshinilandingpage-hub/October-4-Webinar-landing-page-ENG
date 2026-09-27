@@ -46,7 +46,7 @@ export async function startupCheck(raw: RawEnv): Promise<void> {
     try {
       mkdirSync(dir, { recursive: true });
       accessSync(dir, constants.W_OK);
-      log(`Already-paid list: saved in ${dir} (Firestore not set up, which is fine).`);
+      log(`Already-paid list: saved in ${dir}.`);
     } catch {
       log(`Already-paid list: CAN'T WRITE to ${dir}. Repeat buyers are forgotten on restart; give the app write access there.`);
     }

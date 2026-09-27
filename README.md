@@ -20,7 +20,7 @@ A Next.js 16 landing page that sells a ₹99 live webinar (Sunday 4 October 2026
 
 ## Run it on a server (step by step)
 
-No code changes are needed: everything the site needs goes in the `.env` file. Commands are for Ubuntu with nginx; replace `your-domain.in` with the real domain everywhere. Requirements: Node.js **20.9 or newer** (22 LTS recommended), git, nginx, and the domain's DNS pointing at the server (both `your-domain.in` and `www.your-domain.in`).
+No code changes are needed: everything the site needs goes in the `.env` file. It runs on **any server that can run Node.js 20.9 or newer** (22 LTS recommended) and keep a program running: a Linux VPS, a Windows server, or a hosting panel with Node.js support. Nothing else is needed (no database; Firebase is not needed). Replace `your-domain.in` with the real domain everywhere. The commands below are for Linux; on Windows, copy `.env.example` to `.env` in File Explorer and edit it in Notepad, and run the same `npm` commands.
 
 **1. Get the code and fill in the settings**
 
@@ -28,7 +28,7 @@ No code changes are needed: everything the site needs goes in the `.env` file. C
 git clone https://github.com/priyadarshinilandingpage-hub/October-4-Webinar-landing-page.git webinar
 cd webinar
 cp .env.example .env
-nano .env
+nano .env         # or any text editor
 ```
 
 Fill in at least these five (details in "Settings" below):
@@ -53,9 +53,9 @@ pm2 startup      # prints one command: run it, so the site starts again after a 
 pm2 logs webinar --lines 20
 ```
 
-The log must show `[startup] Razorpay keys: working. Payments are ready.` If it says `PAYMENTS ARE OFF` or `keys REJECTED`, it names the setting to fix in `.env`; fix it and run `pm2 restart webinar`.
+The site now runs on port 3000 (another port: `pm2 start npm --name webinar -- start -- -p 8080`). The log must show `[startup] Razorpay keys: working. Payments are ready.` If it says `PAYMENTS ARE OFF` or `keys REJECTED`, it names the setting to fix in `.env`; fix it and run `pm2 restart webinar`. A hosting panel with its own Node.js app manager can run `npm start` instead of pm2.
 
-**3. nginx and HTTPS.** Create `/etc/nginx/sites-available/webinar` with:
+**3. The domain and HTTPS.** Point the domain (and `www.`) at the server and put HTTPS in front of port 3000 with whatever the server already uses (nginx, Caddy, Apache, a hosting panel, Cloudflare). Two things matter: visitors must use `https://`, and the visitor's address should be passed on (`X-Real-IP` / `X-Forwarded-For`). Example for nginx on Ubuntu, in `/etc/nginx/sites-available/webinar`:
 
 ```nginx
 server {
@@ -79,7 +79,13 @@ sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d your-domain.in -d www.your-domain.in --redirect
 ```
 
-Certbot adds the certificate and sends http visitors to https. Both `your-domain.in` and `www.your-domain.in` work.
+Certbot adds the certificate and sends http visitors to https. Both `your-domain.in` and `www.your-domain.in` work. With Caddy instead, the whole `Caddyfile` is below (it gets the certificate by itself):
+
+```
+your-domain.in, www.your-domain.in {
+    reverse_proxy 127.0.0.1:3000
+}
+```
 
 **4. Razorpay dashboard** (in the same mode as the keys): Webhooks → Add: URL `https://your-domain.in/api/webhooks/razorpay`, the same secret as `RAZORPAY_WEBHOOK_SECRET`, events **order.paid** and **payment.captured**. Account & Settings → Payment capture → **Automatic**.
 
@@ -117,7 +123,7 @@ Certbot adds the certificate and sends http visitors to https. Both `your-domain
 | `RAZORPAY_BRAND_NAME` | no | no | Name at the top of the checkout (must match the Razorpay account's business name or the site's domain) |
 | `SITE_URL` | yes | no | `https://your-domain.in`, exactly as in the browser. Used at build time too |
 | `WEBINAR_WHATSAPP_URL` | **yes** | keep private | Buyers-only WhatsApp group invite link. Shown only on the verified thank-you page |
-| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | no | key **yes** | Optional Firestore `registrations` table of buyers + already-paid list (service-account key; free Spark plan). Without it the already-paid list is kept in `data/` and buyers are in the Razorpay dashboard |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | not needed | key **yes** | Only if you want a Firestore table of buyers. Without it (the normal setup) the already-paid list is kept in `data/` and every buyer is in the Razorpay dashboard |
 | `DATA_DIR` | no | no | Folder for the already-paid list when Firestore isn't set up. Default: `data/` next to `package.json` |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | no | token **yes** | Rate limits shared by several server processes |
 | `META_PIXEL_ID` / `META_CAPI_TOKEN` | for ads | token **yes** | Server-side Meta "Purchase" for every verified buyer |
@@ -128,9 +134,9 @@ Certbot adds the certificate and sends http visitors to https. Both `your-domain
 
 Once Razorpay says an order is PAID for exactly 9900 paise INR, the thank-you page shows the **WhatsApp group button** (from `WEBINAR_WHATSAPP_URL`; no email is sent), and `server/fulfil.ts` runs two steps (from the callback, the thank-you check and the webhook; each is safe to repeat, and a failure in one doesn't stop the other):
 1. **Already-paid list**: email and WhatsApp number saved as hashes, in Firestore `paid_contacts` or, without Firestore, in `data/paid-contacts.json`. A later form submit with the same email **or** number opens `/already-paid` instead of a second payment. Names are not matched.
-2. **Registrations table** (only with Firestore): one Firestore document per order in `registrations` (`order_id, name, email, phone, amount, currency, status, mode, webinar_date, confirmed_at, marketing_consent, utm_source, utm_campaign, utm_content, duplicate_of`). As a table: Firebase console → Firestore → **Query builder**. Every payment is also in the Razorpay dashboard (the buyer's details are in each order's notes).
+2. **Buyers list**: every payment, with the buyer's name, email and WhatsApp number (in the order's notes), is in the **Razorpay dashboard** (Orders). Only if Firestore is set up: one Firestore document per order in `registrations` (`order_id, name, email, phone, amount, currency, status, mode, webinar_date, confirmed_at, marketing_consent, utm_source, utm_campaign, utm_content, duplicate_of`). As a table: Firebase console → Firestore → **Query builder**. 
 
-`duplicate_of` marks a second paid order by the same person: refund it from the Razorpay dashboard. Publish `firestore.rules` (denies all browser access).
+`duplicate_of` marks a second paid order by the same person: refund it from the Razorpay dashboard. With Firestore, publish `firestore.rules` (denies all browser access).
 
 ## How payments are kept safe
 
@@ -160,7 +166,7 @@ Test Mode payments: UPI `success@razorpay` (success) or `failure@razorpay` (fail
 - [ ] `curl -X POST https://your-domain.in/api/webhooks/razorpay` answers 401.
 - [ ] Headers checked (securityheaders.com): CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy.
 - [ ] Meta Events Manager shows PageView, InitiateCheckout and Purchase (browser + server, deduplicated).
-- [ ] 2FA on Razorpay, the server, Firebase, the domain registrar and GitHub.
+- [ ] 2FA on Razorpay, the server, the domain registrar and GitHub.
 
 ## Operations
 
