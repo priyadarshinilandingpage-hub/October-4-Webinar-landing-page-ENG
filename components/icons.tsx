@@ -172,9 +172,9 @@ export function CrocusBloom({ className = "size-8" }: P) {
   ];
   return (
     <svg viewBox="0 0 40 40" className={`bloom ${className}`} aria-hidden="true">
-      <path d="M20 38.5V28" stroke="#6f8b6a" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-      <path d="M20 35.5c-3.4-.5-5.6-2.6-6.6-5.7 3.3.2 5.6 2.1 6.6 5.7z" fill="#8aa383" />
-      <path d="M20 34c3-.6 5-2.5 5.9-5.3-3 .3-5 2-5.9 5.3z" fill="#7d9776" />
+      <path d="M20 38.5V28" stroke="#6d5bb0" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <path d="M20 35.5c-3.4-.5-5.6-2.6-6.6-5.7 3.3.2 5.6 2.1 6.6 5.7z" fill="#9d8fd6" />
+      <path d="M20 34c3-.6 5-2.5 5.9-5.3-3 .3-5 2-5.9 5.3z" fill="#8b7cc8" />
       {petals.map((p) => (
         <path
           key={p.k}
@@ -184,12 +184,12 @@ export function CrocusBloom({ className = "size-8" }: P) {
           fill={p.fill}
         />
       ))}
-      <g className="stig" fill="none" stroke="#d9531e" strokeWidth="1.4" strokeLinecap="round">
+      <g className="stig" fill="none" stroke="#6d28d9" strokeWidth="1.4" strokeLinecap="round">
         <path pathLength={1} d="M20 26.5c-.9-3.6-2.2-6.4-4-8.6" />
         <path pathLength={1} d="M20 26.5c0-3.7.1-6.8.3-9.6" />
         <path pathLength={1} d="M20 26.5c.9-3.4 2.3-6.2 4.1-8.3" />
       </g>
-      <g className="anth" fill="#e8a33d">
+      <g className="anth" fill="#a78bfa">
         <circle cx="15.9" cy="17.6" r="1.05" />
         <circle cx="20.3" cy="16.6" r="1.05" />
         <circle cx="24.2" cy="17.4" r="1.05" />
@@ -208,7 +208,7 @@ export function CrocusSketch({ className = "w-20" }: P) {
       <path d="M60 96c16-14 22-38 12-66-10 20-15 44-12 66z" />
       <path d="M60 97C52 72 53 44 60 18c7 26 8 54 0 79z" />
       <path d="M50 44c3 10 6 24 8 40M70 44c-3 10-6 24-8 40" strokeDasharray="1.5 3" />
-      <g stroke="var(--color-thread, #c8441a)" strokeWidth={1.5}>
+      <g stroke="var(--color-thread, #6d28d9)" strokeWidth={1.5}>
         <path d="M60 90c-2-12-6-22-12-30M60 90c0-13 0-24 1-34M60 90c2-12 6-21 11-29" />
       </g>
       <path d="M22 156h76" strokeDasharray="2 4" />
@@ -220,15 +220,15 @@ export function CrocusSketch({ className = "w-20" }: P) {
 export function Crocus({ className = "size-6" }: P) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <path d="M16 29.5V20" stroke="#6f8b6a" strokeWidth="1.6" strokeLinecap="round" fill="none" />
-      <path d="M16 26c-2.6-.4-4.4-2-5.2-4.4 2.6.1 4.4 1.6 5.2 4.4z" fill="#8aa383" />
+      <path d="M16 29.5V20" stroke="#6d5bb0" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+      <path d="M16 26c-2.6-.4-4.4-2-5.2-4.4 2.6.1 4.4 1.6 5.2 4.4z" fill="#9d8fd6" />
       <path d="M16 21c-4.8-1.4-7.6-5.5-7-11.4 3.9 1.9 6.3 5.8 7 11.4z" fill="#9b8cc6" />
       <path d="M16 21c4.8-1.4 7.6-5.5 7-11.4-3.9 1.9-6.3 5.8-7 11.4z" fill="#8b7bbb" />
       <path d="M16 21.2c-3.1-3.3-3.6-9.3 0-16.2 3.6 6.9 3.1 12.9 0 16.2z" fill="#7b6ba8" />
-      <path d="M16 18.5c-.4-2.6-1.4-4.8-3-6.6M16 18.5c0-2.8.1-5.3.2-7.6M16 18.5c.5-2.5 1.6-4.6 3.2-6.3" stroke="#d9531e" strokeWidth="1.3" strokeLinecap="round" fill="none" />
-      <circle cx="13" cy="11.8" r="1" fill="#e8a33d" />
-      <circle cx="16.2" cy="10.8" r="1" fill="#e8a33d" />
-      <circle cx="19.2" cy="12.1" r="1" fill="#e8a33d" />
+      <path d="M16 18.5c-.4-2.6-1.4-4.8-3-6.6M16 18.5c0-2.8.1-5.3.2-7.6M16 18.5c.5-2.5 1.6-4.6 3.2-6.3" stroke="#6d28d9" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+      <circle cx="13" cy="11.8" r="1" fill="#a78bfa" />
+      <circle cx="16.2" cy="10.8" r="1" fill="#a78bfa" />
+      <circle cx="19.2" cy="12.1" r="1" fill="#a78bfa" />
     </svg>
   );
 }

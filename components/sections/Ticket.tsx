@@ -1,7 +1,7 @@
 import { Countdown } from "../Countdown";
 import { EVENT, TICKET } from "../content";
-import { Odometer } from "../motion";
-import { CtaLink, Postmark, SectionHead, Wordmark } from "../ui";
+
+import { CtaLink, Postmark, PriceTag, SectionHead, Wordmark } from "../ui";
 import { Fx } from "./Fx";
 
 /**
@@ -11,7 +11,7 @@ import { Fx } from "./Fx";
  */
 export function Ticket() {
   return (
-    <section id="webinar" aria-labelledby="webinar-title" className="fj-sec feather tint-gold py-12 md:py-16">
+    <section id="webinar" aria-labelledby="webinar-title" className="fj-sec feather tint-gold py-10 md:py-12">
       <div className="wrap">
         <SectionHead id="webinar-title" align="center" kicker={TICKET.kicker} title={TICKET.title} />
 
@@ -48,9 +48,7 @@ export function Ticket() {
           </div>
 
           <div className="fj-tix-stub">
-            <p className="fj-num m-0 text-[4rem] leading-none font-bold tracking-tight text-gold">
-              <Odometer value={EVENT.price} />
-            </p>
+            <PriceTag size="xl" tone="light" />
             <Countdown variant="dark" label={TICKET.countdownLabel} className="w-full max-w-[280px]" />
             <CtaLink size="lg" price={false} className="w-full max-w-[280px]">
               {TICKET.cta}

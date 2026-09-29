@@ -155,7 +155,7 @@ export function CheckoutForm() {
         readonly: { email: Boolean(data.prefill?.email), contact: true },
         callback_url: data.callbackUrl,
         redirect: true,
-        theme: { color: "#D9531E" },
+        theme: { color: "#6d28d9" },
         modal: {
           ondismiss: () => {
             busy.current = false;

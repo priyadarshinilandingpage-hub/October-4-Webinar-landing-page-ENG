@@ -15,7 +15,7 @@ function current(): Theme {
  * and drops a ?theme= override from the address bar so a reload keeps the visitor's choice.
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     setTheme(current());

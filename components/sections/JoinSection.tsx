@@ -1,7 +1,8 @@
 import { CheckoutForm } from "../CheckoutForm";
 import { Countdown } from "../Countdown";
 import { EVENT, JOIN } from "../content";
-import { ByAd, Kicker, TextLink } from "../ui";
+import { SeatsLeft } from "../Seats";
+import { ByAd, ByLang, Kicker, PriceTag, TextLink } from "../ui";
 
 /**
  * 8 · #join, the conversion point (every Register button scrolls here). Built as an admit card:
@@ -21,9 +22,11 @@ export function JoinSection() {
             {JOIN.kicker}
           </Kicker>
           <h2 id="join-title" className="font-serif text-[clamp(1.8rem,5vw,3.6rem)] leading-[1.04] tracking-[-0.015em] text-white sm:mt-4">
-            <ByAd a={JOIN.title.a} b={JOIN.title.b} />
+            <ByAd a={<ByLang ta={JOIN.title.a} en={JOIN.titleEn.a} />} b={<ByLang ta={JOIN.title.b} en={JOIN.titleEn.b} />} />
           </h2>
-          <p className="mt-3 hidden max-w-xl text-[1.06rem] leading-relaxed text-white/75 sm:block">{JOIN.lead}</p>
+          <p className="mt-3 hidden max-w-xl text-[1.06rem] leading-relaxed text-white/75 sm:block">
+            <ByLang ta={JOIN.lead} en={JOIN.leadEn} />
+          </p>
         </div>
 
         {/* light-island: the admit card stays light paper in the dark theme too (paper on a dark desk). */}
@@ -34,7 +37,7 @@ export function JoinSection() {
                 <span className="text-ink">{JOIN.card.form}</span>
                 <span className="hidden sm:inline"> · {JOIN.card.eyebrow}</span>
               </p>
-              <p className="fj-num m-0 shrink-0 text-[1.15rem] leading-none font-bold text-saffron-deep">{EVENT.price}</p>
+              <PriceTag size="sm" className="shrink-0" />
             </div>
             <CheckoutForm />
           </div>
@@ -43,7 +46,7 @@ export function JoinSection() {
             {/* Phones: price | date, then countdown, then the note. Desktop: one column, top to bottom. */}
             <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-x-5 gap-y-3 lg:grid-cols-1 lg:items-start lg:gap-y-5">
               <div className="lg:order-1">
-                <p className="fj-num text-[2.6rem] leading-none font-bold tracking-tight text-saffron-deep lg:text-[3.6rem]">{EVENT.price}</p>
+                <PriceTag size="xl" className="text-[2.8rem] lg:text-[2.9rem]" />
               </div>
               <div className="text-right lg:order-3 lg:border-t lg:border-dashed lg:border-ink/25 lg:pt-5 lg:text-left">
                 <p className="fj-mono text-ink-2">{JOIN.card.eyebrow}</p>
@@ -51,6 +54,7 @@ export function JoinSection() {
               </div>
               <Countdown label={JOIN.countdownLabel} className="col-span-2 lg:order-4 lg:col-span-1" />
               <p className="col-span-2 text-[0.78rem] text-ink-2 lg:order-2 lg:col-span-1 lg:-mt-2">{JOIN.card.priceNote}</p>
+              <SeatsLeft className="col-span-2 lg:order-2 lg:col-span-1" />
               <div aria-hidden="true" className="fj-barcode hidden lg:order-5 lg:block" />
             </div>
           </aside>

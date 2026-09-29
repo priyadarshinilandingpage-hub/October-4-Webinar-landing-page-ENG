@@ -58,7 +58,7 @@ export function Journey() {
                 </span>
                 <h3 className="mt-4 font-serif text-[2.2rem] leading-none text-ink italic">{JOURNEY.finale.title}</h3>
                 <p className="mt-3 text-[0.95rem] leading-[28px] text-ink-2">{JOURNEY.finale.body}</p>
-                <CtaLink className="mt-5 w-full">{JOURNEY.cta}</CtaLink>
+                <CtaLink className="cta-compact mt-5 w-full">{JOURNEY.cta}</CtaLink>
               </article>
             </div>
           </Fx>

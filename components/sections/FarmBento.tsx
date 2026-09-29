@@ -1,7 +1,7 @@
 import { FARM, type MediaSlot } from "../content";
 import { Media } from "../Media";
 import { Odometer } from "../motion";
-import { SectionHead, SpecimenTag } from "../ui";
+import { ByLang, SectionHead, SpecimenTag } from "../ui";
 import { Fx } from "./Fx";
 import { idx } from "./fxStyle";
 
@@ -25,11 +25,11 @@ export function FarmBento() {
   ];
 
   return (
-    <section id="farm" aria-labelledby="farm-title" className="fj-sec feather tint-blush py-12 md:py-16">
+    <section id="farm" aria-labelledby="farm-title" className="fj-sec feather tint-blush py-10 md:py-12">
       {/* One grid: phones stack head, stat, sheet, note. Desktop: the stat and the note fill the column
           beside the heading (rows 1-2), the sheet runs full width below. */}
       <div className="wrap grid grid-cols-1 gap-y-6 md:gap-y-8 lg:grid-cols-12 lg:gap-x-8 lg:gap-y-4">
-        <SectionHead className="lg:col-span-7 lg:row-span-2 lg:row-start-1 lg:self-center" id="farm-title" kicker={FARM.kicker} title={FARM.title} lead={FARM.lead} />
+        <SectionHead className="lg:col-span-7 lg:row-span-2 lg:row-start-1 lg:self-center" id="farm-title" kicker={FARM.kicker} title={<ByLang ta={FARM.title} en={FARM.titleEn} />} lead={FARM.lead} />
 
         {/* Stat as a specimen tag, hung off the header (digits roll in). */}
         <div className="lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-end lg:justify-self-start">

@@ -1,6 +1,6 @@
 import { AI_ART, PROBLEM } from "../content";
 import { Media } from "../Media";
-import { SectionHead } from "../ui";
+import { ByLang, SectionHead } from "../ui";
 import { Fx } from "./Fx";
 import { idx } from "./fxStyle";
 
@@ -15,10 +15,10 @@ import { idx } from "./fxStyle";
 export function Problem() {
   const rows = PROBLEM.before.map((dr, i) => ({ dr, cr: PROBLEM.after[i] ?? "" }));
   return (
-    <section id="why" aria-labelledby="why-title" className="fj-sec feather tint-lilac py-12 md:py-16">
+    <section id="why" aria-labelledby="why-title" className="fj-sec feather tint-lilac py-10 md:py-12">
       <div className="wrap">
         <div className="grid grid-cols-1 items-center gap-7 lg:grid-cols-12 lg:gap-10">
-          <SectionHead className="lg:col-span-6" id="why-title" kicker={PROBLEM.kicker} title={PROBLEM.title} lead={PROBLEM.lead} />
+          <SectionHead className="lg:col-span-6" id="why-title" kicker={PROBLEM.kicker} title={<ByLang ta={PROBLEM.title} en={PROBLEM.titleEn} />} lead={PROBLEM.lead} />
           <Media slot={AI_ART.problem} sizes="(min-width:1024px) 560px, 100vw" className="aspect-[21/9] w-full lg:col-span-6" />
         </div>
 

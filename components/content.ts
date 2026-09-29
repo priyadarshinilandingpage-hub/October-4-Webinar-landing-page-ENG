@@ -176,7 +176,19 @@ type Segment = { t: string; em?: boolean };
  * title/sub = desktop (full ad line). short/shortSub = phones: the first screen is image-first,
  * so the headline stays ≤ 8 words and the support is one short line.
  */
-export type HeroCopy = { title: Segment[]; short: Segment[]; sub: string; shortSub: string; detail: string; evenIf: string };
+export type HeroCopy = {
+  title: Segment[];
+  short: Segment[];
+  sub: string;
+  shortSub: string;
+  detail: string;
+  evenIf: string;
+  /** Plain-English versions, shown on /en (see <ByLang>). */
+  titleEn: Segment[];
+  shortEn: Segment[];
+  subEn: string;
+  shortSubEn: string;
+};
 
 /**
  * HERO MEDIA (image-first hero). The big plate is the LCP image.
@@ -193,11 +205,22 @@ export const HERO_MEDIA = {
   inset: { ...MEDIA.heroLoopSmall, optional: true } as MediaSlot,
   // Her Instagram profile photo (150×150: avatar-size only, too small for the stage). Shown on the 40.1K tag.
   avatar: img("/media/instagram/profile.jpg", "Priyadharsini's Instagram profile photo", true, { optional: true }),
+  // Real screenshot of her public profile, taken 30 Sep 2026 (40.1K followers, verified). Retake it when the
+  // numbers move; never edit the numbers in the image.
+  instagramShot: {
+    src: "/media/instagram/profile-screenshot.png",
+    alt: "Instagram profile of priyadharsini_subramaniam_, verified, 77 posts, 40.1K followers: Startup Strategist, Resource person EDII-TN, 5+ years in agribusiness, Alumni EDII Ahmedabad and TNAU",
+    width: 848,
+    height: 302,
+  },
+  instagramUrl: "https://www.instagram.com/priyadharsini_subramaniam_/",
 };
 
 export const HERO_SHARED = {
   eyebrow: ["Live Tamil webinar", EVENT.shortDate, EVENT.timeLabel],
-  cta: `Ippove register pannunga · ${EVENT.price}`,
+  cta: "Ippove register pannunga",
+  ctaEn: "Register now",
+  priceNote: "one-time, no subscription",
   trust: "Secure checkout by Razorpay · UPI, cards & netbanking",
   countdownLabel: "Starts in",
   /** Authority tags pinned on the hero photo (verified facts only). */
@@ -211,7 +234,7 @@ export const HERO_SHARED = {
   figCaption: "Her indoor saffron (kunguma poo) farm in Tamil Nadu: planned, invested in and built step by step, shared daily on Instagram.",
   insetCaption: "Indoor saffron grow room",
   /** Rubber postmark on the photo. */
-  stamp: { ring: `LIVE · TAMIL WEBINAR · ${EVENT.dayMonth.toUpperCase()} ${EVENT.year} · `, center: EVENT.price, sub: "ONLY" },
+  stamp: { ring: `LIVE · TAMIL WEBINAR · ${EVENT.dayMonth.toUpperCase()} ${EVENT.year} · `, center: EVENT.price, sub: "₹9,500" },
   noteLabel: "Margin note",
 };
 
@@ -225,6 +248,10 @@ export const HERO: Record<"a" | "b", HeroCopy> = {
     detail:
       `One ${OFFER.durationLabel} live session in Tamil on business planning, capital, profitability, market opportunities, and loans & subsidies. Start small and grow step by step,`,
     evenIf: "even if you've never run a business and don't have big capital.",
+    titleEn: [{ t: "How I planned and built a " }, { t: "saffron farm", em: true }, { t: " in Tamil Nadu." }],
+    shortEn: [{ t: "How I planned and built my " }, { t: "saffron farm", em: true }, { t: "." }],
+    shortSubEn: "The same plan for your business. Shown live.",
+    subEn: "In the same way, I'll show you live how to arrange capital for your business, how to get loans and subsidies, and how to grow step by step.",
   },
   // utm_content=creative_b (women angle)
   b: {
@@ -235,6 +262,10 @@ export const HERO: Record<"a" | "b", HeroCopy> = {
     detail:
       `I'm building an indoor saffron farm in Tamil Nadu. On ${EVENT.dayMonthLong}, in a ${OFFER.durationLabel} live session, I'll share the same practical approach: business planning, capital, profitability, market opportunities, and loans & subsidies,`,
     evenIf: "even if you're starting from home with small savings.",
+    titleEn: [{ t: "To start a business as a woman, you don't need " }, { t: "big investment or big space", em: true }, { t: "." }],
+    shortEn: [{ t: "Starting a business as a woman doesn't need " }, { t: "big investment", em: true }, { t: "." }],
+    shortSubEn: "Start small, grow step by step. Shown live.",
+    subEn: "Start on a small scale. Plan your capital, loans and subsidies properly. Grow step by step. I'll show you how, live.",
   },
 };
 
@@ -257,6 +288,7 @@ export const PROOF_MARQUEE = [
 export const FARM = {
   kicker: "Proof, not theory",
   title: "Idhu theory illa. Idhu en farm.",
+  titleEn: "This is not theory. This is my farm.",
   lead: "An indoor saffron (kunguma poo) farm in Tamil Nadu, planned, funded and built step by step. The money lessons behind it are what you'll learn.",
   tiles: {
     setup: { media: MEDIA.farmSetup, caption: "The indoor grow room" },
@@ -275,6 +307,7 @@ export const FARM = {
 export const PROBLEM = {
   kicker: "The real problem",
   title: "Problem panam illa. Plan illadhadhu dhaan.",
+  titleEn: "The problem is not money. It is the missing plan.",
   lead: "Big capital isn't what's missing. A clear plan for your money is.",
   // Ledger columns: what most people do vs what you'll do after the session. Rows pair up 1:1.
   beforeTitle: "Most people…",
@@ -356,6 +389,7 @@ export const BONUSES: { label: string; value: number }[] = [
 export const VALUE = {
   kicker: "Everything in your seat",
   title: "Unga seat-la enna irukku?",
+  titleEn: "What is in your seat?",
   lead: `${EVENT.price} keeps it an easy yes, and keeps the room full of people who are serious about acting.`,
   mainLine: `${OFFER.durationLabel} live Tamil webinar with Priyadharsini`,
   mainSub: `${EVENT.dateLabel} · ${EVENT.timeLabel}`,
@@ -372,6 +406,27 @@ export const VALUE = {
   cta: `Reserve my seat · ${EVENT.price}`,
 };
 
+/** What everything in the seat is worth on its own: 6 modules + bonuses (₹9,500). Shown struck out next to the ₹99. */
+export const TOTAL_VALUE = MODULES.items.length * VALUE.moduleValue + BONUSES.reduce((sum, b) => sum + b.value, 0);
+export const VALUE_LABEL = `₹${TOTAL_VALUE.toLocaleString("en-IN")}`;
+
+/** The "don't miss it" lightbox (components/RegisterNudge.tsx). Everything in it must stay true. */
+export const NUDGE = {
+  delayMs: 25_000,
+  kicker: `Live · ${EVENT.shortDate} · ${EVENT.timeLabel}`,
+  title: "Unga seat-a book pannitingala?",
+  titleEn: "Have you booked your seat yet?",
+  modules: (n: number) => `${n} practical modules: capital, loans & subsidies, profit, market and growth`,
+  live: `${OFFER.durationLabel} live with Priyadharsini in Tamil, with your questions answered`,
+  totalLabel: "Total value · you pay only",
+  countdownLabel: "Session starts in",
+  cta: "Seat book pannunga",
+  ctaEn: "Book my seat",
+  refund: "Not useful? Message us within 24 hours after the session for a full refund.",
+  no: "Ippo illa, thanks",
+  noEn: "No thanks",
+};
+
 /* ───────────────────────── Join / payment (#join) ───────────────────────── */
 
 export const JOIN = {
@@ -381,7 +436,12 @@ export const JOIN = {
     a: "Unga business-a start panna ready-aa?",
     b: "Small-aa start pannalam. Ready-aa?",
   },
+  titleEn: {
+    a: "Ready to start your business?",
+    b: "Let's start small. Ready?",
+  },
   lead: "Seat-a ippove book pannunga. It takes under a minute.",
+  leadEn: "Book your seat now. It takes under a minute.",
   countdownLabel: "Session starts in",
   stepsTitle: "What happens next",
   steps: [
@@ -433,6 +493,7 @@ export const REVIEWS_COPY = {
 export const FIT = {
   kicker: "Honest filter",
   title: "Idhu ungalukku-aa?",
+  titleEn: "Is this for you?",
   yesStamp: "For you",
   yesTitle: "This is for you if…",
   yes: [
@@ -458,6 +519,7 @@ export const ABOUT = {
   kicker: "Meet your host",
   // Her own words from the webinar ad (lightly trimmed). TODO(client): approve.
   quote: "Small scale-la start panni, investment-a smart-aa use panni, business-a step by step grow panni, long-term wealth build pannalam.",
+  quoteEn: "Start on a small scale, use your capital smartly, grow the business step by step, and build long-term wealth.",
   quoteBy: `Priyadharsini, on what she'll teach on ${EVENT.dayMonthLong}`,
   name: "Priyadharsini Subramaniam",
   role: "Startup Strategist",
@@ -477,10 +539,13 @@ export const ABOUT = {
     url: "https://www.instagram.com/priyadharsini_subramaniam_/",
     label: "Open her profile on Instagram",
     name: "Priyadharsini | Startup Strategist",
-    followers: "40.1K",
+    followers: "40.1k",
     followersLabel: "followers",
+    posts: "77",
+    following: "8",
+    category: "Entrepreneur",
     verified: true,
-    bio: ["Resource person, EDII-TN", "5+ years in agribusiness", "Alumni EDII Ahmedabad, TNAU", "Spl. New Enterprise Creation"],
+    bio: ["Resource person- EDIITN", "5+ years in agribusiness", "Alumni EDII Ahmedabad, TNAU", "Spl. (New Enterprise creation)", "Founder, Building and scaling up"],
     highlights: ["Webinar reviews", "Saffron series", "RKVY-RAFTAAR"],
     asOf: "Profile as on 30 Sep 2026",
   },
@@ -553,6 +618,7 @@ export const TICKET = {
 export const PS = {
   body: `Skimmed everything? Here's the short version: on ${EVENT.dateLabel} at ${EVENT.timeLabel}, I'll show you live how I invested and built my saffron farm, and how you can start small, invest smart and grow your own business. Just ${EVENT.price}.`,
   close: "Ippove register pannunga. See you there.",
+  closeEn: "Register now. See you there.",
   sign: "Priyadharsini",
   cta: `Reserve my seat · ${EVENT.price}`,
 };

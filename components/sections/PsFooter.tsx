@@ -1,5 +1,5 @@
 import { FOOTER, PS } from "../content";
-import { CtaLink, Rule, Wordmark } from "../ui";
+import { ByLang, CtaLink, Rule, Wordmark } from "../ui";
 import { Fx } from "./Fx";
 
 /**
@@ -16,7 +16,9 @@ export function Ps() {
               P.S.
             </h2>
             <p className="mt-4 text-[1.05rem] leading-[32px] text-ink sm:text-[1.1rem]">{PS.body}</p>
-            <p className="fj-hand mt-2 text-[1.35rem] leading-[32px] text-ink">{PS.close}</p>
+            <p className="fj-hand mt-2 text-[1.35rem] leading-[32px] text-ink">
+              <ByLang ta={PS.close} en={PS.closeEn} />
+            </p>
             <Fx className="mt-4 inline-block">
               <p className="fj-hand text-[2.3rem] leading-none text-ink">{PS.sign}</p>
               <svg aria-hidden="true" viewBox="0 0 220 26" className="fj-flourish fj-draw -mt-1 h-6 w-48" style={{ ["--d" as string]: "300ms", ["--dur" as string]: "1.1s" }}>

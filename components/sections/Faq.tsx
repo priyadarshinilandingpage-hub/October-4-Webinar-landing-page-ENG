@@ -10,7 +10,7 @@ export function Faq() {
   const items = FAQ.items;
 
   return (
-    <section id="faq" aria-labelledby="faq-title" className="fj-sec feather tint-cream py-12 md:py-16">
+    <section id="faq" aria-labelledby="faq-title" className="fj-sec feather tint-cream py-10 md:py-12">
       <div className="wrap">
         <SectionHead
           id="faq-title"

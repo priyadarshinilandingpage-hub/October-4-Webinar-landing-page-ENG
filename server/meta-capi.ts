@@ -1,4 +1,5 @@
 import { OFFER, ORDER_AMOUNT } from "../lib/offer";
+import { DEFAULT_META_PIXEL_ID } from "../lib/meta";
 import { sha256Hex } from "./crypto";
 import type { ServerEnv } from "./env";
 import type { PaidOrder } from "./order";
@@ -27,7 +28,8 @@ export type CapiResult = "sent" | "skipped" | "failed";
 /** Sends a Purchase for a verified, paid order. Never throws. */
 export async function sendPurchaseEvent(env: ServerEnv, order: PaidOrder, now = Date.now()): Promise<CapiResult> {
   try {
-    if (!env.META_PIXEL_ID || !env.META_CAPI_TOKEN) return "skipped";
+    if (!env.META_CAPI_TOKEN) return "skipped";
+    const pixelId = env.META_PIXEL_ID ?? DEFAULT_META_PIXEL_ID;
     const c = order.customer;
     const t = order.notes;
     const em = c.email ? await hashEmail(c.email) : undefined;
@@ -41,7 +43,7 @@ export async function sendPurchaseEvent(env: ServerEnv, order: PaidOrder, now = 
       ...(t.fbp && { fbp: t.fbp }),
       ...(t.fbc && { fbc: t.fbc }),
     };
-    const res = await fetch(`https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${env.META_PIXEL_ID}/events`, {
+    const res = await fetch(`https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${pixelId}/events`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       // Token in the body, not the URL, so it can't end up in access logs.

@@ -19,9 +19,9 @@ const TAPE = ["", "fj-tape--rose", "fj-tape--violet"];
 export function Modules() {
   const n = MODULES.items.length;
   return (
-    <section id="learn" aria-labelledby="learn-title" className="fj-sec feather tint-cream py-12 md:py-16">
+    <section id="learn" aria-labelledby="learn-title" className="fj-sec feather tint-cream py-10 md:py-12">
       <div className="wrap lg:grid lg:grid-cols-12 lg:gap-10">
-        <div className="lg:sticky lg:top-[calc(var(--topbar-h,60px)+28px)] lg:col-span-4 lg:self-start">
+        <div className="lg:sticky lg:top-[calc(var(--header-h,104px)+20px)] lg:col-span-4 lg:self-start">
           <SectionHead id="learn-title" kicker={MODULES.kicker} title={MODULES.title} lead={MODULES.lead} />
         </div>
 

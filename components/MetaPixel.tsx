@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { META_PIXEL_ID } from "@/lib/meta";
 import { OFFER } from "@/lib/offer";
 
 // Meta Pixel for ad measurement: PageView on every page, InitiateCheckout when the form opens Razorpay,
-// Purchase on a verified thank-you page. Active only when NEXT_PUBLIC_META_PIXEL_ID is set at build time
+// Purchase on a verified thank-you page. Pixel ID from lib/meta.ts (built in; NEXT_PUBLIC_META_PIXEL_ID overrides it)
 // (scripts/write-headers.mjs then opens the CSP for Meta's hosts). No personal data goes through the browser Pixel: the
 // server sends hashed email/phone for purchases (server/meta-capi.ts), matched by the same event id.
 // Meta's script (about 90 KB) loads only after the page has finished loading and gone idle, so the hero
@@ -26,7 +27,7 @@ declare global {
   }
 }
 
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+const PIXEL_ID = META_PIXEL_ID;
 const SCRIPT_SRC = "https://connect.facebook.net/en_US/fbevents.js";
 
 let initialised = false;

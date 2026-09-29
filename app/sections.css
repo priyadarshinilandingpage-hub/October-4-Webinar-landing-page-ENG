@@ -392,7 +392,7 @@
     /* Each card sticks one tab-height (56px) lower than the one before. */
     .fj-deck > li {
       position: sticky;
-      top: calc(var(--topbar-h, 60px) + 28px + var(--i, 0) * 56px);
+      top: calc(var(--header-h, 104px) + 20px + var(--i, 0) * 56px);
       margin-bottom: 22px;
       /* box-shadow, not filter: drop-shadow. A filter over a card that holds a playing video (and sticks while
          scrolling) is recomputed on every frame. */

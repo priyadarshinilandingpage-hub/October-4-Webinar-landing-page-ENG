@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { NAV } from "./content";
 import { ThreadArrow } from "./icons";
+import { PriceTag } from "./ui";
 
 /**
  * Mobile-only sticky bottom bar: a paper ledger strip with the stamped price and the one CTA.
@@ -41,8 +42,8 @@ export function MobileCta() {
     >
       <div className="mcta-bar flex items-center justify-between gap-3 px-4 pt-2.5 pb-[max(12px,env(safe-area-inset-bottom))]">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="lbl lbl-stamp shrink-0 text-[0.95rem] tracking-[0] normal-case">{NAV.mobileTitle}</span>
-          <p className="lbl min-w-0 truncate text-[0.62rem] text-ink-2">{NAV.mobileSub}</p>
+          <PriceTag size="sm" className="shrink-0" />
+          <p className="lbl min-w-0 truncate text-[0.62rem] text-ink-2 max-[459px]:hidden">{NAV.mobileSub}</p>
         </div>
         <a href="#join" className="btn btn-saffron btn-sm shrink-0">
           <span>{NAV.mobileCta}</span>

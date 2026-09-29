@@ -1,6 +1,8 @@
 import { WarmImages } from "@/components/WarmImages";
 import { FloralDivider, FlowerDefs, HeroCrown, HeroPlateBlooms } from "@/components/Flowers";
 import { MobileCta } from "@/components/MobileCta";
+import { RegisterNudge } from "@/components/RegisterNudge";
+import { LandingToast } from "@/components/LandingToast";
 import { MotionProvider, SaffronThread } from "@/components/motion";
 import { About } from "@/components/sections/About";
 import { Faq } from "@/components/sections/Faq";
@@ -30,9 +32,10 @@ export { THEME_COLOR, type Theme } from "@/components/theme";
  * - Ad message match: the page carries both headlines; boot.js marks utm_content=creative_b and CSS shows the
  *   matching one (components/ui.tsx <ByAd>).
  */
-export function LandingPage({ theme }: { theme?: Theme }) {
+export function LandingPage({ theme, lang }: { theme?: Theme; lang?: "en" }) {
   return (
-    <div data-theme={theme} data-type="bold" className="theme-root">
+    // data-lang="en" (the /en route) switches every <ByLang> to its plain-English text.
+    <div data-theme={theme} data-lang={lang} data-type="bold" className="theme-root">
       <MotionProvider>
         <TopBar />
         <main id="top" className="ledger-page relative overflow-x-clip">
@@ -66,6 +69,8 @@ export function LandingPage({ theme }: { theme?: Theme }) {
         </main>
         <Footer />
         <MobileCta />
+        <RegisterNudge />
+        <LandingToast />
       </MotionProvider>
     </div>
   );

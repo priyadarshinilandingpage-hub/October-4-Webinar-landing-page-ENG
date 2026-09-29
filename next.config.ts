@@ -14,8 +14,8 @@ const lanHosts = Object.values(networkInterfaces())
 // Security headers for every page. A pre-built page can't carry a fresh nonce per visit, so inline scripts are
 // allowed by 'unsafe-inline'; everything else is pinned: scripts only from this site and Razorpay (checkout.js
 // also loads its risk check from cdn.razorpay.com), frames only from Razorpay, no plugins, no framing of this
-// site. Meta's hosts only when a Pixel ID is set.
-const pixel = Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+// site. Meta's Pixel hosts are allowed (the Pixel is always on).
+const pixel = true; // the Pixel ID is built in (lib/meta.ts)
 const https = (process.env.SITE_URL ?? "").startsWith("https://");
 const RZP = "https://*.razorpay.com";
 const csp = [

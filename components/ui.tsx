@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from "react";
-import { BRAND } from "./content";
+import { BRAND, EVENT, VALUE_LABEL } from "./content";
 import { Crocus, ThreadArrow } from "./icons";
 import { RiseText } from "./motion";
 
@@ -21,6 +21,32 @@ export function ByAd({ a, b }: { a: ReactNode; b: ReactNode }) {
       <span className="v-a">{a}</span>
       <span className="v-b">{b}</span>
     </>
+  );
+}
+
+/**
+ * Language switch, same idea as <ByAd>: both versions are in the page; the page wrapper's data-lang="en"
+ * (the /en route) shows the English one, everything else shows the Tanglish one. CSS: .l-ta / .l-en in globals.css.
+ */
+export function ByLang({ ta, en }: { ta: ReactNode; en: ReactNode }) {
+  return (
+    <>
+      <span className="l-ta">{ta}</span>
+      <span className="l-en">{en}</span>
+    </>
+  );
+}
+
+/**
+ * The price as people should read it everywhere: the total value struck out, the ₹99 big next to it
+ * (Shyam, 30 Sep 2026). Sizes: sm (top bar, mobile bar), md, lg (hero), xl (admit card, ticket).
+ */
+export function PriceTag({ size = "md", tone = "ink", className = "" }: { size?: "sm" | "md" | "lg" | "xl"; tone?: "ink" | "light"; className?: string }) {
+  return (
+    <span className={`pt pt-${size} pt-${tone} ${className}`}>
+      <s className="pt-was">{VALUE_LABEL}</s>
+      <span className="pt-now">{EVENT.price}</span>
+    </span>
   );
 }
 
@@ -189,12 +215,15 @@ export function CtaLink({
   className = "",
   href = "#join",
   price,
+  pulse = false,
 }: {
   children: ReactNode;
   size?: "sm" | "md" | "lg";
   className?: string;
   href?: string;
   price?: string | false;
+  /** A soft ring that keeps pulsing around the button (transform/opacity only). */
+  pulse?: boolean;
 }) {
   let label: ReactNode = children;
   let stub: string | undefined = price === false ? undefined : price;
@@ -207,6 +236,7 @@ export function CtaLink({
   }
   return (
     <a href={href} className={`cta cta-${size} ${stub ? "cta-has-stub" : ""} ${className}`}>
+      {pulse && <span aria-hidden="true" className="cta-ring" />}
       <span aria-hidden="true" className="cta-plate cta-shape" />
       <span className="cta-face cta-shape">
         <span className="cta-label">{label}</span>
@@ -215,6 +245,9 @@ export function CtaLink({
           <>
             <span aria-hidden="true" className="cta-perf" />
             <span className="cta-stub">
+              <s aria-hidden="true" className="cta-was">
+                {VALUE_LABEL}
+              </s>
               <span className="cta-price">{stub}</span>
             </span>
           </>
@@ -286,12 +319,15 @@ export function Postmark({
   ring,
   center,
   sub,
+  subStrike = false,
   className = "",
   pathId,
 }: {
   ring: string;
   center: string;
   sub?: string;
+  /** Draw the sub line struck through (the old price under the new one). */
+  subStrike?: boolean;
   className?: string;
   /** Optional explicit id for the ring path (auto-generated and unique by default). */
   pathId?: string;
@@ -309,11 +345,21 @@ export function Postmark({
       <text fill="currentColor" fontSize="9.4" letterSpacing="2.1" className="font-mono" fontWeight={600}>
         <textPath href={`#${ringId}`}>{ring}</textPath>
       </text>
-      <text x="60" y={sub ? 63 : 67} textAnchor="middle" fill="currentColor" fontSize="21" fontWeight={700} className="font-mono">
+      <text x="60" y={sub ? 62 : 67} textAnchor="middle" fill="currentColor" fontSize={subStrike ? "24" : "21"} fontWeight={700} className="font-mono">
         {center}
       </text>
       {sub && (
-        <text x="60" y="78" textAnchor="middle" fill="currentColor" fontSize="7.4" letterSpacing="1.6" className="font-mono" fontWeight={600}>
+        <text
+          x="60"
+          y={subStrike ? "80" : "78"}
+          textAnchor="middle"
+          fill="currentColor"
+          fontSize={subStrike ? "11" : "7.4"}
+          letterSpacing={subStrike ? "0.5" : "1.6"}
+          className="font-mono"
+          fontWeight={subStrike ? 700 : 600}
+          textDecoration={subStrike ? "line-through" : undefined}
+        >
           {sub}
         </text>
       )}

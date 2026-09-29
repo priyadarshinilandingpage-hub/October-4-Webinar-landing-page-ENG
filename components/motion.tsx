@@ -350,14 +350,7 @@ export function SaffronThread() {
   const svgRef = useRef<SVGSVGElement>(null);
   const metrics = useRef({ top: 0, h: 1 });
   const [geo, setGeo] = useState<ThreadGeo | null>(null);
-  const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const progress = useTransform(scrollY, (y) => {
-    if (typeof window === "undefined") return 0;
-    const { top, h } = metrics.current;
-    return Math.min(1, Math.max(0, (y + window.innerHeight * 0.62 - top) / h));
-  });
-  const pathLength = useSpring(progress, { stiffness: 110, damping: 30, mass: 0.5 });
+  // Drawn once, fully (30 Sep 2026): the scroll-linked redraw of a page-long path cost frames on laptops.
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -367,7 +360,7 @@ export function SaffronThread() {
     const build = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        if (window.innerWidth < 768) return;
+        if (window.innerWidth < 1024) return; // desktop only: the scroll-drawn path costs frames on tablets and phones
         const hostRect = host.getBoundingClientRect();
         const h = Math.max(1, Math.round(host.offsetHeight));
         // Width of the free gutter left of the content column.
@@ -401,7 +394,6 @@ export function SaffronThread() {
           .map((y) => ({ x: xAt(y), y }));
         metrics.current = { top: hostRect.top + window.scrollY, h };
         setGeo({ w, h, d: `M${pts.join("L")}`, knots });
-        progress.set(Math.min(1, Math.max(0, (window.scrollY + window.innerHeight * 0.62 - metrics.current.top) / h)));
       });
     };
     build();
@@ -413,7 +405,7 @@ export function SaffronThread() {
       ro.disconnect();
       window.removeEventListener("resize", build);
     };
-  }, [progress]);
+  }, []);
 
   return (
     <svg
@@ -431,7 +423,7 @@ export function SaffronThread() {
           {geo.knots.map((k) => (
             <path key={k.y} className="thread-knot" d={`M${k.x - 3.5} ${k.y - 3.5}l7 7M${k.x + 3.5} ${k.y - 3.5}l-7 7`} fill="none" />
           ))}
-          <m.path d={geo.d} className="thread-line" fill="none" style={{ pathLength: reduce ? 1 : pathLength }} />
+          <path d={geo.d} className="thread-line" fill="none" />
         </>
       )}
     </svg>

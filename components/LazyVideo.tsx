@@ -28,6 +28,29 @@ function whenPageReady(): Promise<void> {
 }
 
 /**
+ * At most this many decorative loops decode at once, page-wide (30 Sep 2026: several clips playing together
+ * while scrolling was a main source of lag on phones and laptops). The most recently scrolled-in clips win;
+ * the others pause and show their still image.
+ */
+const MAX_PLAYING = 2;
+const wanting: HTMLVideoElement[] = [];
+function syncPlayback() {
+  const allowed = new Set(wanting.slice(-MAX_PLAYING));
+  for (const v of wanting) {
+    if (allowed.has(v)) {
+      if (v.paused) v.play().catch(() => {});
+    } else if (!v.paused) v.pause();
+  }
+}
+function want(v: HTMLVideoElement, on: boolean) {
+  const i = wanting.indexOf(v);
+  if (on && i === -1) wanting.push(v);
+  if (!on && i !== -1) wanting.splice(i, 1);
+  if (!on) v.pause();
+  syncPlayback();
+}
+
+/**
  * Same-origin video only (CSP media-src 'self').
  * Decorative loops: muted, inline, looped, fetched only after the page has loaded and when near the viewport,
  * paused off-screen, never autoplayed for people who prefer reduced motion. The video stays transparent until
@@ -78,8 +101,8 @@ export function LazyVideo({ src, poster, label, className = "", eager = false, c
     // Autoplay is only allowed when muted; set the property explicitly (hydrated <video> may miss it).
     el.muted = true;
     el.defaultMuted = true;
-    if (inView && !reduce) el.play().catch(() => {});
-    else el.pause();
+    want(el, inView && !reduce);
+    return () => want(el, false);
   }, [armed, inView, reduce, controls]);
 
   if (controls) {

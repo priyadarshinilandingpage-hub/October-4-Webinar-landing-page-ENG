@@ -51,7 +51,7 @@ export function ThankYou() {
 
   const status = result.status;
   return (
-    <main className="min-h-screen bg-white text-[#1E1530]">
+    <main className="min-h-screen bg-[#0f0620] bg-[radial-gradient(120%_70%_at_50%_0%,#2e1065_0%,#0f0620_65%)] text-white">
       <div className="mx-auto max-w-xl px-4 py-12 sm:py-20">
         {status === "loading" && (
           <h1 className="font-serif text-3xl leading-tight sm:text-4xl" aria-live="polite">
@@ -63,42 +63,57 @@ export function ThankYou() {
           <>
             {/* Browser half of the Purchase event; the server sends its half with the same id. */}
             <PixelEvent event="Purchase" eventId={orderId} value={OFFER.priceInr} />
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#D9531E]">Payment received · ₹{OFFER.priceInr}</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-[#c4b5fd]">Payment received · ₹{OFFER.priceInr}</p>
             <h1 className="mt-3 font-serif text-4xl leading-tight sm:text-5xl">
               Your seat is confirmed{result.firstName ? `, ${result.firstName}` : ""}.
             </h1>
-            <p className="mt-5 text-lg text-[#5B5270]">
+            <p className="mt-5 text-lg text-[#ddd6fe]">
               See you live on{" "}
-              <strong className="text-[#1E1530]">
+              <strong className="text-white">
                 {OFFER.dateLabel}, {startTimeLabel()}
               </strong>
               , in {OFFER.language}.
               {!result.whatsapp && " The joining link will be shared with you on WhatsApp."}
             </p>
             {result.whatsapp && (
-              <section aria-labelledby="wa-step" className="mt-8 rounded-3xl border-2 border-[#128C4A]/30 bg-[#128C4A]/[0.06] p-5 sm:p-6">
-                <p className="text-sm font-semibold uppercase tracking-wider text-[#128C4A]">Last step</p>
+              <section aria-labelledby="wa-step" className="mt-8 rounded-3xl border-2 border-[#a78bfa]/40 bg-white/[0.06] p-5 sm:p-6">
+                <p className="text-sm font-semibold uppercase tracking-wider text-[#c4b5fd]">Important · do this now</p>
                 <h2 id="wa-step" className="mt-1 text-2xl font-semibold leading-snug">
-                  Join the WhatsApp group now
+                  You must join the WhatsApp group to attend
                 </h2>
-                <ol className="mt-3 list-decimal space-y-1 pl-5 text-[#5B5270]">
-                  <li>Tap the green button below.</li>
-                  <li>
-                    WhatsApp opens. Tap <strong className="text-[#1E1530]">Join group</strong>.
+                <ol className="mt-4 space-y-3 text-[1.05rem] text-white">
+                  <li className="flex gap-3">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#7c3aed] text-sm font-bold text-white">1</span>
+                    <span>
+                      <strong>Join the WhatsApp group.</strong> Tap the green button below, then tap <strong>Join group</strong> in WhatsApp.
+                    </span>
                   </li>
-                  <li>The joining link and reminders are shared in this group.</li>
+                  <li className="flex gap-3">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#7c3aed] text-sm font-bold text-white">2</span>
+                    <span>
+                      <strong>The meeting link will be sent in this group</strong>, along with every update and reminder before the
+                      live session. It is not sent anywhere else.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#7c3aed] text-sm font-bold text-white">3</span>
+                    <span>
+                      Join live on <strong>{OFFER.dateLabel}, {startTimeLabel()}</strong>. The recording link is shared in the same group afterwards.
+                    </span>
+                  </li>
                 </ol>
                 <a
                   href={result.whatsapp}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className={`${btn} mt-5 w-full gap-2 bg-[#128C4A] text-lg text-white`}
+                  className={`${btn} mt-5 w-full gap-2 bg-[#7c3aed] text-lg text-white`}
                 >
                   <Chat className="size-5" />
                   Join the WhatsApp group
                 </a>
-                <p className="mt-3 text-sm text-[#5B5270]">
-                  Closed this page by mistake? Fill in the form again with the same email or number to see this button.
+                <p className="mt-3 text-sm text-[#ddd6fe]">
+                  Without joining the group you won&apos;t get the meeting link. Closed this page by mistake? Fill in the form again
+                  with the same WhatsApp number to see this button.
                 </p>
               </section>
             )}
@@ -108,12 +123,12 @@ export function ThankYou() {
         {status === "pending" && (
           <>
             <h1 className="font-serif text-3xl leading-tight sm:text-4xl">Confirming your payment…</h1>
-            <p className="mt-5 text-lg text-[#5B5270]">
+            <p className="mt-5 text-lg text-[#ddd6fe]">
               Your bank is still confirming this payment. Keep this page open: it checks again every few seconds
               and shows the WhatsApp group button as soon as the payment is confirmed. If money was debited, your
               seat is safe.
             </p>
-            <a href="" className={`${btn} mt-10 bg-[#1E1530] text-white`}>
+            <a href="" className={`${btn} mt-10 bg-white text-[#2e1065]`}>
               Check again
             </a>
           </>
@@ -122,11 +137,11 @@ export function ThankYou() {
         {(status === "unpaid" || status === "failed" || status === "not_found") && (
           <>
             <h1 className="font-serif text-3xl leading-tight sm:text-4xl">Payment not completed</h1>
-            <p className="mt-5 text-lg text-[#5B5270]">
+            <p className="mt-5 text-lg text-[#ddd6fe]">
               No seat was booked. If any amount was debited, it is returned to your account automatically by your
               bank, usually within 5 to 7 working days. You can try again below.
             </p>
-            <a href="/#join" className={`${btn} mt-10 bg-[#D9531E] text-white`}>
+            <a href="/#join" className={`${btn} mt-10 bg-[#7c3aed] text-white`}>
               Try again · ₹{OFFER.priceInr}
             </a>
           </>

@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { LandingPage, THEME_COLOR } from "@/components/LandingPage";
-import { SITE_LANG } from "@/lib/site";
 
-// Same page as `/`, built in the dark purple-pink theme. Kept out of search results (duplicate of `/`); ads can
-// still link here.
+// Same page as `/`, with the Tanglish lines in plain English (for English ad sets; link ads here with the same
+// utm parameters). Kept out of search results as a duplicate of `/`.
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: "/" },
@@ -13,6 +12,6 @@ export const viewport: Viewport = {
   themeColor: THEME_COLOR.dark,
 };
 
-export default function DarkHome() {
-  return <LandingPage theme="dark" lang={SITE_LANG} />;
+export default function EnglishHome() {
+  return <LandingPage lang="en" />;
 }

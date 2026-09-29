@@ -107,6 +107,18 @@ export async function rememberBuyer(env: ServerEnv, orderId: string, contact: Co
   return duplicateOf ? { duplicateOf } : {};
 }
 
+/**
+ * How many distinct paid orders this session has (current Razorpay mode + session date), from the local
+ * already-paid list. null when Firestore holds the list instead (not counted there, to keep reads cheap).
+ */
+export function countPaidOrders(env: ServerEnv): number | null {
+  if (firestoreEnabled(env)) return null;
+  const prefix = `${env.mode}_${OFFER.startsAtIso.slice(0, 10).replace(/-/g, "")}_`;
+  const orders = new Set<string>();
+  for (const [id, orderId] of mem()) if (id.startsWith(prefix)) orders.add(orderId);
+  return orders.size;
+}
+
 /** Test hook. `keepStore` simulates a server restart: memory is cleared, the store is read again. */
 export function resetBuyersForTests(keepStore = false) {
   memory.clear();

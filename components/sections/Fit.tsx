@@ -1,5 +1,5 @@
 import { FIT } from "../content";
-import { SectionHead } from "../ui";
+import { ByLang, SectionHead } from "../ui";
 import { Fx } from "./Fx";
 import { idx } from "./fxStyle";
 
@@ -10,9 +10,9 @@ import { idx } from "./fxStyle";
  */
 export function Fit() {
   return (
-    <section id="fit" aria-labelledby="fit-title" className="fj-sec feather py-12 md:py-16">
+    <section id="fit" aria-labelledby="fit-title" className="fj-sec feather py-10 md:py-12">
       <div className="wrap">
-        <SectionHead id="fit-title" kicker={FIT.kicker} title={FIT.title} />
+        <SectionHead id="fit-title" kicker={FIT.kicker} title={<ByLang ta={FIT.title} en={FIT.titleEn} />} />
 
         <div className="mt-9 grid items-start gap-9 md:mt-11 md:grid-cols-2 md:gap-6 lg:grid-cols-12 lg:gap-8">
           <Fx as="article" labelledBy="fit-yes" className="fj-slip px-5 pt-7 pb-3 sm:px-7 sm:pt-8 lg:col-span-7" style={{ ["--tilt" as string]: "-0.6deg" }}>
