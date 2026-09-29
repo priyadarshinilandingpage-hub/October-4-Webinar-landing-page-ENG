@@ -83,7 +83,7 @@ export async function handleCreateOrder({ request, env: envRaw }: Ctx, now = Dat
   // Stored on the Razorpay order (visible only in the dashboard). The follow-up steps read the buyer from here.
   const notes: Record<string, string> = {
     name: lead.name.slice(0, 100),
-    email: lead.email,
+    ...(lead.email && { email: lead.email }), // optional on the form
     phone: lead.phone,
     consent_marketing: String(lead.marketingConsent),
   };

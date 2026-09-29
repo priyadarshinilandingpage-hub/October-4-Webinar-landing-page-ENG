@@ -151,7 +151,8 @@ export function CheckoutForm() {
         name: data.name,
         description: data.description,
         prefill: data.prefill,
-        readonly: { email: true, contact: true },
+        // Email is optional on our form; when it's empty Razorpay lets the buyer type one if it wants it.
+        readonly: { email: Boolean(data.prefill?.email), contact: true },
         callback_url: data.callbackUrl,
         redirect: true,
         theme: { color: "#D9531E" },
@@ -200,31 +201,9 @@ export function CheckoutForm() {
           <FieldError id={fid("name-err")} message={errorFor("name")} />
         </div>
         <div className="fj-field">
-          <label htmlFor={fid("email")}>
-            <span className="fj-fieldno" aria-hidden="true">
-              02
-            </span>
-            {CHECKOUT.email}
-          </label>
-          <input
-            id={fid("email")}
-            name="email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            required
-            maxLength={100}
-            placeholder={CHECKOUT.emailPh}
-            enterKeyHint="next"
-            aria-invalid={invalid("email")}
-            aria-describedby={describedBy("email")}
-          />
-          <FieldError id={fid("email-err")} message={errorFor("email")} />
-        </div>
-        <div className="fj-field">
           <label htmlFor={fid("phone")}>
             <span className="fj-fieldno" aria-hidden="true">
-              03
+              02
             </span>
             {CHECKOUT.phone}
           </label>
@@ -237,11 +216,33 @@ export function CheckoutForm() {
             required
             maxLength={20}
             placeholder={CHECKOUT.phonePh}
-            enterKeyHint="done"
+            enterKeyHint="next"
             aria-invalid={invalid("phone")}
             aria-describedby={describedBy("phone")}
           />
           <FieldError id={fid("phone-err")} message={errorFor("phone")} />
+        </div>
+        {/* Optional (30 Sep 2026): ad visitors often have no email handy; the WhatsApp number is what matters. */}
+        <div className="fj-field">
+          <label htmlFor={fid("email")}>
+            <span className="fj-fieldno" aria-hidden="true">
+              03
+            </span>
+            {CHECKOUT.email}
+          </label>
+          <input
+            id={fid("email")}
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            maxLength={100}
+            placeholder={CHECKOUT.emailPh}
+            enterKeyHint="done"
+            aria-invalid={invalid("email")}
+            aria-describedby={describedBy("email")}
+          />
+          <FieldError id={fid("email-err")} message={errorFor("email")} />
         </div>
       </div>
 
@@ -293,6 +294,7 @@ export function CheckoutForm() {
         </span>
         <span>{CHECKOUT.methods}</span>
       </p>
+      <p className="fj-trust mt-2 text-ink-2">{CHECKOUT.refund}</p>
     </form>
   );
 }

@@ -6,7 +6,10 @@ import { Fx } from "./Fx";
  * 7 · Value stack on the plum band: a till receipt that prints out of a slot (stepped clip), itemised
  * like a ledger, with the price as a round rubber seal that thumps down once the receipt is out.
  */
+const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
 export function ValueStack() {
+  const totalValue = MODULES.items.length * VALUE.moduleValue + BONUSES.reduce((sum, b) => sum + b.value, 0);
   return (
     <section id="value" aria-labelledby="value-title" className="fj-sec pt-20 pb-6 md:pt-24 md:pb-8">
       <div className="wrap grid items-start gap-8 lg:grid-cols-12 lg:gap-10">
@@ -30,19 +33,20 @@ export function ValueStack() {
               </div>
               <ul className="mt-3 space-y-2.5">
                 {MODULES.items.map((m) => (
-                  <Line key={m.n} n={m.n} label={m.title} />
+                  <Line key={m.n} n={m.n} label={`${m.tag}: ${m.title}`} value={inr(VALUE.moduleValue)} />
                 ))}
                 {BONUSES.map((b, i) => (
-                  <Line key={b.label} n={`B${i + 1}`} label={b.label} />
+                  <Line key={b.label} n={`B${i + 1}`} label={b.label} value={inr(b.value)} />
                 ))}
               </ul>
 
               <div className="fj-dash my-5" />
 
-              <div className="fj-rline text-[0.92rem] text-ink-2">
-                <span>{VALUE.strikeLabel}</span>
+              {/* Total value, struck through: what all of it is worth on its own, against the ₹99 seal below. */}
+              <div className="fj-rline text-[1rem] font-semibold text-ink">
+                <span>{VALUE.totalValueLabel}</span>
                 <span aria-hidden="true" className="fj-leader" />
-                <s className="decoration-saffron-deep decoration-2">{VALUE.strikeValue}</s>
+                <s className="fj-num decoration-saffron-deep decoration-2">{inr(totalValue)}</s>
               </div>
 
               {/* Total: the accountant's double rule, then the seal. */}
@@ -78,16 +82,13 @@ export function ValueStack() {
   );
 }
 
-function Line({ n, label }: { n: string; label: string }) {
+function Line({ n, label, value }: { n: string; label: string; value: string }) {
   return (
     <li className="fj-rline text-[0.95rem] text-ink">
       <span className="w-7 shrink-0 font-mono text-xs text-violet-deep">{n}</span>
       <span className="min-w-0">{label}</span>
       <span aria-hidden="true" className="fj-leader" />
-      <span className="fj-mono shrink-0 self-center text-violet-deep">
-        <span aria-hidden="true">✓</span>
-        <span className="sr-only sm:not-sr-only sm:ml-1">{VALUE.included}</span>
-      </span>
+      <span className="fj-num shrink-0 self-center text-ink-2">{value}</span>
     </li>
   );
 }

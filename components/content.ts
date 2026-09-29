@@ -191,7 +191,7 @@ export const HERO_MEDIA = {
   stageFocus: "50% 24%",
   // Her at work in the grow room: "what she has built", next to her portrait on every screen size.
   inset: { ...MEDIA.heroLoopSmall, optional: true } as MediaSlot,
-  // Her Instagram profile photo (150×150: avatar-size only, too small for the stage). Shown on the 39.4K tag.
+  // Her Instagram profile photo (150×150: avatar-size only, too small for the stage). Shown on the 40.1K tag.
   avatar: img("/media/instagram/profile.jpg", "Priyadharsini's Instagram profile photo", true, { optional: true }),
 };
 
@@ -202,7 +202,7 @@ export const HERO_SHARED = {
   countdownLabel: "Starts in",
   /** Authority tags pinned on the hero photo (verified facts only). */
   badges: [
-    { value: "39.4K", label: "on Instagram" },
+    { value: "40.1K", label: "on Instagram" },
     { value: "Day 58+", label: "building the farm live" },
     { value: "EDII", label: "Ahmedabad alumna" },
     { value: "5+ yrs", label: "in agribusiness" },
@@ -218,22 +218,22 @@ export const HERO_SHARED = {
 export const HERO: Record<"a" | "b", HeroCopy> = {
   // utm_content=creative_a, or no/unknown utm (investor angle)
   a: {
-    title: [{ t: "Naan epdi invest panni " }, { t: "Kunguma Poo farm", em: true }, { t: " build panen." }],
-    short: [{ t: "Epdi invest panni " }, { t: "Kunguma Poo farm", em: true }, { t: " build panen." }],
+    title: [{ t: "Naan epdi plan panni " }, { t: "Kunguma Poo farm", em: true }, { t: " build panen." }],
+    short: [{ t: "Epdi plan panni " }, { t: "Kunguma Poo farm", em: true }, { t: " build panen." }],
     shortSub: "Unga business-kum adhe plan. Live-aa solli tharen.",
-    sub: "Adhe madhiri, unga money-a smart-aa invest panni unga business-ku capital & wealth build panradhu epdi-nu live-aa solli tharen.",
+    sub: "Adhe madhiri, unga business-ku capital epdi arrange panradhu, loans & subsidies epdi vaangradhu, step-by-step epdi grow panradhu-nu live-aa solli tharen.",
     detail:
-      "One live session in Tamil on investment planning, capital management, profitability, market opportunities, and loans & subsidies. Start small, grow step by step, build long-term wealth,",
+      `One ${OFFER.durationLabel} live session in Tamil on business planning, capital, profitability, market opportunities, and loans & subsidies. Start small and grow step by step,`,
     evenIf: "even if you've never run a business and don't have big capital.",
   },
   // utm_content=creative_b (women angle)
   b: {
     title: [{ t: "Oru woman-aa business start panna " }, { t: "periya investment-um, periya space-um", em: true }, { t: " thevai illa." }],
     short: [{ t: "Woman-aa business start panna " }, { t: "periya investment", em: true }, { t: " thevai illa." }],
-    shortSub: "Small-aa start, smart-aa invest. Live-aa solli tharen.",
-    sub: "Small scale-la start pannunga. Smart-aa invest pannunga. Wealth build pannunga. Epdi-nu live-aa solli tharen.",
+    shortSub: "Small-aa start, step-by-step grow. Live-aa solli tharen.",
+    sub: "Small scale-la start pannunga. Capital, loans & subsidies-a sariyaa plan pannunga. Step-by-step grow pannunga. Epdi-nu live-aa solli tharen.",
     detail:
-      `I'm building an indoor saffron farm in Tamil Nadu. On ${EVENT.dayMonthLong} I'll share the same practical approach: investment planning, capital management, profitability, market opportunities, and loans & subsidies,`,
+      `I'm building an indoor saffron farm in Tamil Nadu. On ${EVENT.dayMonthLong}, in a ${OFFER.durationLabel} live session, I'll share the same practical approach: business planning, capital, profitability, market opportunities, and loans & subsidies,`,
     evenIf: "even if you're starting from home with small savings.",
   },
 };
@@ -248,7 +248,7 @@ export const PROOF_MARQUEE = [
   "Specialisation · New Enterprise Creation",
   "5+ years in agribusiness",
   "Exhibited · United Agritech 2026, Madurai",
-  "39.4K on Instagram",
+  "40.1K on Instagram",
   "Indoor saffron farm · Tamil Nadu",
 ];
 
@@ -347,20 +347,24 @@ export const JOURNEY = {
  *   { label: "Loan & subsidy document checklist" },
  *   { label: "Replay for 48 hours" },
  */
-export const BONUSES: { label: string }[] = [];
+/** Bonuses confirmed by Shyam, 30 Sep 2026. `value` = what it would cost on its own (shown on the receipt). */
+export const BONUSES: { label: string; value: number }[] = [
+  { label: "Recording of the session (Google Drive link, shared in the WhatsApp group)", value: 2000 },
+  { label: "Saffron intro: how she started a rare business small, and how she is scaling it", value: 1500 },
+];
 
 export const VALUE = {
   kicker: "Everything in your seat",
   title: "Unga seat-la enna irukku?",
   lead: `${EVENT.price} keeps it an easy yes, and keeps the room full of people who are serious about acting.`,
-  mainLine: "Live Tamil webinar with Priyadharsini",
+  mainLine: `${OFFER.durationLabel} live Tamil webinar with Priyadharsini`,
   mainSub: `${EVENT.dateLabel} · ${EVENT.timeLabel}`,
   colItem: "Item",
-  colStatus: "In your seat",
-  included: "Included",
-  strikeLabel: "Learning it by trial & error",
-  strikeValue: "years + lakhs",
-  totalLabel: "Total today",
+  colStatus: "Value",
+  /** Each of the 6 modules, valued on its own (6 × 1,000 + bonuses = ₹9,500 total value). */
+  moduleValue: 1000,
+  totalValueLabel: "Total value",
+  totalLabel: "You pay today",
   totalNote: "One-time · no subscription",
   // Round rubber postmark around the price (text runs along the ring; ~34 characters fills it).
   stampRing: `Live ${EVENT.language} webinar · ${EVENT.dayMonth} ${EVENT.year} ·`,
@@ -374,7 +378,7 @@ export const JOIN = {
   kicker: "Reserve your seat",
   // Echoes the ad the visitor clicked (utm_content).
   title: {
-    a: "Unga money-a grow panna ready-aa?",
+    a: "Unga business-a start panna ready-aa?",
     b: "Small-aa start pannalam. Ready-aa?",
   },
   lead: "Seat-a ippove book pannunga. It takes under a minute.",
@@ -387,7 +391,7 @@ export const JOIN = {
   ],
   backLink: "New here? See who's teaching",
   card: {
-    eyebrow: "Live Tamil webinar",
+    eyebrow: `${OFFER.durationLabel} live Tamil webinar`,
     form: "Seat reservation",
     when: `${EVENT.shortDate} · ${EVENT.timeLabel}`,
     priceNote: "One-time payment · no subscription",
@@ -398,11 +402,13 @@ export const JOIN = {
 export const CHECKOUT = {
   name: "Your name",
   namePh: "e.g. Priya",
-  email: "Email",
+  email: "Email (optional)",
   emailPh: "you@example.com",
   phone: "WhatsApp number",
   phonePh: "10-digit mobile",
-  consentBefore: "I agree that my name, email and WhatsApp number are used to register me for this webinar and send the joining details. See ",
+  consentBefore: "I agree that my name and WhatsApp number (and email, if given) are used to register me for this webinar and send the joining details. See ",
+  // Refund promise (Shyam, 30 Sep 2026): yes, with a couple of questions on chat. Keep the wording and the policy page in sync.
+  refund: "Not useful for you? Message us on WhatsApp within 24 hours after the session and we refund your ₹99.",
   marketing: "(Optional) Send me future updates and offers. I can unsubscribe anytime.",
   button: `Reserve my seat · ${EVENT.price}`,
   loading: "Opening secure payment…",
@@ -464,10 +470,19 @@ export const ABOUT = {
     "Startup strategist and Resource Person at EDII-TN. Alumna of EDII Ahmedabad and TNAU, specialised in New Enterprise Creation.",
     "Right now she's building an indoor saffron farm, and sharing every step in her daily “Day X” series. She also exhibited at United Agritech 2026, Madurai.",
   ],
+  // Real profile details, copied from instagram.com/priyadharsini_subramaniam_ on 30 Sep 2026. Update the
+  // follower count now and then; never round it up.
   instagram: {
     handle: BRAND.instagram,
     url: "https://www.instagram.com/priyadharsini_subramaniam_/",
-    label: "Follow the build",
+    label: "Open her profile on Instagram",
+    name: "Priyadharsini | Startup Strategist",
+    followers: "40.1K",
+    followersLabel: "followers",
+    verified: true,
+    bio: ["Resource person, EDII-TN", "5+ years in agribusiness", "Alumni EDII Ahmedabad, TNAU", "Spl. New Enterprise Creation"],
+    highlights: ["Webinar reviews", "Saffron series", "RKVY-RAFTAAR"],
+    asOf: "Profile as on 30 Sep 2026",
   },
   credentials: [
     { label: "Alumna", value: "EDII Ahmedabad" },
@@ -475,7 +490,7 @@ export const ABOUT = {
     { label: "Resource Person", value: "EDII-TN" },
     { label: "Specialisation", value: "New Enterprise Creation" },
     { label: "Agribusiness", value: "5+ years" },
-    { label: "Instagram", value: "39.4K followers" },
+    { label: "Instagram", value: "40.1K followers" },
   ],
   introBadge: "37 sec",
   introTitle: "Hear it from her",
@@ -489,7 +504,7 @@ export const FAQ = {
   title: "Questions? Answers.",
   items: [
     { q: "What language is the webinar in?", a: `${EVENT.language}, with simple English words where needed. No jargon.` },
-    { q: "When is it?", a: `${EVENT.dateLabel}, ${EVENT.timeLabel}. It's live, so please join on time.` },
+    { q: "When is it, and how long?", a: `${EVENT.dateLabel}, ${EVENT.timeLabel}, for about ${OFFER.durationLabel}. It's live, so please join on time.` },
     // TODO(client): name the platform (Zoom / Google Meet / YouTube Live).
     { q: "Where do I join?", a: "It's online. After you pay, you get a button to join the WhatsApp group, and the joining link is shared there." },
     {
@@ -500,9 +515,9 @@ export const FAQ = {
       q: "I don't have big money or business experience. Is it still for me?",
       a: "Yes. The whole session is about starting small and growing step by step.",
     },
-    // TODO(client): confirm replay policy, then update this answer.
-    { q: "Will there be a replay?", a: "Please plan to attend live. Any replay details will be shared with registered attendees." },
+    { q: "Will there be a recording?", a: "Yes. The session is recorded and the Google Drive link is shared in the buyers' WhatsApp group. Still, join live if you can: that's where your questions get answered." },
     { q: `Why ${EVENT.price} and not free?`, a: "A small fee means the people who join are serious. That keeps the session focused and practical." },
+    { q: "What if it isn't useful for me?", a: `Message us on WhatsApp within 24 hours after the session and we refund your ${EVENT.price}. We may ask a question or two, that's all.` },
     {
       q: "Is the payment safe?",
       a: "Yes. Payment happens on Razorpay's secure checkout (UPI, cards, netbanking). We never see your card or UPI details.",
@@ -521,7 +536,7 @@ export const TICKET = {
   title: "Your ticket to a smarter start.",
   rows: [
     { label: "Date", value: EVENT.dateLabel },
-    { label: "Time", value: EVENT.timeLabel }, // TODO(client): confirm start time in lib/offer.ts
+    { label: "Time", value: `${EVENT.timeLabel} · ${OFFER.durationLabel}` }, // TODO(client): confirm start time in lib/offer.ts
     { label: "Where", value: `${EVENT.platform} · ${EVENT.platformNote}` },
     { label: "Language", value: EVENT.language },
     { label: "Host", value: EVENT.host },

@@ -50,6 +50,14 @@ describe("leadSchema", () => {
     expect(firstPath(parse({ email }))).toBe("email");
   });
 
+  it("email is optional: empty, blank or missing becomes \"\"", () => {
+    for (const email of ["", "   ", undefined]) {
+      const r = parse({ email });
+      expect(r.success).toBe(true);
+      if (r.success) expect(r.data.email).toBe("");
+    }
+  });
+
   it("requires the registration consent box", () => {
     expect(firstPath(parse({ consent: false }))).toBe("consent");
     expect(firstPath(parse({ consent: "true" }))).toBe("consent");

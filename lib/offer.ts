@@ -10,6 +10,8 @@ export const OFFER = {
   /** Session start in IST. TODO(client): confirm the start time. */
   startsAtIso: "2026-10-04T11:00:00+05:30",
   dateLabel: "Sunday, 4 October 2026",
+  /** Shown on the page and in the ads; keep them the same. */
+  durationLabel: "2 hours",
   language: "Tamil",
 } as const;
 

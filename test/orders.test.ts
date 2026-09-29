@@ -44,6 +44,17 @@ afterEach(() => {
 });
 
 describe("POST /api/orders", () => {
+  it("email is optional: a blank email still creates the order, with no email in the notes or prefill", async () => {
+    const f = razorpayOk();
+    const res = await post(req(lead({ email: "" })));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.prefill).toEqual({ name: "Priya Raman", email: "", contact: "+919876543210" });
+    const sent = JSON.parse(String(f.mock.calls[0]![1]!.body));
+    expect(sent.notes).not.toHaveProperty("email");
+    expect(sent.notes.phone).toBe("9876543210");
+  });
+
   it("success: only public checkout details come back; Razorpay gets ₹99 (9900 paise) INR with server auth", async () => {
     const f = razorpayOk();
     const res = await post(req(lead({ utmSource: "facebook", utmContent: "creative_b" }), { "user-agent": "Mozilla/5.0 Test", cookie: "_fbp=fb.1.1790000000000.123456789" }));

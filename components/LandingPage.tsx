@@ -41,11 +41,8 @@ export function LandingPage({ theme }: { theme?: Theme }) {
           <FlowerDefs />
           <Hero floral={{ crown: <HeroCrown />, plate: <HeroPlateBlooms /> }} />
           <ProofMarquee />
-          <FarmBento />
-          <Problem />
-          <FloralDivider />
-          <Modules />
-          <Journey />
+          {/* Order since 30 Sep 2026 (Shyam): the offer and the payment come right after the hero so ad visitors
+              reach them in one short scroll, with the reviews directly under the form. The story sections follow. */}
           {/* The one contrast band: value stack + checkout, feathered in and out. */}
           <div className="plum-zone">
             <ValueStack />
@@ -54,6 +51,11 @@ export function LandingPage({ theme }: { theme?: Theme }) {
           {/* Clears the band's feathered tail so dark text never sits on it (Reviews may be hidden). */}
           <div aria-hidden="true" className="h-8 md:h-10" />
           <Reviews />
+          <FarmBento />
+          <Problem />
+          <FloralDivider />
+          <Modules />
+          <Journey />
           <Fit />
           <FloralDivider variant="trio" />
           <About />

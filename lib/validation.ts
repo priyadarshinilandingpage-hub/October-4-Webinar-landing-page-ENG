@@ -26,8 +26,16 @@ export const leadSchema = z
           .max(60, "Name is too long")
           .regex(/^[\p{L}\p{M} .'-]+$/u, "Please use letters only"),
       ),
-    // Razorpay notes hold at most 256 characters; 100 keeps emails sane.
-    email: z.string().trim().toLowerCase().max(100, "Email is too long").pipe(z.email("Please enter a valid email")),
+    // Optional since 30 Sep 2026 (ad visitors often have no email handy; the WhatsApp number is what matters).
+    // Razorpay notes hold at most 256 characters; 100 keeps emails sane. "" = not given.
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(100, "Email is too long")
+      .pipe(z.union([z.literal(""), z.email("Please enter a valid email")]))
+      .optional()
+      .default(""),
     phone: z
       .string()
       .max(20, "Enter a 10-digit WhatsApp number")

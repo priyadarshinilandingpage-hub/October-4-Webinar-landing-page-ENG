@@ -151,11 +151,15 @@ export function VideoSpotlight({ src, poster, label, name, role, facts, ctaLabel
   }, [open, close]);
 
   // Auto-open once per visit when the thumbnail sits well inside the screen for a moment.
+  // Not for visitors arriving from an ad (utm_source or fbclid in the address): a video they can't close for
+  // 5 s is the main reason cold Reels traffic left the page on 29 Sep 2026. They can still tap the thumbnail.
   useEffect(() => {
     const el = thumbRef.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
+    const q = new URLSearchParams(window.location.search);
+    if (q.has("utm_source") || q.has("fbclid")) return;
     let dwell = 0;
     const io = new IntersectionObserver(
       ([e]) => {
