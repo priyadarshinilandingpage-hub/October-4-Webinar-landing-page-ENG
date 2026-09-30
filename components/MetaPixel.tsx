@@ -51,6 +51,9 @@ function ensure(): Fbq | undefined {
     if (!window._fbq) window._fbq = q;
   }
   if (!initialised) {
+    // No automatic button-click / page-metadata events: only the three events this file sends. Meta's automatic
+    // "SubscribedButtonClick" was capturing each button's link, including the buyers-only WhatsApp group link.
+    window.fbq("set", "autoConfig", false, PIXEL_ID);
     window.fbq("init", PIXEL_ID);
     initialised = true;
   }

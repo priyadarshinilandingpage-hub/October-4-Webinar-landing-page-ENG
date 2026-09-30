@@ -26,8 +26,10 @@ const csp = [
   "font-src 'self' data:",
   "media-src 'self' blob:",
   `connect-src 'self' ${RZP}${pixel ? " https://www.facebook.com https://connect.facebook.net" : ""}`,
-  `frame-src ${RZP}`,
-  `form-action 'self' ${RZP}`,
+  // Once the buyer has filled the form, the Pixel sends its events (InitiateCheckout) as a form POST inside a
+  // hidden frame to www.facebook.com/tr instead of an image request; without these two it is silently dropped.
+  `frame-src ${RZP}${pixel ? " https://www.facebook.com" : ""}`,
+  `form-action 'self' ${RZP}${pixel ? " https://www.facebook.com" : ""}`,
   "frame-ancestors 'none'",
   "base-uri 'none'",
   "object-src 'none'",
