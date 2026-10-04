@@ -304,8 +304,8 @@ export function Ui3Page() {
             <ul className={u("checks")}>
               {MODULES.items.map((m, i) => (
                 <li key={m.n} className={u("check has-img")}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- remote CDN file, see ACTION_PHOTOS */}
-                  <img src={ACTION_PHOTOS.modules[i]!.src} alt={ACTION_PHOTOS.modules[i]!.alt} width={1024} height={1024} loading="lazy" decoding="async" />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- fixed-size WebP in /public, see ACTION_PHOTOS */}
+                  <img src={ACTION_PHOTOS.modules[i]!.src} alt={ACTION_PHOTOS.modules[i]!.alt} width={720} height={720} loading="lazy" decoding="async" />
                   <div className={u("row")}>
                     <i>
                       <Tick />
@@ -332,8 +332,8 @@ export function Ui3Page() {
             </h2>
             <p className={u("lead")}>{PROBLEM.lead}</p>
             <div className={u("banner")}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- remote CDN file, see ACTION_PHOTOS */}
-              <img src={ACTION_PHOTOS.problem.src} alt={ACTION_PHOTOS.problem.alt} width={1344} height={752} loading="lazy" decoding="async" />
+              {/* eslint-disable-next-line @next/next/no-img-element -- fixed-size WebP in /public, see ACTION_PHOTOS */}
+              <img src={ACTION_PHOTOS.problem.src} alt={ACTION_PHOTOS.problem.alt} width={1200} height={671} loading="lazy" decoding="async" />
             </div>
             <div className={u("vs")}>
               <div className={u("bad")}>

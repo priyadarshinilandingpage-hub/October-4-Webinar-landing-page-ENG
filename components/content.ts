@@ -647,17 +647,16 @@ export const WHO = [
 /**
  * AI-generated photos (GPT Image 2.5 on Higgsfield, 3 Oct 2026): one made-up man doing each module's step, plus a
  * before/after banner. They show the modules as a story; never present them as real students or real results.
- * Loaded from Higgsfield's CDN (allowed in next.config.ts img-src). TODO: download into /public and drop the CDN.
+ * Stored in /public/media/actions as WebP (720x720 modules, 1200x671 banner).
  */
-const HF = "https://d8j0ntlcm91z4.cloudfront.net/user_36t7CeZ6sbuaTeswEhm81fFdpeC/";
 export const ACTION_PHOTOS = {
   modules: [
-    { src: `${HF}hf_20261003_130954_1293df9a-084f-4d61-b086-259d7c8746f6.png`, alt: "A man pinning his 30 day business plan on the wall" },
-    { src: `${HF}hf_20261003_130954_51452d41-1336-48bb-963c-718537041570.png`, alt: "A man buying only a small sealing machine first and leaving the expensive one for later" },
-    { src: `${HF}hf_20261003_130953_2aa50866-f75d-432c-bfc9-274880ef4a84.png`, alt: "A man putting part of the day's cash into a reserve box and noting it in his cash book" },
-    { src: `${HF}hf_20261003_130953_a60eb3dc-e180-4e9d-99f1-f3e83845d7f4.png`, alt: "A shop owner tasting the man's sample and placing a first order" },
-    { src: `${HF}hf_20261003_130953_a5ff8909-fd46-4c94-801c-a967a9e5523f.png`, alt: "A man handing his loan and subsidy file to a bank officer" },
-    { src: `${HF}hf_20261003_130953_49121909-26f9-4591-8720-9d9e2de70e16.png`, alt: "A man directing workers loading his cartons into a delivery van" },
+    { src: "/media/actions/module-1.webp", alt: "A man pinning his 30 day business plan on the wall" },
+    { src: "/media/actions/module-2.webp", alt: "A man buying only a small sealing machine first and leaving the expensive one for later" },
+    { src: "/media/actions/module-3.webp", alt: "A man putting part of the day's cash into a reserve box and noting it in his cash book" },
+    { src: "/media/actions/module-4.webp", alt: "A shop owner tasting the man's sample and placing a first order" },
+    { src: "/media/actions/module-5.webp", alt: "A man handing his loan and subsidy file to a bank officer" },
+    { src: "/media/actions/module-6.webp", alt: "A man directing workers loading his cartons into a delivery van" },
   ],
-  problem: { src: `${HF}hf_20261003_123535_777529b7-1098-4b11-9096-e8e792f6a9f9.png`, alt: "Before: a man stuck with scattered bills at night. After: the same man at work on his product with a clear plan" },
+  problem: { src: "/media/actions/problem.webp", alt: "Before: a man stuck with scattered bills at night. After: the same man at work on his product with a clear plan" },
 };
