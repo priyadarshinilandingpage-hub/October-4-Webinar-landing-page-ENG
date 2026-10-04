@@ -182,7 +182,7 @@ describe("POST /api/orders", () => {
   });
 
   it("after the session has started (+30 min) → 410", async () => {
-    vi.setSystemTime(new Date("2026-10-04T12:00:00+05:30"));
+    vi.setSystemTime(new Date("2026-10-10T12:00:00+05:30"));
     const f = razorpayOk();
     expect((await post(req(lead()))).status).toBe(410);
     expect(f).not.toHaveBeenCalled();

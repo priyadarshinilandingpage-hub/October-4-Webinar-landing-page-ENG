@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     description:
       "Learn how Priyadharsini invested and built an indoor saffron farm, and how to grow your own money into a business and long-term wealth.",
     locale: "en_IN",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Start small. Invest smart. Build wealth. Live Tamil webinar with Priyadharsini, Sun 4 Oct, 11:00 AM, ₹99" }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: `Live Tamil webinar with Priyadharsini, ${OFFER.dateLabel}, ₹${OFFER.priceInr}` }],
   },
   twitter: { card: "summary_large_image", images: ["/og.jpg"] },
   // Meta Business Manager domain verification (meta-tag method). Not a secret; set per deployment.

@@ -86,7 +86,7 @@ describe("fulfilPaidOrder", () => {
       currency: { stringValue: "INR" },
       status: { stringValue: "PAID" },
       mode: { stringValue: "test" },
-      webinar_date: { stringValue: "2026-10-04" },
+      webinar_date: { stringValue: "2026-10-10" },
       marketing_consent: { booleanValue: true },
       utm_source: { stringValue: "meta" },
       utm_content: { stringValue: "creative_b" },
@@ -112,7 +112,7 @@ describe("fulfilPaidOrder", () => {
     const ids = [...docs.keys()].filter((k) => k.startsWith("/paid_contacts/"));
     expect(ids).toHaveLength(2);
     for (const id of ids) {
-      expect(id).toMatch(/^\/paid_contacts\/test_20261004_(email|phone)_[0-9a-f]{40}$/);
+      expect(id).toMatch(/^\/paid_contacts\/test_20261010_(email|phone)_[0-9a-f]{40}$/);
       expect(id).not.toContain("priya");
       expect(id).not.toContain("9876543210");
     }

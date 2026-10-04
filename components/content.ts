@@ -104,7 +104,7 @@ export const MEDIA = {
 
   aboutPortrait: img("/media/hero/hero-portrait.jpg", "Portrait of Priyadharsini Subramaniam", true),
   // The general (authority) ad creative, with sound + controls.
-  intro: vid("/media/creatives/general.mp4", "Priyadharsini on the saffron farm she is building and the 4 October webinar", true, "/media/creatives/general.jpg", true),
+  intro: vid("/media/creatives/general.mp4", `Priyadharsini on the saffron farm she is building and the ${OFFER.dateLabel.replace(/^\w+, /, "")} webinar`, true, "/media/creatives/general.jpg", true),
 } satisfies Record<string, MediaSlot>;
 
 /**
@@ -339,12 +339,12 @@ export const MODULES = {
   swipeHint: "Swipe",
   itemLabel: "module",
   items: [
-    { n: "01", tag: "How to start a business", title: "Idea → Plan", body: "Turn “I want to start something” into a clear 30-day action plan." },
+    { n: "01", tag: "How to start a business", title: "Idea → Plan", body: "Turn “I want to start something” into a clear 30 day action plan." },
     { n: "02", tag: "Investment planning", title: "How much money, really?", body: "What to spend on first, and what can wait." },
     { n: "03", tag: "Capital management", title: "Don't run out of cash", body: "Simple monthly money rules that keep the business breathing." },
     { n: "04", tag: "Market opportunities", title: "Who will buy?", body: "Find the demand before you invest a rupee." },
     { n: "05", tag: "Loans & govt subsidies", title: "Free & cheap money", body: "Loans and subsidies you can actually apply for, and how." },
-    { n: "06", tag: "Growth & wealth creation", title: "From one unit to wealth", body: "Grow the profit, then turn it into long-term wealth." },
+    { n: "06", tag: "Growth & wealth creation", title: "From one unit to wealth", body: "Grow the profit, then turn it into long term wealth." },
   ],
 };
 
@@ -465,10 +465,10 @@ export const CHECKOUT = {
   email: "Email (optional)",
   emailPh: "you@example.com",
   phone: "WhatsApp number",
-  phonePh: "10-digit mobile",
+  phonePh: "10 digit mobile",
   consentBefore: "I agree that my name and WhatsApp number (and email, if given) are used to register me for this webinar and send the joining details. See ",
   // Refund promise (Shyam, 30 Sep 2026): yes, with a couple of questions on chat. Keep the wording and the policy page in sync.
-  refund: "Not useful for you? Message us on WhatsApp within 24 hours after the session and we refund your ₹99.",
+  refund: `Not useful for you? Message us on WhatsApp within 24 hours after the session and we refund your ${EVENT.price}.`,
   marketing: "(Optional) Send me future updates and offers. I can unsubscribe anytime.",
   button: `Reserve my seat · ${EVENT.price}`,
   loading: "Opening secure payment…",
@@ -506,10 +506,10 @@ export const FIT = {
   noStamp: "Not for you",
   noTitle: "This is NOT for you if…",
   no: [
-    "You want a get-rich-quick scheme.",
+    "You want a get rich quick scheme.",
     "You want guaranteed returns, or someone to hand you money.",
     "You won't act after the session.",
-    "You only want a saffron-growing course. This is about business & money; the farm is the proof.",
+    "You only want a saffron growing course. This is about business & money; the farm is the proof.",
   ],
 };
 
@@ -518,8 +518,8 @@ export const FIT = {
 export const ABOUT = {
   kicker: "Meet your host",
   // Her own words from the webinar ad (lightly trimmed). TODO(client): approve.
-  quote: "Small scale-la start panni, investment-a smart-aa use panni, business-a step by step grow panni, long-term wealth build pannalam.",
-  quoteEn: "Start on a small scale, use your capital smartly, grow the business step by step, and build long-term wealth.",
+  quote: "Small scale-la start panni, investment-a smart-aa use panni, business-a step by step grow panni, long term wealth build pannalam.",
+  quoteEn: "Start on a small scale, use your capital smartly, grow the business step by step, and build long term wealth.",
   quoteBy: `Priyadharsini, on what she'll teach on ${EVENT.dayMonthLong}`,
   name: "Priyadharsini Subramaniam",
   role: "Startup Strategist",
@@ -559,7 +559,7 @@ export const ABOUT = {
   ],
   introBadge: "37 sec",
   introTitle: "Hear it from her",
-  introBody: "What she is building, what you'll learn on 4 October, and why it's just ",
+  introBody: `What she is building, what you'll learn on ${EVENT.dayMonthLong}, and why it's just `,
 };
 
 /* ───────────────────────── FAQ ───────────────────────── */
@@ -573,8 +573,8 @@ export const FAQ = {
     // TODO(client): name the platform (Zoom / Google Meet / YouTube Live).
     { q: "Where do I join?", a: "It's online. After you pay, you get a button to join the WhatsApp group, and the joining link is shared there." },
     {
-      q: "Is this a saffron-farming course?",
-      a: "No. It's about starting and growing a business with smart money decisions: planning, capital, market, loans & subsidies. Her saffron farm is the real-life example.",
+      q: "Is this a saffron farming course?",
+      a: "No. It's about starting and growing a business with smart money decisions: planning, capital, market, loans & subsidies. Her saffron farm is the real life example.",
     },
     {
       q: "I don't have big money or business experience. Is it still for me?",
@@ -632,4 +632,32 @@ export const FOOTER = {
   disclaimer:
     "This webinar is for education only. It is not financial or investment advice, and no income or returns are promised. Results depend on your own decisions and effort.",
   copyright: `© ${EVENT.year} ${EVENT.host}. All rights reserved.`,
+};
+
+/* ───────────────────────── Page design since Oct 2026 (components/ui3) ───────────────────────── */
+
+/** "Who should attend?" cards (icons are drawn in components/ui3/Ui3Page.tsx). */
+export const WHO = [
+  { icon: "home", title: "Homemakers", body: "You want to start something of your own from home, without “big” capital." },
+  { icon: "work", title: "Working professionals", body: "You have savings and want them to work, not sit idle, while you plan your own business." },
+  { icon: "study", title: "Students", body: "You are planning a business and want to learn capital, loans and subsidies the right way." },
+  { icon: "shop", title: "Small business owners", body: "You run a small business and want to grow without running out of cash." },
+] as const;
+
+/**
+ * AI-generated photos (GPT Image 2.5 on Higgsfield, 3 Oct 2026): one made-up man doing each module's step, plus a
+ * before/after banner. They show the modules as a story; never present them as real students or real results.
+ * Loaded from Higgsfield's CDN (allowed in next.config.ts img-src). TODO: download into /public and drop the CDN.
+ */
+const HF = "https://d8j0ntlcm91z4.cloudfront.net/user_36t7CeZ6sbuaTeswEhm81fFdpeC/";
+export const ACTION_PHOTOS = {
+  modules: [
+    { src: `${HF}hf_20261003_130954_1293df9a-084f-4d61-b086-259d7c8746f6.png`, alt: "A man pinning his 30 day business plan on the wall" },
+    { src: `${HF}hf_20261003_130954_51452d41-1336-48bb-963c-718537041570.png`, alt: "A man buying only a small sealing machine first and leaving the expensive one for later" },
+    { src: `${HF}hf_20261003_130953_2aa50866-f75d-432c-bfc9-274880ef4a84.png`, alt: "A man putting part of the day's cash into a reserve box and noting it in his cash book" },
+    { src: `${HF}hf_20261003_130953_a60eb3dc-e180-4e9d-99f1-f3e83845d7f4.png`, alt: "A shop owner tasting the man's sample and placing a first order" },
+    { src: `${HF}hf_20261003_130953_a5ff8909-fd46-4c94-801c-a967a9e5523f.png`, alt: "A man handing his loan and subsidy file to a bank officer" },
+    { src: `${HF}hf_20261003_130953_49121909-26f9-4591-8720-9d9e2de70e16.png`, alt: "A man directing workers loading his cartons into a delivery van" },
+  ],
+  problem: { src: `${HF}hf_20261003_123535_777529b7-1098-4b11-9096-e8e792f6a9f9.png`, alt: "Before: a man stuck with scattered bills at night. After: the same man at work on his product with a clear plan" },
 };

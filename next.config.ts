@@ -22,7 +22,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' ${RZP}${pixel ? " https://connect.facebook.net" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${RZP}${pixel ? " https://www.facebook.com" : ""}`,
+  // d8j0ntlcm91z4.cloudfront.net: the module photos made on Higgsfield (components/content.ts ACTION_PHOTOS).
+  `img-src 'self' data: blob: ${RZP} https://d8j0ntlcm91z4.cloudfront.net${pixel ? " https://www.facebook.com" : ""}`,
   "font-src 'self' data:",
   "media-src 'self' blob:",
   `connect-src 'self' ${RZP}${pixel ? " https://www.facebook.com https://connect.facebook.net" : ""}`,

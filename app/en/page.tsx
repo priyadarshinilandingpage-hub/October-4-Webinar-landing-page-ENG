@@ -1,17 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { LandingPage, THEME_COLOR } from "@/components/LandingPage";
+import { Ui3Page } from "@/components/ui3/Ui3Page";
+import "../ui3/ui3.css";
 
-// Same page as `/`, with the Tanglish lines in plain English (for English ad sets; link ads here with the same
-// utm parameters). Kept out of search results as a duplicate of `/`.
+// Same page as `/` (the page is English). Kept so older ad links still work; out of search results as a duplicate.
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: "/" },
 };
 
 export const viewport: Viewport = {
-  themeColor: THEME_COLOR.dark,
+  themeColor: "#0d0718",
 };
 
 export default function EnglishHome() {
-  return <LandingPage lang="en" />;
+  return <Ui3Page />;
 }
